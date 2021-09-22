@@ -12,7 +12,7 @@ HELLO -> "Hello"
 indentation is nesting
 every node is (prev, current, parent, nodes, memo, dfs) =>
 prev = parent output
-current = ket of current node
+current = key of current node
 parent = parent node key
 nodes = object all nodes
 memo = object 
