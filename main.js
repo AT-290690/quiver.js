@@ -1,3 +1,2 @@
-import build from './quiver.js';
-build('./example/cats/cats.qu');
-build('./example/hello/hello.qu');
+import compile from './quiver.js';
+compile('./example/cats/cats.qu');
