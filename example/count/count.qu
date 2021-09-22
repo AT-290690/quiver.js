@@ -1,0 +1,3 @@
+START -> 0
+  INC -> ++prev
+    LOOP -> prev < 10 ? dfs(nodes[parent], prev, nodes) : console.log(prev)
