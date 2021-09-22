@@ -2,10 +2,10 @@
   "name": "quiver.js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.qu",
+  "main": "quiver.js",
   "scripts": {
     "compile": "node main.js",
-    "start": "node example/dist/index.js"
+    "start": "node example/cats/dist/cats.js"
   },
   "type": "module",
   "author": "",

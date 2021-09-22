@@ -75,9 +75,9 @@ server.on("request", start)
 
 const { mkdir, writeFile, access } = memo.init.imports.fs.promises
 
-await access("./example/dist/db/cats.json").catch(async () => {
-await mkdir("./example/dist/db", { recursive: true } )
-await writeFile("./example/dist/db/cats.json",
+await access("./example/cats/dist/db/cats.json").catch(async () => {
+await mkdir("./example/cats/dist/db", { recursive: true } )
+await writeFile("./example/cats/dist/db/cats.json",
 `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 })
 return void 0 // short circuit server init
@@ -143,13 +143,13 @@ _qvr.func["CAT[GET][all](validate)"] = async (prev, current, parent, nodes, memo
 return !("id" in prev.query) && prev || void 0
 }
 _qvr.func["CAT[GET][all](send)"] = async (prev, current, parent, nodes, memo, dfs) => {
-return prev.end(prev.res).status(200).send(prev.toJSON(await prev.fs.readFile("./example/dist/db/cats.json", "utf8")))
+return prev.end(prev.res).status(200).send(prev.toJSON(await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")))
 }
 _qvr.func["CAT[GET][id](validate)"] = async (prev, current, parent, nodes, memo, dfs) => {
 return ("id" in prev.query) && prev || void 0
 }
 _qvr.func["CAT[GET][id](send)"] = async (prev, current, parent, nodes, memo, dfs) => {
-const data = await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+const data = await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
 const json = prev.toJSON(data)
 if (json[prev.query.id]) {
 prev.end(prev.res).status(200).send(json[prev.query.id])
@@ -168,11 +168,11 @@ if (!prev.body.name || !prev.body.age || !prev.body.breed) return void (prev.end
 return prev
 }
 _qvr.func["CAT[POST](send)"] = async (prev, current, parent, nodes, memo, dfs) => {
-const data = await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+const data = await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
 const json = prev.toJSON(data)
 const id = Object.keys(json).length
 json[id] = { ...prev.body, id }
-await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
 prev.end(prev.res).status(200).send({ message: "Cat added!" })
 
 }
@@ -186,12 +186,12 @@ if (!prev.body.age) return void (prev.end(prev.res).status(403).send({ message: 
 return prev
 }
 _qvr.func["CAT[PUT](send)"] = async (prev, current, parent, nodes, memo, dfs) => {
-const data = await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+const data = await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
 const { id } = prev.query
 const json = prev.toJSON(data)
 if (!json[id]) return void(prev.end(prev.res).status(404).send({ message: "Cat not found!"}))
 json[id] = { ...json[id], age: prev.body.age }
-await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
 prev.end(prev.res).status(200).send({ message: "Cat updated!" })
 
 }
@@ -202,13 +202,13 @@ _qvr.func["CAT[DELETE](validate)"] = async (prev, current, parent, nodes, memo, 
 return ("id" in prev.query) && prev || void(prev.end(prev.res).status(403).send({ message: "No id provided!"}))
 }
 _qvr.func["CAT[DELETE](send)"] = async (prev, current, parent, nodes, memo, dfs) => {
-const data = await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+const data = await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
 const json = prev.toJSON(data)
 const { id } = prev.query
 if (!json[id]) return prev.end(prev.res).status(403).send({ message: "Cat not found!"})
 delete json[id]
-await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
 prev.end(prev.res).status(200).send({ message: "Cat deleted!" })
 };
-  _qvr.dfs(root);
+  _qvr.dfs(root, undefined, nodes);
   

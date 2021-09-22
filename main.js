@@ -1,2 +1,3 @@
 import build from './quiver.js';
-build('./example/index.qu');
+build('./example/cats/cats.qu');
+build('./example/hello/hello.qu');

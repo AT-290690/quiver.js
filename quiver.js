@@ -2,6 +2,7 @@ import * as fs from 'fs';
 const { readFile, mkdir, writeFile } = fs.promises;
 export default async file => {
   const buildStandAlone = async (main, graph) => {
+    console.log(`\n^____${file}____\n`);
     const buildCode = `
     const _qvr = { 
     memo: {}, 
@@ -33,13 +34,14 @@ export default async file => {
     _qvr.dfs(root, { req, res, method, quiver: _qvr }, nodes);
   };
   ${main}
-  _qvr.dfs(root);
+  _qvr.dfs(root, undefined, nodes);
   `;
     const path = file.split('/');
     const filename = path.pop().split('.qu')[0];
     const dir = path.join('/');
     await mkdir(`./${dir}/dist`, { recursive: true });
     await writeFile(`./${dir}/dist/${filename}.js`, buildCode);
+    console.log(`${filename}.js is generated!`);
   };
 
   let prev = null;
@@ -86,7 +88,6 @@ export default async file => {
   };
 
   const compileToJs = async () => {
-    console.log('Generating tree structure:\n');
     const mainGraphFile = await readFile(file, 'utf8');
     if (!mainGraphFile.trim()) return;
     const arrows = mainGraphFile.split('\n').map(x => x.split('->'));
@@ -114,8 +115,6 @@ export default async file => {
     traverseTreeMap(treeMap);
     return { main: compiledCode, graph: treeMap };
   };
-
   const { main, graph } = await compileToJs();
   await buildStandAlone(main, graph);
-  console.log('\n Done!');
 };

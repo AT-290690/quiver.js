@@ -45,9 +45,9 @@ SERVER ->
       
     { mkdir, writeFile, access } := memo.init.imports.fs.promises
 
-    await access("./example/dist/db/cats.json").catch(async () => {
-       await mkdir("./example/dist/db", { recursive: true } )
-       await writeFile("./example/dist/db/cats.json",
+    await access("./example/cats/dist/db/cats.json").catch(async () => {
+       await mkdir("./example/cats/dist/db", { recursive: true } )
+       await writeFile("./example/cats/dist/db/cats.json",
     `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
     })
     <- void 0 // short circuit server init
@@ -92,10 +92,10 @@ SERVER ->
     CAT -> prev.match.url(prev, "/cat") && prev || void 0
       CAT[GET] -> prev.match.method(prev, "GET") && prev || void 0
         CAT[GET][all](validate) -> !("id" in prev.query) && prev || void 0
-          CAT[GET][all](send) -> prev.end(prev.res).status(200).send(prev.toJSON(await prev.fs.readFile("./example/dist/db/cats.json", "utf8")))
+          CAT[GET][all](send) -> prev.end(prev.res).status(200).send(prev.toJSON(await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")))
         CAT[GET][id](validate) -> ("id" in prev.query) && prev || void 0
           CAT[GET][id](send) -> 
-            data := await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+            data := await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
             json := prev.toJSON(data)
             if (json[prev.query.id]) {
               prev.end(prev.res).status(200).send(json[prev.query.id])
@@ -110,11 +110,11 @@ SERVER ->
           if (!prev.body.name || !prev.body.age || !prev.body.breed) <- void (prev.end(prev.res).status(403).send({ message: "Missing some or all fields."}))
           <- prev
           CAT[POST](send) -> 
-            data := await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+            data := await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
             json := prev.toJSON(data)
             id := Object.keys(json).length
             json[id] = { ...prev.body, id }
-            await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+            await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
             prev.end(prev.res).status(200).send({ message: "Cat added!" })
 
       CAT[PUT] -> prev.match.method(prev, "PUT") && ("id" in prev.query) && prev || void 0
@@ -124,21 +124,21 @@ SERVER ->
           if (!prev.body.age) <- void (prev.end(prev.res).status(403).send({ message: "Missing some or all fields."}))
           <- prev
           CAT[PUT](send) -> 
-            data := await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+            data := await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
             { id } := prev.query
             json := prev.toJSON(data)
             if (!json[id]) <- void(prev.end(prev.res).status(404).send({ message: "Cat not found!"}))
             json[id] = { ...json[id], age: prev.body.age }
-            await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+            await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
             prev.end(prev.res).status(200).send({ message: "Cat updated!" })
 
       CAT[DELETE] -> prev.match.method(prev, "DELETE") && prev || void 0
         CAT[DELETE](validate) -> ("id" in prev.query) && prev || void(prev.end(prev.res).status(403).send({ message: "No id provided!"}))
           CAT[DELETE](send) -> 
-            data := await prev.fs.readFile("./example/dist/db/cats.json", "utf8")
+            data := await prev.fs.readFile("./example/cats/dist/db/cats.json", "utf8")
             json := prev.toJSON(data)
             { id } := prev.query
             if (!json[id]) <- prev.end(prev.res).status(403).send({ message: "Cat not found!"})
             delete json[id]
-            await prev.fs.writeFile("./example/dist/db/cats.json", prev.toString(json))
+            await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
             prev.end(prev.res).status(200).send({ message: "Cat deleted!" })
