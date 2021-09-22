@@ -23,7 +23,7 @@ dfs = recursive function for traversing the nodes = (node, prev, nodes, memo, pa
 - 2 >     WORLD 
 - 3 >       PRINT 
 
-nesting with lelvels
+nesting with levels
 ```
 adj list:
 ```json
