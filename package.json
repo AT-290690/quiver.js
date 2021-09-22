@@ -1,0 +1,13 @@
+{
+  "name": "quiver.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.qu",
+  "scripts": {
+    "compile": "node main.js",
+    "start": "node example/dist/index.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "MIT"
+}
