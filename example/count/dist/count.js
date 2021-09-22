@@ -23,7 +23,7 @@
     _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
    }
 
-  const nodes = {"START":{"key":"START","next":["INC"],"level":0,"type":"root","prev":null},"INC":{"key":"INC","next":["LOOP"],"level":1,"type":"branch","prev":"START"},"LOOP":{"key":"LOOP","next":[],"level":2,"type":"leaf","prev":"INC"}};
+  const nodes = {"START":{"key":"START","next":["INC"],"level":0,"type":"root","prev":null},"INC":{"key":"INC","next":["LOOP"],"level":1,"type":"branch","prev":"START"},"LOOP":{"key":"LOOP","next":["END"],"level":2,"type":"branch","prev":"INC"},"END":{"key":"END","next":[],"level":3,"type":"leaf","prev":"LOOP"}};
   const root = Object.values(nodes).find(node => node.type === 'root');
   const run = (method, req,res) => {
     _qvr.dfs(root, { req, res, method, quiver: _qvr }, nodes);
@@ -35,7 +35,10 @@ _qvr.func["INC"] = async (prev, current, parent, nodes, memo, dfs) => {
 return ++prev
 }
 _qvr.func["LOOP"] = async (prev, current, parent, nodes, memo, dfs) => {
-return prev < 10 ? dfs(nodes[parent], prev, nodes) : console.log(prev)
+return prev < 10 ? dfs(nodes[parent], prev, nodes) : prev
+}
+_qvr.func["END"] = async (prev, current, parent, nodes, memo, dfs) => {
+return console.log(prev)
 };
   _qvr.dfs(root, undefined, nodes);
   
