@@ -1,6 +1,52 @@
 # quiver.js
 JavaScript parser for graph based pipe development
 ```
+HELLO -> "Hello"
+  SPACE -> prev + " "
+    WORLD -> prev + "World"
+      PRINT -> console.log(prev)
+
+-> - arrow function
+<- return
+:= assign with const
+indentation is nesting
+every node is (prev, current, parent, nodes, memo, dfs) =>
+prev = parent output
+current = ket of current node
+parent = parent node key
+nodes = object all nodes
+memo = object 
+dfs = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => prev
+
+- 0 > HELLO 
+- 1 >   SPACE 
+- 2 >     WORLD 
+- 3 >       PRINT 
+
+nesting with lelvels
+```
+adj list:
+```json
+ {
+  HELLO: { key: 'HELLO', next: ['SPACE'], level: 0, type: 'root', prev: null },
+  SPACE: {
+    key: 'SPACE',
+    next: ['WORLD'],
+    level: 1,
+    type: 'branch',
+    prev: 'HELLO'
+  },
+  WORLD: {
+    key: 'WORLD',
+    next: ['PRINT'],
+    level: 2,
+    type: 'branch',
+    prev: 'SPACE'
+  },
+  PRINT: { key: 'PRINT', next: [], level: 3, type: 'leaf', prev: 'WORLD' }
+}
+```
+```
 - 0 > SERVER 
 - 1 >   REQUEST 
 - 2 >     HELLO 
