@@ -66,6 +66,16 @@ adj list:
    }
 }
 ```
+
+Recursive backtracking can be used to retry sertain services
+it will call all their children async
+
+``` 
+START -> 0
+  INC -> ++prev
+    LOOP -> prev < 10 ? dfs(nodes[parent], prev, nodes) : console.log(prev)
+```
+
 ```
 - 0 > SERVER 
 - 1 >   REQUEST 
