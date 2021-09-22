@@ -28,22 +28,42 @@ nesting with lelvels
 adj list:
 ```json
  {
-  HELLO: { key: 'HELLO', next: ['SPACE'], level: 0, type: 'root', prev: null },
-  SPACE: {
-    key: 'SPACE',
-    next: ['WORLD'],
-    level: 1,
-    type: 'branch',
-    prev: 'HELLO'
-  },
-  WORLD: {
-    key: 'WORLD',
-    next: ['PRINT'],
-    level: 2,
-    type: 'branch',
-    prev: 'SPACE'
-  },
-  PRINT: { key: 'PRINT', next: [], level: 3, type: 'leaf', prev: 'WORLD' }
+   "HELLO":{
+      "key":"HELLO",
+      "next":[
+         "SPACE"
+      ],
+      "level":0,
+      "type":"root",
+      "prev":null
+   },
+   "SPACE":{
+      "key":"SPACE",
+      "next":[
+         "WORLD"
+      ],
+      "level":1,
+      "type":"branch",
+      "prev":"HELLO"
+   },
+   "WORLD":{
+      "key":"WORLD",
+      "next":[
+         "PRINT"
+      ],
+      "level":2,
+      "type":"branch",
+      "prev":"SPACE"
+   },
+   "PRINT":{
+      "key":"PRINT",
+      "next":[
+         
+      ],
+      "level":3,
+      "type":"leaf",
+      "prev":"WORLD"
+   }
 }
 ```
 ```
