@@ -7,7 +7,8 @@ export default async file => {
     const _qvr = { 
     memo: {}, 
     func: {}, 
-    dfs: async (node, prev, nodes, parent, memo = _qvr.memo) => {
+    nodes: {},
+    dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
       if (!node) return;
       let result;
       if (typeof _qvr.func[node.key] === 'function')
@@ -28,13 +29,13 @@ export default async file => {
     _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
    }
 
-  const nodes = ${JSON.stringify(graph)};
-  const root = Object.values(nodes).find(node => node.type === 'root');
+  _qvr.nodes = ${JSON.stringify(graph)};
+  const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
   const run = (method, req,res) => {
-    _qvr.dfs(root, { req, res, method, quiver: _qvr }, nodes);
+    _qvr.dfs(root, { req, res, method, quiver: _qvr });
   };
   ${main}
-  _qvr.dfs(root, undefined, nodes);
+  _qvr.dfs(root, undefined, _qvr.nodes );
   `;
     const path = file.split('/');
     const filename = path.pop().split('.qu')[0];
