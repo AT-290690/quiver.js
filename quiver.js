@@ -3,39 +3,38 @@ const { readFile, mkdir, writeFile } = fs.promises;
 export default async file => {
   const buildStandAlone = async (main, graph) => {
     console.log(`\n^____${file}____\n`);
-    const buildCode = `
-    const _qvr = { 
-    memo: {}, 
-    func: {}, 
-    nodes: {},
-    dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
-      if (!node) return;
-      let result;
-      if (typeof _qvr.func[node.key] === 'function')
-          result = await _qvr.func[node.key](
-          prev,
-          node.key,
-          parent,
-          nodes,
-          memo,
-          _qvr.dfs);
-      if (result !== undefined && node.next) {
-        node.next.forEach(n => {
-          _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
-        });
-      }
-    },
-    wrap: (callback = res => res) =>
+    const buildCode = `const _qvr = { 
+memo: {}, 
+func: {}, 
+nodes: {},
+dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
+    if (!node) return;
+    let result;
+    if (typeof _qvr.func[node.key] === 'function')
+        result = await _qvr.func[node.key](
+        prev,
+        node.key,
+        parent,
+        nodes,
+        memo,
+        _qvr.dfs);
+    if (result !== undefined && node.next) {
+      node.next.forEach(n => {
+        _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+      });
+    }
+  },
+  wrap: (callback = res => res) =>
     _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
-   }
+}
 
-  _qvr.nodes = ${JSON.stringify(graph)};
-  const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-  const run = (method, req,res) => {
-    _qvr.dfs(root, { req, res, method, quiver: _qvr });
-  };
-  ${main}
-  _qvr.dfs(root, undefined, _qvr.nodes );
+_qvr.nodes = ${JSON.stringify(graph)};
+const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
+const run = (method, req,res) => {
+  _qvr.dfs(root, { req, res, method, quiver: _qvr });
+};
+${main}
+_qvr.dfs(root, undefined, _qvr.nodes );
   `;
     const path = file.split('/');
     const filename = path.pop().split('.qu')[0];

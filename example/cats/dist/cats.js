@@ -1,35 +1,34 @@
-
-    const _qvr = { 
-    memo: {}, 
-    func: {}, 
-    nodes: {},
-    dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
-      if (!node) return;
-      let result;
-      if (typeof _qvr.func[node.key] === 'function')
-          result = await _qvr.func[node.key](
-          prev,
-          node.key,
-          parent,
-          nodes,
-          memo,
-          _qvr.dfs);
-      if (result !== undefined && node.next) {
-        node.next.forEach(n => {
-          _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
-        });
-      }
-    },
-    wrap: (callback = res => res) =>
+const _qvr = { 
+memo: {}, 
+func: {}, 
+nodes: {},
+dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
+    if (!node) return;
+    let result;
+    if (typeof _qvr.func[node.key] === 'function')
+        result = await _qvr.func[node.key](
+        prev,
+        node.key,
+        parent,
+        nodes,
+        memo,
+        _qvr.dfs);
+    if (result !== undefined && node.next) {
+      node.next.forEach(n => {
+        _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+      });
+    }
+  },
+  wrap: (callback = res => res) =>
     _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
-   }
+}
 
-  _qvr.nodes = {"SERVER":{"key":"SERVER","next":["REQUEST"],"level":0,"type":"root","prev":null},"REQUEST":{"key":"REQUEST","next":["HELLO","ABOUT","AGE","CAT"],"level":1,"type":"branch","prev":"SERVER"},"HELLO":{"key":"HELLO","next":["HELLO[GET]"],"level":2,"type":"branch","prev":"REQUEST"},"HELLO[GET]":{"key":"HELLO[GET]","next":[],"level":3,"type":"leaf","prev":"HELLO"},"ABOUT":{"key":"ABOUT","next":[],"level":2,"type":"leaf","prev":"REQUEST"},"AGE":{"key":"AGE","next":["AGE[POST]"],"level":2,"type":"branch","prev":"REQUEST"},"AGE[POST]":{"key":"AGE[POST]","next":["AGE[POST](validate)"],"level":3,"type":"branch","prev":"AGE"},"AGE[POST](validate)":{"key":"AGE[POST](validate)","next":["AGE[POST](send)"],"level":4,"type":"branch","prev":"AGE[POST]"},"AGE[POST](send)":{"key":"AGE[POST](send)","next":[],"level":5,"type":"leaf","prev":"AGE[POST](validate)"},"CAT":{"key":"CAT","next":["CAT[GET]","CAT[POST]","CAT[PUT]","CAT[DELETE]"],"level":2,"type":"branch","prev":"REQUEST"},"CAT[GET]":{"key":"CAT[GET]","next":["CAT[GET][all](validate)","CAT[GET][id](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[GET][all](validate)":{"key":"CAT[GET][all](validate)","next":["CAT[GET][all](send)"],"level":4,"type":"branch","prev":"CAT[GET]"},"CAT[GET][all](send)":{"key":"CAT[GET][all](send)","next":[],"level":5,"type":"leaf","prev":"CAT[GET][all](validate)"},"CAT[GET][id](validate)":{"key":"CAT[GET][id](validate)","next":["CAT[GET][id](send)"],"level":4,"type":"branch","prev":"CAT[GET]"},"CAT[GET][id](send)":{"key":"CAT[GET][id](send)","next":[],"level":5,"type":"leaf","prev":"CAT[GET][id](validate)"},"CAT[POST]":{"key":"CAT[POST]","next":["CAT[POST](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[POST](validate)":{"key":"CAT[POST](validate)","next":["CAT[POST](send)"],"level":4,"type":"branch","prev":"CAT[POST]"},"CAT[POST](send)":{"key":"CAT[POST](send)","next":[],"level":5,"type":"leaf","prev":"CAT[POST](validate)"},"CAT[PUT]":{"key":"CAT[PUT]","next":["CAT[PUT](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[PUT](validate)":{"key":"CAT[PUT](validate)","next":["CAT[PUT](send)"],"level":4,"type":"branch","prev":"CAT[PUT]"},"CAT[PUT](send)":{"key":"CAT[PUT](send)","next":[],"level":5,"type":"leaf","prev":"CAT[PUT](validate)"},"CAT[DELETE]":{"key":"CAT[DELETE]","next":["CAT[DELETE](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[DELETE](validate)":{"key":"CAT[DELETE](validate)","next":["CAT[DELETE](send)"],"level":4,"type":"branch","prev":"CAT[DELETE]"},"CAT[DELETE](send)":{"key":"CAT[DELETE](send)","next":[],"level":5,"type":"leaf","prev":"CAT[DELETE](validate)"}};
-  const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-  const run = (method, req,res) => {
-    _qvr.dfs(root, { req, res, method, quiver: _qvr });
-  };
-  _qvr.func["SERVER"] = async (prev, current, parent, nodes, memo, dfs) => {
+_qvr.nodes = {"SERVER":{"key":"SERVER","next":["REQUEST"],"level":0,"type":"root","prev":null},"REQUEST":{"key":"REQUEST","next":["HELLO","ABOUT","AGE","CAT"],"level":1,"type":"branch","prev":"SERVER"},"HELLO":{"key":"HELLO","next":["HELLO[GET]"],"level":2,"type":"branch","prev":"REQUEST"},"HELLO[GET]":{"key":"HELLO[GET]","next":[],"level":3,"type":"leaf","prev":"HELLO"},"ABOUT":{"key":"ABOUT","next":[],"level":2,"type":"leaf","prev":"REQUEST"},"AGE":{"key":"AGE","next":["AGE[POST]"],"level":2,"type":"branch","prev":"REQUEST"},"AGE[POST]":{"key":"AGE[POST]","next":["AGE[POST](validate)"],"level":3,"type":"branch","prev":"AGE"},"AGE[POST](validate)":{"key":"AGE[POST](validate)","next":["AGE[POST](send)"],"level":4,"type":"branch","prev":"AGE[POST]"},"AGE[POST](send)":{"key":"AGE[POST](send)","next":[],"level":5,"type":"leaf","prev":"AGE[POST](validate)"},"CAT":{"key":"CAT","next":["CAT[GET]","CAT[POST]","CAT[PUT]","CAT[DELETE]"],"level":2,"type":"branch","prev":"REQUEST"},"CAT[GET]":{"key":"CAT[GET]","next":["CAT[GET][all](validate)","CAT[GET][id](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[GET][all](validate)":{"key":"CAT[GET][all](validate)","next":["CAT[GET][all](send)"],"level":4,"type":"branch","prev":"CAT[GET]"},"CAT[GET][all](send)":{"key":"CAT[GET][all](send)","next":[],"level":5,"type":"leaf","prev":"CAT[GET][all](validate)"},"CAT[GET][id](validate)":{"key":"CAT[GET][id](validate)","next":["CAT[GET][id](send)"],"level":4,"type":"branch","prev":"CAT[GET]"},"CAT[GET][id](send)":{"key":"CAT[GET][id](send)","next":[],"level":5,"type":"leaf","prev":"CAT[GET][id](validate)"},"CAT[POST]":{"key":"CAT[POST]","next":["CAT[POST](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[POST](validate)":{"key":"CAT[POST](validate)","next":["CAT[POST](send)"],"level":4,"type":"branch","prev":"CAT[POST]"},"CAT[POST](send)":{"key":"CAT[POST](send)","next":[],"level":5,"type":"leaf","prev":"CAT[POST](validate)"},"CAT[PUT]":{"key":"CAT[PUT]","next":["CAT[PUT](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[PUT](validate)":{"key":"CAT[PUT](validate)","next":["CAT[PUT](send)"],"level":4,"type":"branch","prev":"CAT[PUT]"},"CAT[PUT](send)":{"key":"CAT[PUT](send)","next":[],"level":5,"type":"leaf","prev":"CAT[PUT](validate)"},"CAT[DELETE]":{"key":"CAT[DELETE]","next":["CAT[DELETE](validate)"],"level":3,"type":"branch","prev":"CAT"},"CAT[DELETE](validate)":{"key":"CAT[DELETE](validate)","next":["CAT[DELETE](send)"],"level":4,"type":"branch","prev":"CAT[DELETE]"},"CAT[DELETE](send)":{"key":"CAT[DELETE](send)","next":[],"level":5,"type":"leaf","prev":"CAT[DELETE](validate)"}};
+const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
+const run = (method, req,res) => {
+  _qvr.dfs(root, { req, res, method, quiver: _qvr });
+};
+_qvr.func["SERVER"] = async (prev, current, parent, nodes, memo, dfs) => {
 if (memo.init) return prev
 memo.init = Object.freeze({
 imports: {
@@ -211,5 +210,5 @@ delete json[id]
 await prev.fs.writeFile("./example/cats/dist/db/cats.json", prev.toString(json))
 prev.end(prev.res).status(200).send({ message: "Cat deleted!" })
 };
-  _qvr.dfs(root, undefined, _qvr.nodes );
+_qvr.dfs(root, undefined, _qvr.nodes );
   
