@@ -16,7 +16,7 @@ current = key of current node
 parent = parent node key
 nodes = object all nodes
 memo = object 
-dfs = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => prev
+dfs = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => void
 
 - 0 > HELLO 
 - 1 >   SPACE 
@@ -69,11 +69,13 @@ adj list:
 
 Recursive backtracking can be used to retry sertain services
 it will call all their children async
+dfs returns void which will natrually short circuit the current node.
 
 ``` 
 START -> 0
   INC -> ++prev
-    LOOP -> prev < 10 ? dfs(nodes[parent], prev, nodes) : console.log(prev)
+    LOOP -> prev < 10 ? dfs(nodes[parent], prev, nodes) : prev
+      END -> console.log(prev)
 ```
 
 ```
