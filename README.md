@@ -74,7 +74,7 @@ dfs returns void which will natrually short circuit the current node.
 ``` 
 START -> 0
   INC -> ++prev
-    LOOP -> prev < 10 ? dfs(nodes[parent], prev, nodes) : prev
+    LOOP -> prev < 10 ? dfs(nodes[parent], prev) : prev
       END -> console.log(prev)
 ```
 
