@@ -49,7 +49,7 @@ export default async file => {
   const createTreeMap = (tree, line) => {
     const current = line.trim();
     if (!current) return;
-    const level = (line.split(' ').length - 2) / 2;
+    const level = (line.trimEnd().split(' ').length - 1) / 2;
     console.log('- ' + level + ' > ' + line);
     if (!tree[line.trim()]) {
       tree[current] = {
