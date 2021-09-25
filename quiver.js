@@ -126,26 +126,26 @@ export default _qvr`;
   const compileToJs = async () => {
     const mainGraphFile = await readFile(file, 'utf8');
     if (!mainGraphFile.trim()) return;
-    const arrows = mainGraphFile.split('\n').map(x => x.split('->'));
+    const arrows = mainGraphFile.split('\n').map(line => line.split('->'));
     const treeMap = {};
     let compiledCode = '';
-    arrows.forEach((x, i) => {
-      if (x.length === 2) {
-        createTreeMap(treeMap, x[0]);
-        const expression = x[1]?.trim();
+    arrows.forEach((lambda, index) => {
+      if (lambda.length === 2) {
+        createTreeMap(treeMap, lambda[0]);
+        const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
-        let startBrace = i !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${x[0].trim()}"] = async (prev, current, parent, nodes, memo, goTo) => {\n${
+        let startBrace = index !== 0 ? '}\n' : '';
+        compiledCode += `${startBrace}_qvr.func["${lambda[0].trim()}"] = async (prev, current, parent, nodes, memo, goTo) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
-        const body = x[0]?.trim().replace(/<- /g, 'return ').split(':=');
+        const body = lambda[0]?.trim().replace(/<- /g, 'return ').split(':=');
         if (body?.length > 1) {
           body[0] = 'const ' + body[0] + '=';
         }
         compiledCode += body ? body.join('') + '\n' : '';
       }
-      if (compiledCode && i === arrows.length - 1) compiledCode += '}';
+      if (compiledCode && index === arrows.length - 1) compiledCode += '}';
     });
     compiledCode += ';';
     traverseTreeMap(treeMap);
