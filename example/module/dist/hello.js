@@ -2,6 +2,7 @@ const _qvr = {
   memo: {}, 
   func: {}, 
   nodes: {},
+  root: null,
   dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
       if (!node) return;
       let result;
@@ -23,8 +24,9 @@ const _qvr = {
       _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
   }
 _qvr.nodes = {"HELLO":{"key":"HELLO","next":["SPACE"],"level":0,"type":"root","prev":null},"SPACE":{"key":"SPACE","next":["WORLD"],"level":1,"type":"branch","prev":"HELLO"},"WORLD":{"key":"WORLD","next":["PRINT"],"level":2,"type":"branch","prev":"SPACE"},"PRINT":{"key":"PRINT","next":[],"level":3,"type":"leaf","prev":"WORLD"}};
-const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const run = (args) => _qvr.dfs(root, {...args, quiver: _qvr });
+_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
+const root = (node) => _qvr.root = node;
+const run = (args) => _qvr.dfs(_qvr.root, {...args, quiver: _qvr });
 _qvr.func["HELLO"] = async (prev, current, parent, nodes, memo, goTo) => {
 return "Hello"
 }
@@ -37,5 +39,5 @@ return prev + "World"
 _qvr.func["PRINT"] = async (prev, current, parent, nodes, memo, goTo) => {
 return console.log(prev)
 };
-_qvr.dfs(root, undefined, _qvr.nodes );
+run();
 export default _qvr
