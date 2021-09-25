@@ -30,7 +30,9 @@ const _qvr = {
   wrap: (callback = res => res) =>
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    )
+    ),
+  setAsRoot: node => (_qvr.root = node),
+  run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
   SERVER: { key: 'SERVER', next: [], level: 0, type: 'root', prev: null },
@@ -190,10 +192,9 @@ _qvr.nodes = {
     prev: 'CAT[DELETE](validate)'
   }
 };
-_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const root = node => (_qvr.root = node);
-const run = args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr });
+_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
 _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
+  const { quiver } = prev;
   memo.init = Object.freeze({
     imports: {
       fs: await import('fs'),
@@ -232,7 +233,7 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
         req.body = body;
       }
       req.query = query;
-      run({ method, req, res });
+      quiver.run({ method, req, res });
     });
   };
 
@@ -250,7 +251,7 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
     );
   });
   nodes['SERVER'].type = 'leaf';
-  root(nodes['REQUEST']);
+  prev.quiver.setAsRoot(nodes['REQUEST']);
 };
 _qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
   const { method, req, res, quiver } = prev;
@@ -293,9 +294,12 @@ _qvr.func['ABOUT'] = async (prev, current, parent, nodes, memo, goTo) => {
   return (
     prev.match.url(prev, '/about') &&
     prev.match.method(prev, 'GET') &&
-    prev.end(prev.res).status(200).send({
-      message: 'This is a demo for service code generation using a graph'
-    })
+    prev
+      .end(prev.res)
+      .status(200)
+      .send({
+        message: 'This is a demo for service code generation using a graph'
+      })
   );
 };
 _qvr.func['AGE'] = async (prev, current, parent, nodes, memo, goTo) => {
@@ -516,5 +520,5 @@ _qvr.func['CAT[DELETE](send)'] = async (
   await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
   prev.end(prev.res).status(200).send({ message: 'Cat deleted!' });
 };
-run();
+_qvr.run();
 export default _qvr;

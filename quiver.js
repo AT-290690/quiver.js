@@ -24,10 +24,11 @@ const library = `const _qvr = {
       }
     },
     wrap: (callback = res => res) =>
-      _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
+      _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))),
+    setAsRoot: (node) => _qvr.root = node,
+    run: (args) => _qvr.dfs(_qvr.root, {...args, quiver: _qvr })
   }`;
-const helpers = `const root = (node) => _qvr.root = node;
-const run = (args) => _qvr.dfs(_qvr.root, {...args, quiver: _qvr });`;
+
 const monolithArr = [];
 const monolithNodes = [];
 
@@ -36,10 +37,9 @@ export default async (file, files = []) => {
     console.log(`\n^____${file}____\n`);
     const buildCode = `${library}
 _qvr.nodes = ${JSON.stringify(graph)};
-_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-${helpers}
+_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'))
 ${main}
-run();
+_qvr.run();
 export default _qvr`;
     const path = file.split('/');
     const filename = path.pop().split('.go')[0];
@@ -57,12 +57,11 @@ export default _qvr`;
   _qvr.nodes = ${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
   )};
-_qvr.root = _qvr.nodes["${
+_qvr.setAsRoot(_qvr.nodes["${
         Object.values(monolithNodes[0]).find(node => node.type === 'root').key
-      }"];
-${helpers}
+      }"]);
 ${monolithArr.join('\n')}
-run();
+_qvr.run();
 export default _qvr`;
       const path = file.split('/');
       const filename = path.pop().split('.go')[0];

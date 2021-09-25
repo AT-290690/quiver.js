@@ -1,4 +1,5 @@
 SERVER ->
+		{ quiver } := prev;
 		memo.init = Object.freeze({ 
 		imports: {
 			fs: await import("fs"),
@@ -36,7 +37,7 @@ SERVER ->
 				req.body = body
 			}
 			req.query = query
-			run({ method, req, res })
+			quiver.run({ method, req, res })
 		})
 	}
 
@@ -52,7 +53,7 @@ SERVER ->
 	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 	})
 	nodes["SERVER"].type = "leaf"
-	root(nodes["REQUEST"]);
+	prev.quiver.setAsRoot(nodes["REQUEST"]);
 REQUEST -> 
 		{ method, req, res, quiver } := prev
 		{ match, end, imports, toJSON, toString, DB_DIR, DB_FILE } := memo.init

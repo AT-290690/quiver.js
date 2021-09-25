@@ -30,7 +30,9 @@ const _qvr = {
   wrap: (callback = res => res) =>
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    )
+    ),
+  setAsRoot: node => (_qvr.root = node),
+  run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
   root: { key: 'root', next: ['a0', 'a1'], level: 0, type: 'root', prev: null },
@@ -62,9 +64,7 @@ _qvr.nodes = {
   amp1: { key: 'amp1', next: [], level: 1, type: 'leaf', prev: 'amp' },
   logger: { key: 'logger', next: [], level: 0, type: 'root', prev: 'amp1' }
 };
-_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const root = node => (_qvr.root = node);
-const run = args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr });
+_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
 _qvr.func['root'] = async (prev, current, parent, nodes, memo, goTo) => {
   return [];
 };
@@ -131,5 +131,5 @@ _qvr.func['amp1'] = async (prev, current, parent, nodes, memo, goTo) => {
 _qvr.func['logger'] = async (prev, current, parent, nodes, memo, goTo) => {
   return console.log(prev);
 };
-run();
+_qvr.run();
 export default _qvr;

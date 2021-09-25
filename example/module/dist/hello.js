@@ -30,7 +30,9 @@ const _qvr = {
   wrap: (callback = res => res) =>
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    )
+    ),
+  setAsRoot: node => (_qvr.root = node),
+  run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
   HELLO: { key: 'HELLO', next: ['SPACE'], level: 0, type: 'root', prev: null },
@@ -50,9 +52,7 @@ _qvr.nodes = {
   },
   PRINT: { key: 'PRINT', next: [], level: 3, type: 'leaf', prev: 'WORLD' }
 };
-_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const root = node => (_qvr.root = node);
-const run = args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr });
+_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
 _qvr.func['HELLO'] = async (prev, current, parent, nodes, memo, goTo) => {
   return 'Hello';
 };
@@ -65,5 +65,5 @@ _qvr.func['WORLD'] = async (prev, current, parent, nodes, memo, goTo) => {
 _qvr.func['PRINT'] = async (prev, current, parent, nodes, memo, goTo) => {
   return console.log(prev);
 };
-run();
+_qvr.run();
 export default _qvr;

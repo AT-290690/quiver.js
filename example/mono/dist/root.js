@@ -30,7 +30,9 @@ const _qvr = {
   wrap: (callback = res => res) =>
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    )
+    ),
+  setAsRoot: node => (_qvr.root = node),
+  run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
   root: { key: 'root', next: ['a0', 'a1'], level: 0, type: 'root', prev: null },
@@ -47,9 +49,6 @@ _qvr.nodes = {
   e1: { key: 'e1', next: ['f1'], level: 5, type: 'branch', prev: 'd1' },
   f1: { key: 'f1', next: ['g1'], level: 6, type: 'branch', prev: 'e1' },
   g1: { key: 'g1', next: [], level: 7, type: 'leaf', prev: 'f1' },
-  amp: { key: 'amp', next: ['amp1'], level: 0, type: 'root', prev: null },
-  amp1: { key: 'amp1', next: [], level: 1, type: 'leaf', prev: 'amp' },
-  logger: { key: 'logger', next: [], level: 0, type: 'root', prev: null },
   m0: { key: 'm0', next: ['m1'], level: 0, type: 'root', prev: null },
   m1: { key: 'm1', next: ['m2'], level: 1, type: 'branch', prev: 'm0' },
   m2: {
@@ -60,11 +59,12 @@ _qvr.nodes = {
     prev: 'm1'
   },
   m3: { key: 'm3', next: [], level: 3, type: 'leaf', prev: 'm2' },
-  toAmp: { key: 'toAmp', next: [], level: 3, type: 'leaf', prev: 'm2' }
+  toAmp: { key: 'toAmp', next: [], level: 3, type: 'leaf', prev: 'm2' },
+  amp: { key: 'amp', next: ['amp1'], level: 0, type: 'root', prev: null },
+  amp1: { key: 'amp1', next: [], level: 1, type: 'leaf', prev: 'amp' },
+  logger: { key: 'logger', next: [], level: 0, type: 'root', prev: null }
 };
-_qvr.root = _qvr.nodes['root'];
-const root = node => (_qvr.root = node);
-const run = args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr });
+_qvr.setAsRoot(_qvr.nodes['root']);
 _qvr.func['root'] = async (prev, current, parent, nodes, memo, goTo) => {
   return [];
 };
@@ -107,15 +107,6 @@ _qvr.func['f1'] = async (prev, current, parent, nodes, memo, goTo) => {
 _qvr.func['g1'] = async (prev, current, parent, nodes, memo, goTo) => {
   return goTo(nodes['m0'], prev);
 };
-_qvr.func['amp'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return prev.reduce((acc, x) => (acc += Math.abs(x)), 0);
-};
-_qvr.func['amp1'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return goTo(nodes['logger'], prev);
-};
-_qvr.func['logger'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return console.log(prev);
-};
 _qvr.func['m0'] = async (prev, current, parent, nodes, memo, goTo) => {
   return prev.map(x => x * 2);
 };
@@ -131,5 +122,14 @@ _qvr.func['m3'] = async (prev, current, parent, nodes, memo, goTo) => {
 _qvr.func['toAmp'] = async (prev, current, parent, nodes, memo, goTo) => {
   return goTo(nodes['amp'], prev);
 };
-run();
+_qvr.func['amp'] = async (prev, current, parent, nodes, memo, goTo) => {
+  return prev.reduce((acc, x) => (acc += Math.abs(x)), 0);
+};
+_qvr.func['amp1'] = async (prev, current, parent, nodes, memo, goTo) => {
+  return goTo(nodes['logger'], prev);
+};
+_qvr.func['logger'] = async (prev, current, parent, nodes, memo, goTo) => {
+  return console.log(prev);
+};
+_qvr.run();
 export default _qvr;
