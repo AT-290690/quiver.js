@@ -10,13 +10,13 @@ HELLO -> "Hello"
 <- return
 := assign with const
 indentation is nesting
-every node is (prev, current, parent, nodes, memo, dfs) =>
+every node is (prev, current, parent, nodes, memo, goTo) =>
 prev = parent output
 current = key of current node
 parent = parent node key
 nodes = object all nodes
 memo = object 
-dfs = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => void
+goTo = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => void
 
 - 0 > HELLO 
 - 1 >   SPACE 
@@ -67,40 +67,30 @@ adj list:
 }
 ```
 
-Recursive backtracking can be used to retry sertain services
-it will call all their children async
-dfs returns void which will natrually short circuit the current node.
-
-``` 
-START -> 0
-  INC -> ++prev
-    LOOP -> prev < 10 ? dfs(nodes[parent], prev) : prev
-      END -> console.log(prev)
 ```
-
-```
-- 0 > SERVER 
-- 1 >   REQUEST 
-- 2 >     HELLO 
-- 3 >       HELLO[GET] 
-- 2 >     ABOUT 
-- 2 >     AGE 
-- 3 >       AGE[POST] 
-- 4 >         AGE[POST](validate) 
-- 5 >           AGE[POST](send) 
-- 2 >     CAT 
-- 3 >       CAT[GET] 
-- 4 >         CAT[GET][all](validate) 
-- 5 >           CAT[GET][all](send) 
-- 4 >         CAT[GET][id](validate) 
-- 5 >           CAT[GET][id](send) 
-- 3 >       CAT[POST] 
-- 4 >         CAT[POST](validate) 
-- 5 >           CAT[POST](send) 
-- 3 >       CAT[PUT] 
-- 4 >         CAT[PUT](validate) 
-- 5 >           CAT[PUT](send) 
-- 3 >       CAT[DELETE] 
-- 4 >         CAT[DELETE](validate) 
-- 5 >           CAT[DELETE](send) 
+- 0 > SERVER
+- 1 >  SWITCH
+- 0 > REQUEST
+- 1 >  HELLO_CAT
+- 2 >   HELLO[GET]
+- 1 >  ABOUT
+- 1 >  AGE
+- 2 >   AGE[POST]
+- 3 >    AGE[POST](validate)
+- 4 >     AGE[POST](send)
+- 1 >  CAT
+- 2 >   CAT[GET]
+- 3 >    CAT[GET][all](validate)
+- 4 >     CAT[GET][all](send)
+- 3 >    CAT[GET][id](validate)
+- 4 >     CAT[GET][id](send)
+- 2 >   CAT[POST]
+- 3 >    CAT[POST](validate)
+- 4 >     CAT[POST](send)
+- 2 >   CAT[PUT]
+- 3 >    CAT[PUT](validate)
+- 4 >     CAT[PUT](send)
+- 2 >   CAT[DELETE]
+- 3 >    CAT[DELETE](validate)
+- 4 >     CAT[DELETE](send)
 ```
