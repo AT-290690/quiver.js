@@ -1,55 +1,89 @@
 import * as fs from 'fs';
 const { readFile, mkdir, writeFile } = fs.promises;
-export default async file => {
-  const buildStandAlone = async (main, graph) => {
-    console.log(`\n^____${file}____\n`);
-    const buildCode = `const _qvr = { 
-memo: {}, 
-func: {}, 
-nodes: {},
-dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
-    if (!node) return;
-    let result;
-    if (typeof _qvr.func[node.key] === 'function')
-        result = await _qvr.func[node.key](
-        prev,
-        node.key,
-        parent,
-        nodes,
-        memo,
-        _qvr.dfs);
-    if (result !== undefined && node.next) {
-      node.next.forEach(n => {
-        _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
-      });
-    }
-  },
-  wrap: (callback = res => res) =>
-    _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
-}
 
+const library = `const _qvr = { 
+  memo: {}, 
+  func: {}, 
+  nodes: {},
+  dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
+      if (!node) return;
+      let result;
+      if (typeof _qvr.func[node.key] === 'function')
+          result = await _qvr.func[node.key](
+          prev,
+          node.key,
+          parent,
+          nodes,
+          memo,
+          _qvr.dfs);
+      if (result !== undefined && node.next) {
+        node.next.forEach(n => {
+          _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+        });
+      }
+    },
+    wrap: (callback = res => res) =>
+      _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
+  }`;
+
+const monolithArr = [];
+const monolithNodes = [];
+
+export default async (file, files = []) => {
+  const buildModular = async (main, graph) => {
+    console.log(`\n^____${file}____\n`);
+    const buildCode = `${library}
 _qvr.nodes = ${JSON.stringify(graph)};
 const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const run = (method, req,res) => {
-  _qvr.dfs(root, { req, res, method, quiver: _qvr });
-};
+const run = (args) => _qvr.dfs(root, {...args, quiver: _qvr });
 ${main}
 _qvr.dfs(root, undefined, _qvr.nodes );
-  `;
+export default _qvr`;
     const path = file.split('/');
-    const filename = path.pop().split('.qu')[0];
+    const filename = path.pop().split('.go')[0];
     const dir = path.join('/');
     await mkdir(`./${dir}/dist`, { recursive: true });
     await writeFile(`./${dir}/dist/${filename}.js`, buildCode);
     console.log(`${filename}.js is generated!`);
   };
+  const buildMonolithic = async (main, graph) => {
+    if (monolithArr.lenght === 0) {
+      monolithArr.length = 1;
+      monolithNodes.length = 0;
+    }
 
+    monolithNodes.push(graph);
+    monolithArr.push(main);
+    if (files.length === monolithNodes.length) {
+      console.log(`\n^____${files.join(' -> ')}____\n`);
+      const buildCode = `${library}
+  _qvr.nodes = ${JSON.stringify(
+    monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
+  )};
+  const root = Object.values(_qvr.nodes).find(node => node.type === 'root');
+  const run = (args) => _qvr.dfs(root, {...args, quiver: _qvr });
+  ${monolithArr.join('\n')}
+  _qvr.dfs(root, undefined, _qvr.nodes );
+  export default _qvr`;
+      const path = file.split('/');
+      const filename = path.pop().split('.go')[0];
+      const dir = path.join('/');
+      await mkdir(`./${dir}/dist`, { recursive: true });
+      await writeFile(
+        `./${dir}/dist/${files[0].split('.go')[0]}.js`,
+        buildCode
+      );
+      console.log(`${files[0].split('.go')[0]}.js is generated!`);
+    }
+  };
   let prev = null;
   const createTreeMap = (tree, line) => {
     const current = line.trim();
     if (!current) return;
-    const level = (line.trimEnd().split(' ').length - 1) / 2;
-    console.log('- ' + level + ' > ' + line);
+    const level = line.trimEnd().split('\t').length - 1;
+    console.log(
+      '- ' + level + ' > ' + Array(level).fill(' ').join('') + current
+    );
     if (!tree[line.trim()]) {
       tree[current] = {
         key: current,
@@ -99,7 +133,7 @@ _qvr.dfs(root, undefined, _qvr.nodes );
         const expression = x[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = i !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${x[0].trim()}"] = async (prev, current, parent, nodes, memo, dfs) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${x[0].trim()}"] = async (prev, current, parent, nodes, memo, goTo) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
@@ -116,5 +150,7 @@ _qvr.dfs(root, undefined, _qvr.nodes );
     return { main: compiledCode, graph: treeMap };
   };
   const { main, graph } = await compileToJs();
-  await buildStandAlone(main, graph);
+  files.length
+    ? await buildMonolithic(main, graph)
+    : await buildModular(main, graph);
 };

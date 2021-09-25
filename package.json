@@ -4,8 +4,9 @@
   "description": "",
   "main": "quiver.js",
   "scripts": {
-    "compile": "node main.js",
-    "start": "node example/cats/dist/cats.js"
+    "module": "node module.js",
+    "monolith": "node monolith.js",
+    "start": "node example/main/dist/cats.js"
   },
   "type": "module",
   "author": "",
