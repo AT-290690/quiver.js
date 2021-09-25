@@ -26,8 +26,7 @@ const library = `const _qvr = {
     wrap: (callback = res => res) =>
       _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args))))
   }`;
-const helpers = `_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
-const root = (node) => _qvr.root = node;
+const helpers = `const root = (node) => _qvr.root = node;
 const run = (args) => _qvr.dfs(_qvr.root, {...args, quiver: _qvr });`;
 const monolithArr = [];
 const monolithNodes = [];
@@ -37,6 +36,7 @@ export default async (file, files = []) => {
     console.log(`\n^____${file}____\n`);
     const buildCode = `${library}
 _qvr.nodes = ${JSON.stringify(graph)};
+_qvr.root = Object.values(_qvr.nodes).find(node => node.type === 'root');
 ${helpers}
 ${main}
 run();
@@ -49,11 +49,6 @@ export default _qvr`;
     console.log(`${filename}.js is generated!`);
   };
   const buildMonolithic = async (main, graph) => {
-    if (monolithArr.lenght === 0) {
-      monolithArr.length = 1;
-      monolithNodes.length = 0;
-    }
-
     monolithNodes.push(graph);
     monolithArr.push(main);
     if (files.length === monolithNodes.length) {
@@ -62,6 +57,9 @@ export default _qvr`;
   _qvr.nodes = ${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
   )};
+_qvr.root = _qvr.nodes["${
+        Object.values(monolithNodes[0]).find(node => node.type === 'root').key
+      }"];
 ${helpers}
 ${monolithArr.join('\n')}
 run();
@@ -75,6 +73,8 @@ export default _qvr`;
         buildCode
       );
       console.log(`${files[0].split('.go')[0]}.js is generated!`);
+      monolithArr.length = 0;
+      monolithNodes.length = 0;
     }
   };
   let prev = null;
@@ -90,7 +90,7 @@ export default _qvr`;
         key: current,
         next: [],
         level,
-        type: 'leaf',
+        type: 'root',
         prev: prev
       };
       prev = current;
@@ -113,10 +113,11 @@ export default _qvr`;
       if (parent) {
         parent.next.push(current.key);
         current.prev = parent.key;
+        if (current.next.length === 0) {
+          current.type = 'leaf';
+        }
         if (parent.level !== 0) {
           parent.type = 'branch';
-        } else {
-          parent.type = 'root';
         }
       }
     });
