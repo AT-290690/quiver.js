@@ -1,60 +1,58 @@
 SERVER ->
-			memo.init = Object.freeze({ 
-			imports: {
-				fs: await import("fs"),
-				URL: await import("url"),
-				http: await import("http")
-			},
-			match: {
-				url: (prev, url) => (prev.url.split("?")[0] === url) || void 0,
-				method: (prev, method) => (prev.method === method) || void 0
-			},
-			end: (res) => ({
-					status: (status) => res.writeHead(status, 
-					 { "Content-Type": "application/json" }) && 
-					 { send: (data) => res.end(JSON.stringify(data)) }
-			}),
-			toJSON: (json,...args) => JSON.parse(json,...args),
-			toString: (json,...args) => JSON.stringify(json,...args),
-			DB_DIR: "./example/module/dist/db/",
-			DB_FILE: "cats.json",
-		 })
-		 PORT := 8075
-		 start := (req, res) => {
-			 method := req.method
-			 urlParsed := memo.init.imports.URL.parse(req.url)
-			 query := urlParsed.query
-			if (req.url === "/favicon.ico") {
-				res.writeHead(200, { "Content-Type": "image/x-icon" })
-				<- res.end()
-			}
-		
-			let body = ""
-			req.on("data", chunk => body += chunk)
-			req.on("end", () => {
-				if (method !== "GET" && body) {
-					req.body = body
-				}
-				req.query = query
-				run({ method, req, res })
-			})
+		memo.init = Object.freeze({ 
+		imports: {
+			fs: await import("fs"),
+			URL: await import("url"),
+			http: await import("http")
+		},
+		match: {
+			url: (prev, url) => (prev.url.split("?")[0] === url) || void 0,
+			method: (prev, method) => (prev.method === method) || void 0
+		},
+		end: (res) => ({
+				status: (status) => res.writeHead(status, 
+					{ "Content-Type": "application/json" }) && 
+					{ send: (data) => res.end(JSON.stringify(data)) }
+		}),
+		toJSON: (json,...args) => JSON.parse(json,...args),
+		toString: (json,...args) => JSON.stringify(json,...args),
+		DB_DIR: "./example/module/dist/db/",
+		DB_FILE: "cats.json",
+		})
+		PORT := 8075
+		start := (req, res) => {
+			method := req.method
+			urlParsed := memo.init.imports.URL.parse(req.url)
+			query := urlParsed.query
+		if (req.url === "/favicon.ico") {
+			res.writeHead(200, { "Content-Type": "image/x-icon" })
+			<- res.end()
 		}
 	
-			server := memo.init.imports.http.createServer()
-			server.listen(PORT, () => console.log("http://localhost:" + PORT))
-			server.on("request", start)
-			
-		{ mkdir, writeFile, access } := memo.init.imports.fs.promises
-
-		await access(memo.init.DB_DIR + memo.init.DB_FILE).catch(async () => {
-			 await mkdir(memo.init.DB_DIR, { recursive: true } )
-			 await writeFile(memo.init.DB_DIR + memo.init.DB_FILE,
-		`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
+		let body = ""
+		req.on("data", chunk => body += chunk)
+		req.on("end", () => {
+			if (method !== "GET" && body) {
+				req.body = body
+			}
+			req.query = query
+			run({ method, req, res })
 		})
-		<- 1
-	SWITCH -> 
-		nodes["SERVER"].type = "leaf"
-		root(nodes["REQUEST"]);
+	}
+
+		server := memo.init.imports.http.createServer()
+		server.listen(PORT, () => console.log("http://localhost:" + PORT))
+		server.on("request", start)
+		
+	{ mkdir, writeFile, access } := memo.init.imports.fs.promises
+
+	await access(memo.init.DB_DIR + memo.init.DB_FILE).catch(async () => {
+			await mkdir(memo.init.DB_DIR, { recursive: true } )
+			await writeFile(memo.init.DB_DIR + memo.init.DB_FILE,
+	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
+	})
+	nodes["SERVER"].type = "leaf"
+	root(nodes["REQUEST"]);
 REQUEST -> 
 		{ method, req, res, quiver } := prev
 		{ match, end, imports, toJSON, toString, DB_DIR, DB_FILE } := memo.init

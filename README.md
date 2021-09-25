@@ -1,5 +1,7 @@
 # quiver.js
+
 JavaScript parser for graph based pipe development
+
 ```
 HELLO -> "Hello"
   SPACE -> prev + " "
@@ -15,61 +17,54 @@ prev = parent output
 current = key of current node
 parent = parent node key
 nodes = object all nodes
-memo = object 
+memo = object
 goTo = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => void
 
-- 0 > HELLO 
-- 1 >   SPACE 
-- 2 >     WORLD 
-- 3 >       PRINT 
+- 0 > HELLO
+- 1 >   SPACE
+- 2 >     WORLD
+- 3 >       PRINT
 
 nesting with levels
 ```
+
 adj list:
+
 ```json
- {
-   "HELLO":{
-      "key":"HELLO",
-      "next":[
-         "SPACE"
-      ],
-      "level":0,
-      "type":"root",
-      "prev":null
-   },
-   "SPACE":{
-      "key":"SPACE",
-      "next":[
-         "WORLD"
-      ],
-      "level":1,
-      "type":"branch",
-      "prev":"HELLO"
-   },
-   "WORLD":{
-      "key":"WORLD",
-      "next":[
-         "PRINT"
-      ],
-      "level":2,
-      "type":"branch",
-      "prev":"SPACE"
-   },
-   "PRINT":{
-      "key":"PRINT",
-      "next":[
-         
-      ],
-      "level":3,
-      "type":"leaf",
-      "prev":"WORLD"
-   }
+{
+  "HELLO": {
+    "key": "HELLO",
+    "next": ["SPACE"],
+    "level": 0,
+    "type": "root",
+    "prev": null
+  },
+  "SPACE": {
+    "key": "SPACE",
+    "next": ["WORLD"],
+    "level": 1,
+    "type": "branch",
+    "prev": "HELLO"
+  },
+  "WORLD": {
+    "key": "WORLD",
+    "next": ["PRINT"],
+    "level": 2,
+    "type": "branch",
+    "prev": "SPACE"
+  },
+  "PRINT": {
+    "key": "PRINT",
+    "next": [],
+    "level": 3,
+    "type": "leaf",
+    "prev": "WORLD"
+  }
 }
 ```
 
 ```
 - 0 > SERVER
-- 1 >  SWITCH
 - 0 > REQUEST
 - 1 >  HELLO_CAT
 - 2 >   HELLO[GET]

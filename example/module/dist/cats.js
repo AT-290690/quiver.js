@@ -33,20 +33,13 @@ const _qvr = {
     )
 };
 _qvr.nodes = {
-  SERVER: {
-    key: 'SERVER',
-    next: ['SWITCH'],
-    level: 0,
-    type: 'root',
-    prev: null
-  },
-  SWITCH: { key: 'SWITCH', next: [], level: 1, type: 'leaf', prev: 'SERVER' },
+  SERVER: { key: 'SERVER', next: [], level: 0, type: 'root', prev: null },
   REQUEST: {
     key: 'REQUEST',
     next: ['HELLO_CAT', 'ABOUT', 'AGE', 'CAT'],
     level: 0,
     type: 'root',
-    prev: 'SWITCH'
+    prev: 'SERVER'
   },
   HELLO_CAT: {
     key: 'HELLO_CAT',
@@ -256,9 +249,6 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
       `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`
     );
   });
-  return 1;
-};
-_qvr.func['SWITCH'] = async (prev, current, parent, nodes, memo, goTo) => {
   nodes['SERVER'].type = 'leaf';
   root(nodes['REQUEST']);
 };
