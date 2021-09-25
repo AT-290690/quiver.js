@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import compile from './quiver.js';
 const { readdir } = fs.promises;
 
-const dir = './example/main/';
+const dir = './example/module/';
 
 const files = await readdir(dir);
 files

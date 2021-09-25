@@ -44,7 +44,7 @@ status: (status) => res.writeHead(status,
 }),
 toJSON: (json,...args) => JSON.parse(json,...args),
 toString: (json,...args) => JSON.stringify(json,...args),
-DB_DIR: "./example/main/dist/db/",
+DB_DIR: "./example/module/dist/db/",
 DB_FILE: "cats.json",
 })
 const PORT = 8075

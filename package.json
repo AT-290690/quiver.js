@@ -6,7 +6,7 @@
   "scripts": {
     "module": "node module.js",
     "monolith": "node monolith.js",
-    "start": "node example/main/dist/cats.js"
+    "start": "node example/module/dist/cats.js"
   },
   "type": "module",
   "author": "",
