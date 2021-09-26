@@ -39,8 +39,6 @@ out() - returns output array
 nesting with levels
 ```
 
-adj list:
-
 ```json
 {
   "HELLO": {
