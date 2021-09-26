@@ -249,6 +249,7 @@ export default async (dir, root) => {
   );
   files.unshift(root);
   const merge = monolithic ? files : [];
+
   for (const file of files) {
     await compile(dir + file, merge);
   }
