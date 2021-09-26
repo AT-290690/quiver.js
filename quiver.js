@@ -51,7 +51,12 @@ const library = `const _qvr = {
         return { goTo: () => undefined, visit: _qvr.visit }
       }
     },
-    leave: (key) => { delete _qvr.visited[key] }
+    leave: (key) => { delete _qvr.visited[key] },
+    shortCircuit: (callback) => {
+     const result = callback()
+     return result ? result : undefined
+    },
+    ifNotVisited: (key, callback) => (key in _qvr.visited) ? undefined : callback() 
   }`;
 const logBoldMessage = msg => console.log('\x1b[1m', msg);
 const logErrorMessage = msg =>
@@ -238,7 +243,7 @@ export default async () => {
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart, out }) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, ifNotVisited, leave, goTo, wrap, setRoot, getRoot, restart, out, shortCircuit }) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
