@@ -3,13 +3,7 @@ const _qvr = {
   func: {},
   nodes: {},
   root: null,
-  dfs: async (
-    node,
-    prev,
-    nodes = _qvr.nodes,
-    parent = null,
-    memo = _qvr.memo
-  ) => {
+  dfs: async (node, prev, parent = null) => {
     if (!node) return;
     let result;
     if (typeof _qvr.func[node.key] === 'function')
@@ -17,13 +11,13 @@ const _qvr = {
         prev,
         node.key,
         parent,
-        nodes,
-        memo,
+        _qvr.nodes,
+        _qvr.memo,
         _qvr.dfs
       );
     if (result !== undefined && node.next) {
       node.next.forEach(n => {
-        _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+        _qvr.dfs(_qvr.nodes[n], result, node.key);
       });
     }
   },
@@ -35,22 +29,22 @@ const _qvr = {
   run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
-  HELLO: { key: 'HELLO', next: ['SPACE'], level: 0, type: 'root', prev: null },
+  HELLO: { key: 'HELLO', next: ['SPACE'], prev: null, level: 0, type: 'root' },
   SPACE: {
     key: 'SPACE',
     next: ['WORLD'],
+    prev: 'HELLO',
     level: 1,
-    type: 'branch',
-    prev: 'HELLO'
+    type: 'branch'
   },
   WORLD: {
     key: 'WORLD',
     next: ['PRINT'],
+    prev: 'SPACE',
     level: 2,
-    type: 'branch',
-    prev: 'SPACE'
+    type: 'branch'
   },
-  PRINT: { key: 'PRINT', next: [], level: 3, type: 'leaf', prev: 'WORLD' }
+  PRINT: { key: 'PRINT', next: [], prev: 'WORLD', level: 3, type: 'leaf' }
 };
 _qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
 _qvr.func['HELLO'] = async (prev, current, parent, nodes, memo, goTo) => {

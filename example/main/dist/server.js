@@ -30,170 +30,147 @@ const _qvr = {
 };
 _qvr.nodes = {
   SERVER: { key: 'SERVER', next: [], prev: null, level: 0, type: 'root' },
-  REQUEST: {
-    key: 'REQUEST',
-    next: ['HELLO_CAT', 'ABOUT', 'AGE', 'CAT'],
-    prev: 'SERVER',
-    level: 0,
-    type: 'root'
-  },
-  HELLO_CAT: {
-    key: 'HELLO_CAT',
-    next: ['HELLO[GET]'],
-    prev: 'REQUEST',
-    level: 1,
-    type: 'branch'
-  },
-  'HELLO[GET]': {
-    key: 'HELLO[GET]',
-    next: [],
-    prev: 'HELLO_CAT',
-    level: 2,
-    type: 'leaf'
-  },
-  ABOUT: { key: 'ABOUT', next: [], prev: 'REQUEST', level: 1, type: 'leaf' },
-  AGE: {
-    key: 'AGE',
-    next: ['AGE[POST]'],
-    prev: 'REQUEST',
-    level: 1,
-    type: 'branch'
-  },
-  'AGE[POST]': {
-    key: 'AGE[POST]',
-    next: ['AGE[POST](validate)'],
-    prev: 'AGE',
-    level: 2,
-    type: 'branch'
-  },
-  'AGE[POST](validate)': {
-    key: 'AGE[POST](validate)',
-    next: ['AGE[POST](send)'],
-    prev: 'AGE[POST]',
-    level: 3,
-    type: 'branch'
-  },
-  'AGE[POST](send)': {
-    key: 'AGE[POST](send)',
-    next: [],
-    prev: 'AGE[POST](validate)',
-    level: 4,
-    type: 'leaf'
-  },
+  REQUEST: { key: 'REQUEST', next: [], prev: null, level: 0, type: 'root' },
   CAT: {
     key: 'CAT',
     next: ['CAT[GET]', 'CAT[POST]', 'CAT[PUT]', 'CAT[DELETE]'],
-    prev: 'REQUEST',
-    level: 1,
-    type: 'branch'
+    prev: null,
+    level: 0,
+    type: 'root'
   },
   'CAT[GET]': {
     key: 'CAT[GET]',
     next: ['CAT[GET][all](validate)', 'CAT[GET][id](validate)'],
     prev: 'CAT',
-    level: 2,
+    level: 1,
     type: 'branch'
   },
   'CAT[GET][all](validate)': {
     key: 'CAT[GET][all](validate)',
     next: ['CAT[GET][all](send)'],
     prev: 'CAT[GET]',
-    level: 3,
+    level: 2,
     type: 'branch'
   },
   'CAT[GET][all](send)': {
     key: 'CAT[GET][all](send)',
     next: [],
     prev: 'CAT[GET][all](validate)',
-    level: 4,
+    level: 3,
     type: 'leaf'
   },
   'CAT[GET][id](validate)': {
     key: 'CAT[GET][id](validate)',
     next: ['CAT[GET][id](send)'],
     prev: 'CAT[GET]',
-    level: 3,
+    level: 2,
     type: 'branch'
   },
   'CAT[GET][id](send)': {
     key: 'CAT[GET][id](send)',
     next: [],
     prev: 'CAT[GET][id](validate)',
-    level: 4,
+    level: 3,
     type: 'leaf'
   },
   'CAT[POST]': {
     key: 'CAT[POST]',
     next: ['CAT[POST](validate)'],
     prev: 'CAT',
-    level: 2,
+    level: 1,
     type: 'branch'
   },
   'CAT[POST](validate)': {
     key: 'CAT[POST](validate)',
     next: ['CAT[POST](send)'],
     prev: 'CAT[POST]',
-    level: 3,
+    level: 2,
     type: 'branch'
   },
   'CAT[POST](send)': {
     key: 'CAT[POST](send)',
     next: [],
     prev: 'CAT[POST](validate)',
-    level: 4,
+    level: 3,
     type: 'leaf'
   },
   'CAT[PUT]': {
     key: 'CAT[PUT]',
     next: ['CAT[PUT](validate)'],
     prev: 'CAT',
-    level: 2,
+    level: 1,
     type: 'branch'
   },
   'CAT[PUT](validate)': {
     key: 'CAT[PUT](validate)',
     next: ['CAT[PUT](send)'],
     prev: 'CAT[PUT]',
-    level: 3,
+    level: 2,
     type: 'branch'
   },
   'CAT[PUT](send)': {
     key: 'CAT[PUT](send)',
     next: [],
     prev: 'CAT[PUT](validate)',
-    level: 4,
+    level: 3,
     type: 'leaf'
   },
   'CAT[DELETE]': {
     key: 'CAT[DELETE]',
     next: ['CAT[DELETE](validate)'],
     prev: 'CAT',
-    level: 2,
+    level: 1,
     type: 'branch'
   },
   'CAT[DELETE](validate)': {
     key: 'CAT[DELETE](validate)',
     next: ['CAT[DELETE](send)'],
     prev: 'CAT[DELETE]',
-    level: 3,
+    level: 2,
     type: 'branch'
   },
   'CAT[DELETE](send)': {
     key: 'CAT[DELETE](send)',
     next: [],
     prev: 'CAT[DELETE](validate)',
-    level: 4,
+    level: 3,
+    type: 'leaf'
+  },
+  AGE: { key: 'AGE', next: ['AGE[POST]'], prev: null, level: 0, type: 'root' },
+  'AGE[POST]': {
+    key: 'AGE[POST]',
+    next: ['AGE[POST](validate)'],
+    prev: 'AGE',
+    level: 1,
+    type: 'branch'
+  },
+  'AGE[POST](validate)': {
+    key: 'AGE[POST](validate)',
+    next: ['AGE[POST](send)'],
+    prev: 'AGE[POST]',
+    level: 2,
+    type: 'branch'
+  },
+  'AGE[POST](send)': {
+    key: 'AGE[POST](send)',
+    next: [],
+    prev: 'AGE[POST](validate)',
+    level: 3,
     type: 'leaf'
   }
 };
-_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
+_qvr.setAsRoot(_qvr.nodes['SERVER']);
 _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
   const { quiver } = prev;
-  memo.init = Object.freeze({
+  const init = {
     imports: {
       fs: await import('fs'),
       URL: await import('url'),
       http: await import('http')
+    },
+    routes: {
+      '/cat': 'CAT',
+      '/age': 'AGE'
     },
     match: {
       url: (prev, url) => prev.url.split('?')[0] === url || void 0,
@@ -207,13 +184,14 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
     }),
     toJSON: (json, ...args) => JSON.parse(json, ...args),
     toString: (json, ...args) => JSON.stringify(json, ...args),
-    DB_DIR: './example/module/dist/db/',
+    DB_DIR: './example/main/dist/db/',
     DB_FILE: 'cats.json'
-  });
+  };
+
   const PORT = 8075;
   const start = (req, res) => {
     const method = req.method;
-    const urlParsed = memo.init.imports.URL.parse(req.url);
+    const urlParsed = init.imports.URL.parse(req.url);
     const query = urlParsed.query;
     if (req.url === '/favicon.ico') {
       res.writeHead(200, { 'Content-Type': 'image/x-icon' });
@@ -227,29 +205,29 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
         req.body = body;
       }
       req.query = query;
-      quiver.run({ method, req, res });
+      quiver.run({ method, req, res, init });
     });
   };
 
-  const server = memo.init.imports.http.createServer();
+  const server = init.imports.http.createServer();
   server.listen(PORT, () => console.log('http://localhost:' + PORT));
   server.on('request', start);
 
-  const { mkdir, writeFile, access } = memo.init.imports.fs.promises;
+  const { mkdir, writeFile, access } = init.imports.fs.promises;
 
-  await access(memo.init.DB_DIR + memo.init.DB_FILE).catch(async () => {
-    await mkdir(memo.init.DB_DIR, { recursive: true });
+  await access(init.DB_DIR + init.DB_FILE).catch(async () => {
+    await mkdir(init.DB_DIR, { recursive: true });
     await writeFile(
-      memo.init.DB_DIR + memo.init.DB_FILE,
+      init.DB_DIR + init.DB_FILE,
       `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`
     );
   });
-  nodes['SERVER'].type = 'leaf';
   prev.quiver.setAsRoot(nodes['REQUEST']);
 };
 _qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
-  const { method, req, res, quiver } = prev;
-  const { match, end, imports, toJSON, toString, DB_DIR, DB_FILE } = memo.init;
+  const { method, req, res, init, quiver } = prev;
+  const { match, end, imports, routes, toJSON, toString, DB_DIR, DB_FILE } =
+    init;
   const { fs } = imports;
   const { body, query, url } = req;
   const queries =
@@ -260,8 +238,7 @@ _qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
         return { [key]: value };
       })
       .reduce((acc, item) => ({ ...acc, ...item }), {}) || {};
-
-  return {
+  const service = {
     method,
     body,
     query: queries,
@@ -274,72 +251,7 @@ _qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
     toString,
     DB_PATH: DB_DIR + DB_FILE
   };
-};
-_qvr.func['HELLO_CAT'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return (prev.match.url(prev, '/hello') && prev) || void 0;
-};
-_qvr.func['HELLO[GET]'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return (
-    prev.match.method(prev, 'GET') &&
-    prev.end(prev.res).status(200).send({ message: 'Hello, do you like cats?' })
-  );
-};
-_qvr.func['ABOUT'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return (
-    prev.match.url(prev, '/about') &&
-    prev.match.method(prev, 'GET') &&
-    prev
-      .end(prev.res)
-      .status(200)
-      .send({
-        message: 'This is a demo for service code generation using a graph'
-      })
-  );
-};
-_qvr.func['AGE'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return (prev.match.url(prev, '/age') && prev) || void 0;
-};
-_qvr.func['AGE[POST]'] = async (prev, current, parent, nodes, memo, goTo) => {
-  return (prev.match.method(prev, 'POST') && prev) || void 0;
-};
-_qvr.func['AGE[POST](validate)'] = async (
-  prev,
-  current,
-  parent,
-  nodes,
-  memo,
-  goTo
-) => {
-  prev.body = prev.toJSON(prev.body);
-  if (!prev.body)
-    return void prev
-      .end(prev.res)
-      .status(403)
-      .send({ message: 'No data provided' });
-  const date = new Date(prev.body.date);
-  if (!(date.getTime() === date.getTime()))
-    return void prev
-      .end(prev.res)
-      .status(403)
-      .send({ message: 'Invalid date!' });
-  return { ...prev, date };
-};
-_qvr.func['AGE[POST](send)'] = async (
-  prev,
-  current,
-  parent,
-  nodes,
-  memo,
-  goTo
-) => {
-  const today = new Date();
-  const birthDate = prev.date;
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const month = today.getMonth() - birthDate.getMonth();
-  if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return prev.end(prev.res).status(200).send(age);
+  goTo(nodes[routes[url.split('?')[0]]], service);
 };
 _qvr.func['CAT'] = async (prev, current, parent, nodes, memo, goTo) => {
   return (prev.match.url(prev, '/cat') && prev) || void 0;
@@ -513,6 +425,51 @@ _qvr.func['CAT[DELETE](send)'] = async (
   delete json[id];
   await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
   prev.end(prev.res).status(200).send({ message: 'Cat deleted!' });
+};
+_qvr.func['AGE'] = async (prev, current, parent, nodes, memo, goTo) => {
+  return (prev.match.url(prev, '/age') && prev) || void 0;
+};
+_qvr.func['AGE[POST]'] = async (prev, current, parent, nodes, memo, goTo) => {
+  return (prev.match.method(prev, 'POST') && prev) || void 0;
+};
+_qvr.func['AGE[POST](validate)'] = async (
+  prev,
+  current,
+  parent,
+  nodes,
+  memo,
+  goTo
+) => {
+  prev.body = prev.toJSON(prev.body);
+  if (!prev.body)
+    return void prev
+      .end(prev.res)
+      .status(403)
+      .send({ message: 'No data provided' });
+  const date = new Date(prev.body.date);
+  if (!(date.getTime() === date.getTime()))
+    return void prev
+      .end(prev.res)
+      .status(403)
+      .send({ message: 'Invalid date!' });
+  return { ...prev, date };
+};
+_qvr.func['AGE[POST](send)'] = async (
+  prev,
+  current,
+  parent,
+  nodes,
+  memo,
+  goTo
+) => {
+  const today = new Date();
+  const birthDate = prev.date;
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const month = today.getMonth() - birthDate.getMonth();
+  if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return prev.end(prev.res).status(200).send(age);
 };
 _qvr.run();
 export default _qvr;

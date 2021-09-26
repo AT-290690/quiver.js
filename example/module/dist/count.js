@@ -3,13 +3,7 @@ const _qvr = {
   func: {},
   nodes: {},
   root: null,
-  dfs: async (
-    node,
-    prev,
-    nodes = _qvr.nodes,
-    parent = null,
-    memo = _qvr.memo
-  ) => {
+  dfs: async (node, prev, parent = null) => {
     if (!node) return;
     let result;
     if (typeof _qvr.func[node.key] === 'function')
@@ -17,13 +11,13 @@ const _qvr = {
         prev,
         node.key,
         parent,
-        nodes,
-        memo,
+        _qvr.nodes,
+        _qvr.memo,
         _qvr.dfs
       );
     if (result !== undefined && node.next) {
       node.next.forEach(n => {
-        _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+        _qvr.dfs(_qvr.nodes[n], result, node.key);
       });
     }
   },
@@ -35,10 +29,10 @@ const _qvr = {
   run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
 };
 _qvr.nodes = {
-  START: { key: 'START', next: ['INC'], level: 0, type: 'root', prev: null },
-  INC: { key: 'INC', next: ['LOOP'], level: 1, type: 'branch', prev: 'START' },
-  LOOP: { key: 'LOOP', next: ['END'], level: 2, type: 'branch', prev: 'INC' },
-  END: { key: 'END', next: [], level: 3, type: 'leaf', prev: 'LOOP' }
+  START: { key: 'START', next: ['INC'], prev: null, level: 0, type: 'root' },
+  INC: { key: 'INC', next: ['LOOP'], prev: 'START', level: 1, type: 'branch' },
+  LOOP: { key: 'LOOP', next: ['END'], prev: 'INC', level: 2, type: 'branch' },
+  END: { key: 'END', next: [], prev: 'LOOP', level: 3, type: 'leaf' }
 };
 _qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'));
 _qvr.func['START'] = async (prev, current, parent, nodes, memo, goTo) => {

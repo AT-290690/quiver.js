@@ -6,7 +6,7 @@ const library = `const _qvr = {
   func: {}, 
   nodes: {},
   root: null,
-  dfs: async (node, prev, nodes = _qvr.nodes, parent = null, memo = _qvr.memo) => {
+  dfs: async (node, prev, parent = null) => {
       if (!node) return;
       let result;
       if (typeof _qvr.func[node.key] === 'function')
@@ -14,12 +14,12 @@ const library = `const _qvr = {
           prev,
           node.key,
           parent,
-          nodes,
-          memo,
+          _qvr.nodes,
+          _qvr.memo,
           _qvr.dfs);
       if (result !== undefined && node.next) {
         node.next.forEach(n => {
-          _qvr.dfs(nodes[n], result, nodes, node.key, memo, _qvr.func);
+          _qvr.dfs(_qvr.nodes[n], result, node.key);
         });
       }
     },
@@ -52,14 +52,15 @@ export default _qvr`;
     monolithNodes.push(graph);
     monolithArr.push(main);
     if (files.length === monolithNodes.length) {
-      console.log(`\n^____${files.join(' -> ')}____\n`);
+      const root = Object.values(monolithNodes[0]).find(
+        node => node.type === 'root'
+      ).key;
+      console.log(`\n[${root}]^____${files.join(' -> ')}____\n`);
       const buildCode = `${library}
   _qvr.nodes = ${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
   )};
-_qvr.setAsRoot(_qvr.nodes["${
-        Object.values(monolithNodes[0]).find(node => node.type === 'root').key
-      }"]);
+_qvr.setAsRoot(_qvr.nodes["${root}"]);
 ${monolithArr.join('\n')}
 _qvr.run();
 export default _qvr`;
@@ -84,13 +85,13 @@ export default _qvr`;
     console.log(
       '- ' + level + ' > ' + Array(level).fill(' ').join('') + current
     );
-    if (!tree[line.trim()]) {
+    if (!tree[current]) {
       tree[current] = {
         key: current,
         next: [],
+        prev,
         level,
-        type: 'root',
-        prev: prev
+        type: 'root'
       };
       prev = current;
     }
@@ -98,8 +99,8 @@ export default _qvr`;
 
   const backTrack = (node, parent, tree) =>
     node &&
-    node.prev !== null &&
     parent &&
+    node.prev !== null &&
     (node.level - 1 === parent.level
       ? parent
       : backTrack(node, tree[parent.prev], tree));
@@ -107,8 +108,7 @@ export default _qvr`;
   const traverseTreeMap = tree => {
     const values = Object.values(tree);
     values.forEach(current => {
-      const parent =
-        tree[current.prev] && backTrack(current, tree[current.prev], tree);
+      const parent = backTrack(current, tree[current.prev], tree);
       if (parent) {
         parent.next.push(current.key);
         current.prev = parent.key;
