@@ -31,10 +31,6 @@ const _qvr = {
     _qvr.visited = {};
   },
   out: () => _qvr.output,
-  wrap: (callback = res => res) =>
-    _qvr.func.forEach(
-      (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    ),
   setRoot: key => (_qvr.root = key),
   getRoot: () => _qvr.root,
   visit: key => {
@@ -47,7 +43,13 @@ const _qvr = {
   },
   leave: key => {
     delete _qvr.visited[key];
-  }
+  },
+  shortCircuit: callback => {
+    const result = callback();
+    return result ? result : undefined;
+  },
+  ifNotVisited: (key, callback) =>
+    key in _qvr.visited ? undefined : callback()
 };
 _qvr.nodes = Object.freeze({
   begin: {
@@ -82,7 +84,20 @@ _qvr.func['begin'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return 10;
 };
@@ -91,7 +106,20 @@ _qvr.func['add'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args + 5;
 };
@@ -100,7 +128,20 @@ _qvr.func['addRes'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('log', args);
 };
@@ -109,7 +150,20 @@ _qvr.func['toMult'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return visit(key).goTo('mult', args);
 };
@@ -118,7 +172,20 @@ _qvr.func['mult'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args * 22;
 };
@@ -127,7 +194,20 @@ _qvr.func['multRes'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('log', args);
 };
@@ -136,7 +216,20 @@ _qvr.func['toAdd'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return visit(key).goTo('add', args);
 };
@@ -145,7 +238,20 @@ _qvr.func['log'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args;
 };

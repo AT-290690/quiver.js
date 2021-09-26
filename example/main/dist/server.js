@@ -31,10 +31,6 @@ const _qvr = {
     _qvr.visited = {};
   },
   out: () => _qvr.output,
-  wrap: (callback = res => res) =>
-    _qvr.func.forEach(
-      (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    ),
   setRoot: key => (_qvr.root = key),
   getRoot: () => _qvr.root,
   visit: key => {
@@ -47,7 +43,13 @@ const _qvr = {
   },
   leave: key => {
     delete _qvr.visited[key];
-  }
+  },
+  shortCircuit: callback => {
+    const result = callback();
+    return result ? result : undefined;
+  },
+  ifNotVisited: (key, callback) =>
+    key in _qvr.visited ? undefined : callback()
 };
 _qvr.nodes = Object.freeze({
   SERVER: { key: 'SERVER', next: [], prev: null, level: 0, type: 'root' },
@@ -190,13 +192,14 @@ _qvr.func['SERVER'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const init = {
@@ -281,13 +284,14 @@ _qvr.func['AGE'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.url(args, '/age') && args) || void 0;
@@ -302,13 +306,14 @@ _qvr.func['AGE[POST]'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.method(args, 'POST') && args) || void 0;
@@ -323,13 +328,14 @@ _qvr.func['AGE[POST](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   args.body = args.toJSON(args.body);
@@ -356,13 +362,14 @@ _qvr.func['AGE[POST](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const today = new Date();
@@ -384,13 +391,14 @@ _qvr.func['CAT'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.url(args, '/cat') && args) || void 0;
@@ -405,13 +413,14 @@ _qvr.func['CAT[GET]'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.method(args, 'GET') && args) || void 0;
@@ -426,13 +435,14 @@ _qvr.func['CAT[GET][all](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (!('id' in args.query) && args) || void 0;
@@ -447,13 +457,14 @@ _qvr.func['CAT[GET][all](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return args
@@ -471,13 +482,14 @@ _qvr.func['CAT[GET][id](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return ('id' in args.query && args) || void 0;
@@ -492,13 +504,14 @@ _qvr.func['CAT[GET][id](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
@@ -524,13 +537,14 @@ _qvr.func['CAT[POST]'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.method(args, 'POST') && args) || void 0;
@@ -545,13 +559,14 @@ _qvr.func['CAT[POST](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   if (!args.body)
@@ -577,13 +592,14 @@ _qvr.func['CAT[POST](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
@@ -603,13 +619,14 @@ _qvr.func['CAT[PUT]'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (
@@ -626,13 +643,14 @@ _qvr.func['CAT[PUT](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   if (!args.body)
@@ -658,13 +676,14 @@ _qvr.func['CAT[PUT](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
@@ -689,13 +708,14 @@ _qvr.func['CAT[DELETE]'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (args.match.method(args, 'DELETE') && args) || void 0;
@@ -710,13 +730,14 @@ _qvr.func['CAT[DELETE](validate)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   return (
@@ -734,13 +755,14 @@ _qvr.func['CAT[DELETE](send)'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
@@ -762,13 +784,14 @@ _qvr.func['REQUEST'] = async (
     memo,
     visited,
     visit,
+    ifNotVisited,
     leave,
     goTo,
-    wrap,
     setRoot,
     getRoot,
     restart,
-    out
+    out,
+    shortCircuit
   }
 ) => {
   const { method, req, res, init } = args;

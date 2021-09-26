@@ -31,10 +31,6 @@ const _qvr = {
     _qvr.visited = {};
   },
   out: () => _qvr.output,
-  wrap: (callback = res => res) =>
-    _qvr.func.forEach(
-      (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    ),
   setRoot: key => (_qvr.root = key),
   getRoot: () => _qvr.root,
   visit: key => {
@@ -47,7 +43,13 @@ const _qvr = {
   },
   leave: key => {
     delete _qvr.visited[key];
-  }
+  },
+  shortCircuit: callback => {
+    const result = callback();
+    return result ? result : undefined;
+  },
+  ifNotVisited: (key, callback) =>
+    key in _qvr.visited ? undefined : callback()
 };
 _qvr.nodes = Object.freeze({
   root: { key: 'root', next: ['a0', 'a1'], prev: null, level: 0, type: 'root' },
@@ -84,7 +86,20 @@ _qvr.func['root'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return [];
 };
@@ -93,7 +108,20 @@ _qvr.func['a0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(1) || args;
 };
@@ -102,7 +130,20 @@ _qvr.func['b0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(2) || args;
 };
@@ -111,7 +152,20 @@ _qvr.func['c0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(3) || args;
 };
@@ -120,7 +174,20 @@ _qvr.func['d0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(4) || args;
 };
@@ -129,7 +196,20 @@ _qvr.func['e0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(5) || args;
 };
@@ -138,7 +218,20 @@ _qvr.func['f0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.length < 20 ? goTo('a0', args) : args;
 };
@@ -147,7 +240,20 @@ _qvr.func['a1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(-1) || args;
 };
@@ -156,7 +262,20 @@ _qvr.func['b1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(-2) || args;
 };
@@ -165,7 +284,20 @@ _qvr.func['c1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(-3) || args;
 };
@@ -174,7 +306,20 @@ _qvr.func['d1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(-4) || args;
 };
@@ -183,7 +328,20 @@ _qvr.func['e1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return void args.push(-5) || args;
 };
@@ -192,7 +350,20 @@ _qvr.func['f1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.length < 20 ? goTo('a1', args) : args;
 };
@@ -201,7 +372,20 @@ _qvr.func['g1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('m0', args);
 };
@@ -210,7 +394,20 @@ _qvr.func['m0'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.map(x => x * 2);
 };
@@ -219,7 +416,20 @@ _qvr.func['m1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.map(x => x * 3);
 };
@@ -228,7 +438,20 @@ _qvr.func['m2'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.map(x => x * 4);
 };
@@ -237,7 +460,20 @@ _qvr.func['m3'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('logger', args);
 };
@@ -246,7 +482,20 @@ _qvr.func['toAmp'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('amp', args);
 };
@@ -255,7 +504,20 @@ _qvr.func['amp'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args.reduce((acc, x) => (acc += Math.abs(x)), 0);
 };
@@ -264,7 +526,20 @@ _qvr.func['amp1'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return goTo('logger', args);
 };
@@ -273,7 +548,20 @@ _qvr.func['logger'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args;
 };

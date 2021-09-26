@@ -31,10 +31,6 @@ const _qvr = {
     _qvr.visited = {};
   },
   out: () => _qvr.output,
-  wrap: (callback = res => res) =>
-    _qvr.func.forEach(
-      (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
-    ),
   setRoot: key => (_qvr.root = key),
   getRoot: () => _qvr.root,
   visit: key => {
@@ -47,7 +43,13 @@ const _qvr = {
   },
   leave: key => {
     delete _qvr.visited[key];
-  }
+  },
+  shortCircuit: callback => {
+    const result = callback();
+    return result ? result : undefined;
+  },
+  ifNotVisited: (key, callback) =>
+    key in _qvr.visited ? undefined : callback()
 };
 _qvr.nodes = Object.freeze({
   START: { key: 'START', next: ['INC'], prev: null, level: 0, type: 'root' },
@@ -60,7 +62,20 @@ _qvr.func['START'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return 0;
 };
@@ -69,7 +84,20 @@ _qvr.func['INC'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return ++args;
 };
@@ -78,7 +106,20 @@ _qvr.func['LOOP'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args < 10 ? goTo(prev, args) : args;
 };
@@ -87,7 +128,20 @@ _qvr.func['END'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    ifNotVisited,
+    leave,
+    goTo,
+    setRoot,
+    getRoot,
+    restart,
+    out,
+    shortCircuit
+  }
 ) => {
   return args;
 };
