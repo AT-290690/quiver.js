@@ -4,21 +4,32 @@ JavaScript parser for graph based pipe development
 
 ```
 HELLO -> "Hello"
-  SPACE -> prev + " "
-    WORLD -> prev + "World"
-      PRINT -> console.log(prev)
+  SPACE -> args + " "
+    WORLD -> args + "World"
+      PRINT -> console.log(args)
 
--> - arrow function
+
+async (args, key, prev, next, { nodes, memo,
+visited, visit, ifNotVisited, leave, goTo, 
+setRoot, getRoot, restart, out, shortCircuit }) => ... 
+-> declare node
 <- return
-:= assign with const
-indentation is nesting
-every node is (prev, current, parent, nodes, memo, goTo) =>
-prev = parent output
-current = key of current node
-parent = parent node key
-nodes = object all nodes
-memo = object
-goTo = recursive function for traversing the nodes = (node, prev, nodes, memo, parent, memo) => void
+:= assign (with const)
+args - result of prev node
+key - current node key 
+next - array of children
+nodes - adj list
+memo - object containing stuff
+visited - object containing visited nodes
+visit(key) - visit add node to visited - return goTo
+ifNotVisited(key, callback) - call a function if node is not visited
+shortCircuit(callback) - if a function returns false - stop recursing
+leave(key) - remove node from visited
+goTo(key, args) - dfs from specific node 
+setRoot(key) - sets the root to desired
+restart() - resets memo, visited and output
+out() - returns output array
+
 
 - 0 > HELLO
 - 1 >   SPACE
