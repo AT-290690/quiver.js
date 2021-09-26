@@ -39,8 +39,6 @@ const library = `const _qvr = {
       _qvr.visited = {};
     },
     out: () => _qvr.output,
-    wrap: (callback = res => res) =>
-      _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))),
     setRoot: (key) => _qvr.root = key,
     getRoot: () => _qvr.root,
     visit: (key) => {
@@ -243,7 +241,7 @@ export default async () => {
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, ifNotVisited, leave, goTo, wrap, setRoot, getRoot, restart, out, shortCircuit }) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, ifNotVisited, leave, goTo, setRoot, getRoot, restart, out, shortCircuit }) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
