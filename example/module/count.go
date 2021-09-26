@@ -1,4 +1,4 @@
 START -> 0
-	INC -> ++prev
-		LOOP -> prev < 10 ? goTo(parent, prev) : prev
-			END -> console.log(prev)
+	INC -> ++args
+		LOOP -> args < 10 ? goTo(prev, args) : args
+			END -> console.log(args)

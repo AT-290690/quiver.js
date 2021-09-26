@@ -1,4 +1,4 @@
 HELLO -> "Hello"
-	SPACE -> prev + " "
-		WORLD -> prev + "World"
-			PRINT -> console.log(prev)
+	SPACE -> args + " "
+		WORLD -> args + "World"
+			PRINT -> console.log(args)

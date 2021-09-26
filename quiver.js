@@ -6,29 +6,30 @@ const library = `const _qvr = {
   nodes: {},
   root: null,
   visited: {},
-  goTo: async (key, prev, parent = null) => {
+  goTo: async (key, args, prev = null) => {
       const node = _qvr.nodes[key];
       if (!node) return;
       let result;
       if (typeof _qvr.func[node.key] === 'function')
           result = await _qvr.func[node.key](
-          prev,
+          args,
           node.key,
-          parent,
+          prev,
+          node.next,
           _qvr);
       if (result !== undefined && node.next) {
         node.next.forEach(n => {
-          _qvr.goTo(n, result, node.key);
+          _qvr.goTo(n, result, node.key, _qvr.nodes[n]?.next ?? []);
         });
       }
     },
     wrap: (callback = res => res) =>
       _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))),
-    setRoot: (nodeKey) => _qvr.root = nodeKey,
+    setRoot: (key) => _qvr.root = key,
     getRoot: () => _qvr.root,
-    visit: (current) => {
-      if (!_qvr.visited[current]) {
-				_qvr.visited[current] = true;
+    visit: (key) => {
+      if (!_qvr.visited[key]) {
+				_qvr.visited[key] = true;
         return { goTo: _qvr.goTo, visit: _qvr.visit }
 			} else {
         return { goTo: () => undefined, visit: _qvr.visit }
@@ -214,7 +215,7 @@ export default _qvr`;
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${key}"] = async (prev, current, parent, { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {

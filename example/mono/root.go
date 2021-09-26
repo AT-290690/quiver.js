@@ -1,15 +1,15 @@
 root -> []
-	a0 -> void(prev.push(1)) || prev 
-		b0 -> void(prev.push(2)) || prev
-			c0 -> void(prev.push(3)) || prev 
-				d0 -> void(prev.push(4)) || prev
-					e0 -> void(prev.push(5)) || prev 
-						f0 -> prev.length < 20 ? goTo("a0", prev) : prev
+	a0 -> void(args.push(1)) || args 
+		b0 -> void(args.push(2)) || args
+			c0 -> void(args.push(3)) || args 
+				d0 -> void(args.push(4)) || args
+					e0 -> void(args.push(5)) || args 
+						f0 -> args.length < 20 ? goTo("a0", args) : args
 	
-	a1 -> void(prev.push(-1)) || prev 
-		b1 -> void(prev.push(-2)) || prev
-			c1 -> void(prev.push(-3)) || prev 
-				d1 -> void(prev.push(-4)) || prev
-					e1 -> void(prev.push(-5)) || prev 
-						f1 -> prev.length < 20 ? goTo("a1", prev) : prev
-							g1 -> goTo("m0", prev)
+	a1 -> void(args.push(-1)) || args 
+		b1 -> void(args.push(-2)) || args
+			c1 -> void(args.push(-3)) || args 
+				d1 -> void(args.push(-4)) || args
+					e1 -> void(args.push(-5)) || args 
+						f1 -> args.length < 20 ? goTo("a1", args) : args
+							g1 -> goTo("m0", args)

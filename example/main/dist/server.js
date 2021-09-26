@@ -4,15 +4,15 @@ const _qvr = {
   nodes: {},
   root: null,
   visited: {},
-  goTo: async (key, prev, parent = null) => {
+  goTo: async (key, args, prev = null) => {
     const node = _qvr.nodes[key];
     if (!node) return;
     let result;
     if (typeof _qvr.func[node.key] === 'function')
-      result = await _qvr.func[node.key](prev, node.key, parent, _qvr);
+      result = await _qvr.func[node.key](args, node.key, prev, node.next, _qvr);
     if (result !== undefined && node.next) {
       node.next.forEach(n => {
-        _qvr.goTo(n, result, node.key);
+        _qvr.goTo(n, result, node.key, _qvr.nodes[n]?.next ?? []);
       });
     }
   },
@@ -20,11 +20,11 @@ const _qvr = {
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
     ),
-  setRoot: nodeKey => (_qvr.root = nodeKey),
+  setRoot: key => (_qvr.root = key),
   getRoot: () => _qvr.root,
-  visit: current => {
-    if (!_qvr.visited[current]) {
-      _qvr.visited[current] = true;
+  visit: key => {
+    if (!_qvr.visited[key]) {
+      _qvr.visited[key] = true;
       return { goTo: _qvr.goTo, visit: _qvr.visit };
     } else {
       return { goTo: () => undefined, visit: _qvr.visit };
@@ -164,9 +164,10 @@ _qvr.nodes = {
 };
 _qvr.setRoot(_qvr.nodes['SERVER'].key);
 _qvr.func['SERVER'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const init = {
@@ -180,8 +181,8 @@ _qvr.func['SERVER'] = async (
       '/age': 'AGE'
     },
     match: {
-      url: (prev, url) => prev.url.split('?')[0] === url || void 0,
-      method: (prev, method) => prev.method === method || void 0
+      url: (args, url) => args.url.split('?')[0] === url || void 0,
+      method: (args, method) => args.method === method || void 0
     },
     end: res => ({
       status: status =>
@@ -241,12 +242,13 @@ _qvr.func['SERVER'] = async (
   setRoot('REQUEST');
 };
 _qvr.func['REQUEST'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const { method, req, res, init } = prev;
+  const { method, req, res, init } = args;
   const {
     match,
     end,
@@ -285,238 +287,257 @@ _qvr.func['REQUEST'] = async (
   goTo(routes[url.split('?')[0]], service);
 };
 _qvr.func['CAT'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.url(prev, '/cat') && prev) || void 0;
+  return (args.match.url(args, '/cat') && args) || void 0;
 };
 _qvr.func['CAT[GET]'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.method(prev, 'GET') && prev) || void 0;
+  return (args.match.method(args, 'GET') && args) || void 0;
 };
 _qvr.func['CAT[GET][all](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (!('id' in prev.query) && prev) || void 0;
+  return (!('id' in args.query) && args) || void 0;
 };
 _qvr.func['CAT[GET][all](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return prev
-    .end(prev.res)
+  return args
+    .end(args.res)
     .status(200)
-    .send(prev.toJSON(await prev.fs.readFile(prev.DB_PATH, 'utf8')));
+    .send(args.toJSON(await args.fs.readFile(args.DB_PATH, 'utf8')));
 };
 _qvr.func['CAT[GET][id](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return ('id' in prev.query && prev) || void 0;
+  return ('id' in args.query && args) || void 0;
 };
 _qvr.func['CAT[GET][id](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
-  const json = prev.toJSON(data);
-  prev.tryCatch(
+  const data = await args.fs.readFile(args.DB_PATH, 'utf8');
+  const json = args.toJSON(data);
+  args.tryCatch(
     () => {
-      if (!json[prev.query.id]) {
+      if (!json[args.query.id]) {
         throw new Error('Cat not found');
       } else {
-        prev.end(prev.res).status(200).send(json[prev.query.id]);
+        args.end(args.res).status(200).send(json[args.query.id]);
       }
     },
-    message => prev.end(prev.res).status(404).send({ message })
+    message => args.end(args.res).status(404).send({ message })
   );
 };
 _qvr.func['CAT[POST]'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.method(prev, 'POST') && prev) || void 0;
+  return (args.match.method(args, 'POST') && args) || void 0;
 };
 _qvr.func['CAT[POST](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  if (!prev.body)
-    return void prev
-      .end(prev.res)
+  if (!args.body)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'No data provided!' });
-  prev.body = prev.toJSON(prev.body);
-  if (!prev.body.name || !prev.body.age || !prev.body.breed)
-    return void prev
-      .end(prev.res)
+  args.body = args.toJSON(args.body);
+  if (!args.body.name || !args.body.age || !args.body.breed)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'Missing some or all fields.' });
-  return prev;
+  return args;
 };
 _qvr.func['CAT[POST](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
-  const json = prev.toJSON(data);
+  const data = await args.fs.readFile(args.DB_PATH, 'utf8');
+  const json = args.toJSON(data);
   const id = Object.keys(json).length;
-  json[id] = { ...prev.body, id };
-  await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
-  prev.end(prev.res).status(200).send({ message: 'Cat added!' });
+  json[id] = { ...args.body, id };
+  await args.fs.writeFile(args.DB_PATH, args.toString(json));
+  args.end(args.res).status(200).send({ message: 'Cat added!' });
 };
 _qvr.func['CAT[PUT]'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (
-    (prev.match.method(prev, 'PUT') && 'id' in prev.query && prev) || void 0
+    (args.match.method(args, 'PUT') && 'id' in args.query && args) || void 0
   );
 };
 _qvr.func['CAT[PUT](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  if (!prev.body)
-    return void prev
-      .end(prev.res)
+  if (!args.body)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'No data provided!' });
-  prev.body = prev.toJSON(prev.body);
-  if (!prev.body.age)
-    return void prev
-      .end(prev.res)
+  args.body = args.toJSON(args.body);
+  if (!args.body.age)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'Missing some or all fields.' });
-  return prev;
+  return args;
 };
 _qvr.func['CAT[PUT](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
-  const { id } = prev.query;
-  const json = prev.toJSON(data);
+  const data = await args.fs.readFile(args.DB_PATH, 'utf8');
+  const { id } = args.query;
+  const json = args.toJSON(data);
   if (!json[id])
-    return void prev
-      .end(prev.res)
+    return void args
+      .end(args.res)
       .status(404)
       .send({ message: 'Cat not found!' });
-  json[id] = { ...json[id], age: prev.body.age };
-  await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
-  prev.end(prev.res).status(200).send({ message: 'Cat updated!' });
+  json[id] = { ...json[id], age: args.body.age };
+  await args.fs.writeFile(args.DB_PATH, args.toString(json));
+  args.end(args.res).status(200).send({ message: 'Cat updated!' });
 };
 _qvr.func['CAT[DELETE]'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.method(prev, 'DELETE') && prev) || void 0;
+  return (args.match.method(args, 'DELETE') && args) || void 0;
 };
 _qvr.func['CAT[DELETE](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (
-    ('id' in prev.query && prev) ||
-    void prev.end(prev.res).status(403).send({ message: 'No id provided!' })
+    ('id' in args.query && args) ||
+    void args.end(args.res).status(403).send({ message: 'No id provided!' })
   );
 };
 _qvr.func['CAT[DELETE](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
-  const json = prev.toJSON(data);
-  const { id } = prev.query;
+  const data = await args.fs.readFile(args.DB_PATH, 'utf8');
+  const json = args.toJSON(data);
+  const { id } = args.query;
   if (!json[id])
-    return prev.end(prev.res).status(403).send({ message: 'Cat not found!' });
+    return args.end(args.res).status(403).send({ message: 'Cat not found!' });
   delete json[id];
-  await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
-  prev.end(prev.res).status(200).send({ message: 'Cat deleted!' });
+  await args.fs.writeFile(args.DB_PATH, args.toString(json));
+  args.end(args.res).status(200).send({ message: 'Cat deleted!' });
 };
 _qvr.func['AGE'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.url(prev, '/age') && prev) || void 0;
+  return (args.match.url(args, '/age') && args) || void 0;
 };
 _qvr.func['AGE[POST]'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (prev.match.method(prev, 'POST') && prev) || void 0;
+  return (args.match.method(args, 'POST') && args) || void 0;
 };
 _qvr.func['AGE[POST](validate)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  prev.body = prev.toJSON(prev.body);
-  if (!prev.body)
-    return void prev
-      .end(prev.res)
+  args.body = args.toJSON(args.body);
+  if (!args.body)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'No data provided' });
-  const date = new Date(prev.body.date);
+  const date = new Date(args.body.date);
   if (!(date.getTime() === date.getTime()))
-    return void prev
-      .end(prev.res)
+    return void args
+      .end(args.res)
       .status(403)
       .send({ message: 'Invalid date!' });
-  return { ...prev, date };
+  return { ...args, date };
 };
 _qvr.func['AGE[POST](send)'] = async (
+  args,
+  key,
   prev,
-  current,
-  parent,
+  next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const today = new Date();
-  const birthDate = prev.date;
+  const birthDate = args.date;
   let age = today.getFullYear() - birthDate.getFullYear();
   const month = today.getMonth() - birthDate.getMonth();
   if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }
-  return prev.end(prev.res).status(200).send(age);
+  return args.end(args.res).status(200).send(age);
 };
 _qvr.goTo(_qvr.root);
 export default _qvr;

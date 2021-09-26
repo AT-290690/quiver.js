@@ -10,8 +10,8 @@ SERVER ->
 			"/age": "AGE"
 		},
 		match: {
-			url: (prev, url) => (prev.url.split("?")[0] === url) || void 0,
-			method: (prev, method) => (prev.method === method) || void 0
+			url: (args, url) => (args.url.split("?")[0] === url) || void 0,
+			method: (args, method) => (args.method === method) || void 0
 		},
 		end: (res) => ({
 				status: (status) => res.writeHead(status, 

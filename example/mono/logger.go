@@ -1,1 +1,1 @@
-logger -> console.log(prev)
+logger -> console.log(args)

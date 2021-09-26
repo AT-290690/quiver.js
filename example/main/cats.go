@@ -1,55 +1,55 @@
-CAT -> prev.match.url(prev, "/cat") && prev || void 0
-	CAT[GET] -> prev.match.method(prev, "GET") && prev || void 0
-		CAT[GET][all](validate) -> !("id" in prev.query) && prev || void 0
-			CAT[GET][all](send) -> prev.end(prev.res).status(200).send(prev.toJSON(await prev.fs.readFile(prev.DB_PATH, "utf8")))
-		CAT[GET][id](validate) -> ("id" in prev.query) && prev || void 0
+CAT -> args.match.url(args, "/cat") && args || void 0
+	CAT[GET] -> args.match.method(args, "GET") && args || void 0
+		CAT[GET][all](validate) -> !("id" in args.query) && args || void 0
+			CAT[GET][all](send) -> args.end(args.res).status(200).send(args.toJSON(await args.fs.readFile(args.DB_PATH, "utf8")))
+		CAT[GET][id](validate) -> ("id" in args.query) && args || void 0
 			CAT[GET][id](send) -> 
-				data := await prev.fs.readFile(prev.DB_PATH, "utf8")
-				json := prev.toJSON(data)
-				prev.tryCatch(()=> { 
-					if(!json[prev.query.id]) {
+				data := await args.fs.readFile(args.DB_PATH, "utf8")
+				json := args.toJSON(data)
+				args.tryCatch(()=> { 
+					if(!json[args.query.id]) {
 						throw new Error("Cat not found");
 					} else {
-						prev.end(prev.res).status(200).send(json[prev.query.id])
+						args.end(args.res).status(200).send(json[args.query.id])
 					}
-				}, (message) => prev.end(prev.res).status(404).send({message}))	
+				}, (message) => args.end(args.res).status(404).send({message}))	
 
-	CAT[POST] -> prev.match.method(prev, "POST") && prev || void 0
+	CAT[POST] -> args.match.method(args, "POST") && args || void 0
 		CAT[POST](validate) -> 
-			if (!prev.body) <- void (prev.end(prev.res).status(403).send({ message: "No data provided!"}))
-			prev.body = prev.toJSON(prev.body)
-			if (!prev.body.name || !prev.body.age || !prev.body.breed) <- void (prev.end(prev.res).status(403).send({ message: "Missing some or all fields."}))
-			<- prev
+			if (!args.body) <- void (args.end(args.res).status(403).send({ message: "No data provided!"}))
+			args.body = args.toJSON(args.body)
+			if (!args.body.name || !args.body.age || !args.body.breed) <- void (args.end(args.res).status(403).send({ message: "Missing some or all fields."}))
+			<- args
 			CAT[POST](send) -> 
-				data := await prev.fs.readFile(prev.DB_PATH, "utf8")
-				json := prev.toJSON(data)
+				data := await args.fs.readFile(args.DB_PATH, "utf8")
+				json := args.toJSON(data)
 				id := Object.keys(json).length
-				json[id] = { ...prev.body, id }
-				await prev.fs.writeFile(prev.DB_PATH, prev.toString(json))
-				prev.end(prev.res).status(200).send({ message: "Cat added!" })
+				json[id] = { ...args.body, id }
+				await args.fs.writeFile(args.DB_PATH, args.toString(json))
+				args.end(args.res).status(200).send({ message: "Cat added!" })
 
-	CAT[PUT] -> prev.match.method(prev, "PUT") && ("id" in prev.query) && prev || void 0
+	CAT[PUT] -> args.match.method(args, "PUT") && ("id" in args.query) && args || void 0
 		CAT[PUT](validate) -> 
-			if (!prev.body) <- void (prev.end(prev.res).status(403).send({ message: "No data provided!"}))
-			prev.body = prev.toJSON(prev.body)
-			if (!prev.body.age) <- void (prev.end(prev.res).status(403).send({ message: "Missing some or all fields."}))
-			<- prev
+			if (!args.body) <- void (args.end(args.res).status(403).send({ message: "No data provided!"}))
+			args.body = args.toJSON(args.body)
+			if (!args.body.age) <- void (args.end(args.res).status(403).send({ message: "Missing some or all fields."}))
+			<- args
 			CAT[PUT](send) -> 
-				data := await prev.fs.readFile(prev.DB_PATH, "utf8")
-				{ id } := prev.query
-				json := prev.toJSON(data)
-				if (!json[id]) <- void(prev.end(prev.res).status(404).send({ message: "Cat not found!"}))
-				json[id] = { ...json[id], age: prev.body.age }
-				await prev.fs.writeFile(prev.DB_PATH, prev.toString(json))
-				prev.end(prev.res).status(200).send({ message: "Cat updated!" })
+				data := await args.fs.readFile(args.DB_PATH, "utf8")
+				{ id } := args.query
+				json := args.toJSON(data)
+				if (!json[id]) <- void(args.end(args.res).status(404).send({ message: "Cat not found!"}))
+				json[id] = { ...json[id], age: args.body.age }
+				await args.fs.writeFile(args.DB_PATH, args.toString(json))
+				args.end(args.res).status(200).send({ message: "Cat updated!" })
 
-	CAT[DELETE] -> prev.match.method(prev, "DELETE") && prev || void 0
-		CAT[DELETE](validate) -> ("id" in prev.query) && prev || void(prev.end(prev.res).status(403).send({ message: "No id provided!"}))
+	CAT[DELETE] -> args.match.method(args, "DELETE") && args || void 0
+		CAT[DELETE](validate) -> ("id" in args.query) && args || void(args.end(args.res).status(403).send({ message: "No id provided!"}))
 			CAT[DELETE](send) -> 
-				data := await prev.fs.readFile(prev.DB_PATH, "utf8")
-				json := prev.toJSON(data)
-				{ id } := prev.query
-				if (!json[id]) <- prev.end(prev.res).status(403).send({ message: "Cat not found!"})
+				data := await args.fs.readFile(args.DB_PATH, "utf8")
+				json := args.toJSON(data)
+				{ id } := args.query
+				if (!json[id]) <- args.end(args.res).status(403).send({ message: "Cat not found!"})
 				delete json[id]
-				await prev.fs.writeFile(prev.DB_PATH, prev.toString(json))
-				prev.end(prev.res).status(200).send({ message: "Cat deleted!" })
+				await args.fs.writeFile(args.DB_PATH, args.toString(json))
+				args.end(args.res).status(200).send({ message: "Cat deleted!" })

@@ -1,5 +1,5 @@
 REQUEST ->
-		{ method, req, res, init } := prev
+		{ method, req, res, init } := args
 		{ match, end, imports, routes, toJSON, tryCatch, toString, DB_DIR, DB_FILE } := init;
 		{ fs } := imports
 		{ body, query, url } := req
