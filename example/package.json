@@ -1,0 +1,17 @@
+{
+  "name": "quiver.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "quiver.js",
+  "scripts": {
+    "module": "node projects/module.js",
+    "monolith": "node projects/monolith.js",
+    "main": "node projects/main.js",
+    "cats": "node projects/main/index.js",
+    "project_1": "node projects/mono/index.js",
+    "project_2": "node projects/module/index.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "MIT"
+}

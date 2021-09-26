@@ -4,12 +4,9 @@
   "description": "",
   "main": "quiver.js",
   "scripts": {
-    "module": "node example/module.js",
-    "monolith": "node example/monolith.js",
-    "main": "node example/main.js",
-    "cats": "node example/main/index.js",
-    "example_1": "node example/mono/index.js",
-    "example_2": "node example/module/index.js"
+    "start": "node main.js",
+    "qvr": "node index.js",
+    "help": "node quiver/help.js"
   },
   "type": "module",
   "author": "",

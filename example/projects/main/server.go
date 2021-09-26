@@ -26,7 +26,7 @@ SERVER ->
 				output = catcher(err.message) }
 			return output;
  		},
-		DB_DIR: "./example/main/dist/db/",
+		DB_DIR: "./projects/main/dist/db/",
 		DB_FILE: "cats.json",
 		}
 
