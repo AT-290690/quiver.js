@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-const { readFile, mkdir, writeFile } = fs.promises;
+const { readFile, mkdir, writeFile, readdir } = fs.promises;
 const library = `const _qvr = { 
   memo: {}, 
   func: {}, 
@@ -70,7 +70,7 @@ const logErrorAlreadyExists = (node, file, line) =>
 const monolithArr = [];
 const monolithNodes = [];
 let errorCount = 0;
-export default async (file, files = []) => {
+const compile = async (file, files = []) => {
   console.log('\x1b[1m', '\x1b[34m', `\n < ${file} >\n`, '\x1b[0m');
   const buildModular = async (main, graph) => {
     logWarningMessage(`\n< ${file} >\n`);
@@ -235,4 +235,21 @@ export default _qvr`;
   files.length
     ? await buildMonolithic(main, graph)
     : await buildModular(main, graph);
+};
+
+export default async (dir, root) => {
+  let monolithic = true;
+  const allFiles = await readdir(dir);
+  if (!root) {
+    monolithic = false;
+    root = allFiles.find(file => file?.split('.').pop() === 'go');
+  }
+  const files = allFiles.filter(
+    file => file !== root && file?.split('.').pop() === 'go'
+  );
+  files.unshift(root);
+  const merge = monolithic ? files : [];
+  for (const file of files) {
+    await compile(dir + file, merge);
+  }
 };

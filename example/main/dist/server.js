@@ -33,7 +33,28 @@ const _qvr = {
 };
 _qvr.nodes = {
   SERVER: { key: 'SERVER', next: [], prev: null, level: 0, type: 'root' },
-  REQUEST: { key: 'REQUEST', next: [], prev: null, level: 0, type: 'root' },
+  AGE: { key: 'AGE', next: ['AGE[POST]'], prev: null, level: 0, type: 'root' },
+  'AGE[POST]': {
+    key: 'AGE[POST]',
+    next: ['AGE[POST](validate)'],
+    prev: 'AGE',
+    level: 1,
+    type: 'branch'
+  },
+  'AGE[POST](validate)': {
+    key: 'AGE[POST](validate)',
+    next: ['AGE[POST](send)'],
+    prev: 'AGE[POST]',
+    level: 2,
+    type: 'branch'
+  },
+  'AGE[POST](send)': {
+    key: 'AGE[POST](send)',
+    next: [],
+    prev: 'AGE[POST](validate)',
+    level: 3,
+    type: 'leaf'
+  },
   CAT: {
     key: 'CAT',
     next: ['CAT[GET]', 'CAT[POST]', 'CAT[PUT]', 'CAT[DELETE]'],
@@ -139,28 +160,7 @@ _qvr.nodes = {
     level: 3,
     type: 'leaf'
   },
-  AGE: { key: 'AGE', next: ['AGE[POST]'], prev: null, level: 0, type: 'root' },
-  'AGE[POST]': {
-    key: 'AGE[POST]',
-    next: ['AGE[POST](validate)'],
-    prev: 'AGE',
-    level: 1,
-    type: 'branch'
-  },
-  'AGE[POST](validate)': {
-    key: 'AGE[POST](validate)',
-    next: ['AGE[POST](send)'],
-    prev: 'AGE[POST]',
-    level: 2,
-    type: 'branch'
-  },
-  'AGE[POST](send)': {
-    key: 'AGE[POST](send)',
-    next: [],
-    prev: 'AGE[POST](validate)',
-    level: 3,
-    type: 'leaf'
-  }
+  REQUEST: { key: 'REQUEST', next: [], prev: null, level: 0, type: 'root' }
 };
 _qvr.setRoot(_qvr.nodes['SERVER'].key);
 _qvr.func['SERVER'] = async (
@@ -241,50 +241,60 @@ _qvr.func['SERVER'] = async (
   });
   setRoot('REQUEST');
 };
-_qvr.func['REQUEST'] = async (
+_qvr.func['AGE'] = async (
   args,
   key,
   prev,
   next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  const { method, req, res, init } = args;
-  const {
-    match,
-    end,
-    imports,
-    routes,
-    toJSON,
-    tryCatch,
-    toString,
-    DB_DIR,
-    DB_FILE
-  } = init;
-  const { fs } = imports;
-  const { body, query, url } = req;
-  const queries =
-    query
-      ?.split('&')
-      .map(q => {
-        const [key, value] = q.split('=');
-        return { [key]: value };
-      })
-      .reduce((acc, item) => ({ ...acc, ...item }), {}) || {};
-  const service = {
-    method,
-    body,
-    query: queries,
-    res,
-    url,
-    fs: fs.promises,
-    match,
-    end,
-    toJSON,
-    toString,
-    tryCatch,
-    DB_PATH: DB_DIR + DB_FILE
-  };
-  goTo(routes[url.split('?')[0]], service);
+  return (args.match.url(args, '/age') && args) || void 0;
+};
+_qvr.func['AGE[POST]'] = async (
+  args,
+  key,
+  prev,
+  next,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return (args.match.method(args, 'POST') && args) || void 0;
+};
+_qvr.func['AGE[POST](validate)'] = async (
+  args,
+  key,
+  prev,
+  next,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  args.body = args.toJSON(args.body);
+  if (!args.body)
+    return void args
+      .end(args.res)
+      .status(403)
+      .send({ message: 'No data provided' });
+  const date = new Date(args.body.date);
+  if (!(date.getTime() === date.getTime()))
+    return void args
+      .end(args.res)
+      .status(403)
+      .send({ message: 'Invalid date!' });
+  return { ...args, date };
+};
+_qvr.func['AGE[POST](send)'] = async (
+  args,
+  key,
+  prev,
+  next,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  const today = new Date();
+  const birthDate = args.date;
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const month = today.getMonth() - birthDate.getMonth();
+  if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return args.end(args.res).status(200).send(age);
 };
 _qvr.func['CAT'] = async (
   args,
@@ -484,60 +494,50 @@ _qvr.func['CAT[DELETE](send)'] = async (
   await args.fs.writeFile(args.DB_PATH, args.toString(json));
   args.end(args.res).status(200).send({ message: 'Cat deleted!' });
 };
-_qvr.func['AGE'] = async (
+_qvr.func['REQUEST'] = async (
   args,
   key,
   prev,
   next,
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
-  return (args.match.url(args, '/age') && args) || void 0;
-};
-_qvr.func['AGE[POST]'] = async (
-  args,
-  key,
-  prev,
-  next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
-) => {
-  return (args.match.method(args, 'POST') && args) || void 0;
-};
-_qvr.func['AGE[POST](validate)'] = async (
-  args,
-  key,
-  prev,
-  next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
-) => {
-  args.body = args.toJSON(args.body);
-  if (!args.body)
-    return void args
-      .end(args.res)
-      .status(403)
-      .send({ message: 'No data provided' });
-  const date = new Date(args.body.date);
-  if (!(date.getTime() === date.getTime()))
-    return void args
-      .end(args.res)
-      .status(403)
-      .send({ message: 'Invalid date!' });
-  return { ...args, date };
-};
-_qvr.func['AGE[POST](send)'] = async (
-  args,
-  key,
-  prev,
-  next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
-) => {
-  const today = new Date();
-  const birthDate = args.date;
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const month = today.getMonth() - birthDate.getMonth();
-  if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return args.end(args.res).status(200).send(age);
+  const { method, req, res, init } = args;
+  const {
+    match,
+    end,
+    imports,
+    routes,
+    toJSON,
+    tryCatch,
+    toString,
+    DB_DIR,
+    DB_FILE
+  } = init;
+  const { fs } = imports;
+  const { body, query, url } = req;
+  const queries =
+    query
+      ?.split('&')
+      .map(q => {
+        const [key, value] = q.split('=');
+        return { [key]: value };
+      })
+      .reduce((acc, item) => ({ ...acc, ...item }), {}) || {};
+  const service = {
+    method,
+    body,
+    query: queries,
+    res,
+    url,
+    fs: fs.promises,
+    match,
+    end,
+    toJSON,
+    toString,
+    tryCatch,
+    DB_PATH: DB_DIR + DB_FILE
+  };
+  goTo(routes[url.split('?')[0]], service);
 };
 _qvr.goTo(_qvr.root);
 export default _qvr;

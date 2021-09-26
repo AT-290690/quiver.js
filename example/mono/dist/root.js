@@ -48,6 +48,7 @@ _qvr.nodes = {
   g1: { key: 'g1', next: [], prev: 'f1', level: 7, type: 'leaf' },
   amp: { key: 'amp', next: ['amp1'], prev: null, level: 0, type: 'root' },
   amp1: { key: 'amp1', next: [], prev: 'amp', level: 1, type: 'leaf' },
+  logger: { key: 'logger', next: [], prev: null, level: 0, type: 'root' },
   m0: { key: 'm0', next: ['m1'], prev: null, level: 0, type: 'root' },
   m1: { key: 'm1', next: ['m2'], prev: 'm0', level: 1, type: 'branch' },
   m2: {
@@ -58,8 +59,7 @@ _qvr.nodes = {
     type: 'branch'
   },
   m3: { key: 'm3', next: [], prev: 'm2', level: 3, type: 'leaf' },
-  toAmp: { key: 'toAmp', next: [], prev: 'm2', level: 3, type: 'leaf' },
-  logger: { key: 'logger', next: [], prev: null, level: 0, type: 'root' }
+  toAmp: { key: 'toAmp', next: [], prev: 'm2', level: 3, type: 'leaf' }
 };
 _qvr.setRoot(_qvr.nodes['root'].key);
 _qvr.func['root'] = async (
@@ -206,6 +206,15 @@ _qvr.func['amp1'] = async (
 ) => {
   return goTo('logger', args);
 };
+_qvr.func['logger'] = async (
+  args,
+  key,
+  prev,
+  next,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return console.log(args);
+};
 _qvr.func['m0'] = async (
   args,
   key,
@@ -250,15 +259,6 @@ _qvr.func['toAmp'] = async (
   { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return goTo('amp', args);
-};
-_qvr.func['logger'] = async (
-  args,
-  key,
-  prev,
-  next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
-) => {
-  return console.log(args);
 };
 _qvr.goTo(_qvr.root);
 export default _qvr;
