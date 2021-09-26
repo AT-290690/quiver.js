@@ -64,23 +64,23 @@ const logErrorIndentationLevel = (node, file, line) =>
   console.log(
     '\x1b[31m',
     '\x1b[1m',
-    `${node.key} should be exactly 1 indentation from the parent!`
+    `"${node.key}" should be indented exactly once from its parent!`
   ) ||
-  console.log('\x1b[31m', `   Near ${node.prev}`) ||
+  console.log('\x1b[31m', `   Near "${node.prev}"`) ||
   console.log(
     '\x1b[31m',
     '\x1b[1m',
-    `  At file: ${file} line: ${line + 1} indentation: ${node.level}`,
+    `  At file: "${file}" line: [${line + 1}] indentation: [${node.level}]`,
     '\x1b[0m'
   );
 
 const logErrorAlreadyExists = (node, file, line) =>
-  console.log('\x1b[31m', '\x1b[1m', `${node.key} already exist!`) ||
-  console.log('\x1b[31m', `   Near ${node.prev}`) ||
+  console.log('\x1b[31m', '\x1b[1m', `"${node.key}" already exist!`) ||
+  console.log('\x1b[31m', `   Near "${node.prev}"`) ||
   console.log(
     '\x1b[31m',
     '\x1b[1m',
-    `  file: ${file} line: ${line + 1} indentation: ${node.level}`,
+    `  file: "${file}" line: [${line + 1}] indentation: [${node.level}]`,
     '\x1b[0m'
   );
 
