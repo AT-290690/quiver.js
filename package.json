@@ -5,8 +5,7 @@
   "main": "quiver.js",
   "scripts": {
     "start": "node main.js",
-    "qvr": "node index.js",
-    "help": "node quiver/help.js"
+    "qvr": "node index.js"
   },
   "type": "module",
   "author": "",
