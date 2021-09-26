@@ -1,5 +1,5 @@
 m0 -> prev.map(x => x * 2)
 	m1 -> prev.map(x => x * 3)
 		m2 -> prev.map(x => x * 4)
-			m3 -> goTo(nodes["logger"], prev)
-			toAmp -> goTo(nodes["amp"], prev)
+			m3 -> goTo("logger", prev)
+			toAmp -> goTo("amp", prev)

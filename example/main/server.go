@@ -1,5 +1,4 @@
 SERVER ->
-		{ quiver } := prev;
 		init := { 
 		imports: {
 			fs: await import("fs"),
@@ -21,6 +20,12 @@ SERVER ->
 		}),
 		toJSON: (json,...args) => JSON.parse(json,...args),
 		toString: (json,...args) => JSON.stringify(json,...args),
+		tryCatch: (trier, catcher) => {
+			let output
+			try { output = trier() } catch(err){ 
+				output = catcher(err.message) }
+			return output;
+ 		},
 		DB_DIR: "./example/main/dist/db/",
 		DB_FILE: "cats.json",
 		}
@@ -42,7 +47,7 @@ SERVER ->
 				req.body = body
 			}
 			req.query = query
-			quiver.run({ method, req, res, init })
+			run({ method, req, res, init })
 		})
 	}
 
@@ -57,5 +62,5 @@ SERVER ->
 			await writeFile(init.DB_DIR + init.DB_FILE,
 	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 	})
-	prev.quiver.setAsRoot(nodes["REQUEST"]);
+	setAsRoot("REQUEST");
 	

@@ -3,21 +3,16 @@ const _qvr = {
   func: {},
   nodes: {},
   root: null,
-  dfs: async (node, prev, parent = null) => {
+  visited: {},
+  goTo: async (key, prev, parent = null) => {
+    const node = _qvr.nodes[key];
     if (!node) return;
     let result;
     if (typeof _qvr.func[node.key] === 'function')
-      result = await _qvr.func[node.key](
-        prev,
-        node.key,
-        parent,
-        _qvr.nodes,
-        _qvr.memo,
-        _qvr.dfs
-      );
+      result = await _qvr.func[node.key](prev, node.key, parent, _qvr);
     if (result !== undefined && node.next) {
       node.next.forEach(n => {
-        _qvr.dfs(_qvr.nodes[n], result, node.key);
+        _qvr.goTo(n, result, node.key);
       });
     }
   },
@@ -25,8 +20,14 @@ const _qvr = {
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
     ),
-  setAsRoot: node => (_qvr.root = node),
-  run: args => _qvr.dfs(_qvr.root, { ...args, quiver: _qvr })
+  setAsRoot: nodeKey => (_qvr.root = nodeKey),
+  run: args => _qvr.goTo(_qvr.root, args),
+  visit: (current, callback) => {
+    if (!_qvr.visited[current]) {
+      callback();
+      _qvr.visited[current] = true;
+    }
+  }
 };
 _qvr.nodes = {
   SERVER: { key: 'SERVER', next: [], prev: null, level: 0, type: 'root' },
@@ -159,9 +160,13 @@ _qvr.nodes = {
     type: 'leaf'
   }
 };
-_qvr.setAsRoot(_qvr.nodes['SERVER']);
-_qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
-  const { quiver } = prev;
+_qvr.setAsRoot(_qvr.nodes['SERVER'].key);
+_qvr.func['SERVER'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   const init = {
     imports: {
       fs: await import('fs'),
@@ -184,6 +189,15 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
     }),
     toJSON: (json, ...args) => JSON.parse(json, ...args),
     toString: (json, ...args) => JSON.stringify(json, ...args),
+    tryCatch: (trier, catcher) => {
+      let output;
+      try {
+        output = trier();
+      } catch (err) {
+        output = catcher(err.message);
+      }
+      return output;
+    },
     DB_DIR: './example/main/dist/db/',
     DB_FILE: 'cats.json'
   };
@@ -205,7 +219,7 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
         req.body = body;
       }
       req.query = query;
-      quiver.run({ method, req, res, init });
+      run({ method, req, res, init });
     });
   };
 
@@ -222,12 +236,26 @@ _qvr.func['SERVER'] = async (prev, current, parent, nodes, memo, goTo) => {
       `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`
     );
   });
-  prev.quiver.setAsRoot(nodes['REQUEST']);
+  setAsRoot('REQUEST');
 };
-_qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
-  const { method, req, res, init, quiver } = prev;
-  const { match, end, imports, routes, toJSON, toString, DB_DIR, DB_FILE } =
-    init;
+_qvr.func['REQUEST'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
+  const { method, req, res, init } = prev;
+  const {
+    match,
+    end,
+    imports,
+    routes,
+    toJSON,
+    tryCatch,
+    toString,
+    DB_DIR,
+    DB_FILE
+  } = init;
   const { fs } = imports;
   const { body, query, url } = req;
   const queries =
@@ -249,23 +277,32 @@ _qvr.func['REQUEST'] = async (prev, current, parent, nodes, memo, goTo) => {
     end,
     toJSON,
     toString,
+    tryCatch,
     DB_PATH: DB_DIR + DB_FILE
   };
-  goTo(nodes[routes[url.split('?')[0]]], service);
+  goTo(routes[url.split('?')[0]], service);
 };
-_qvr.func['CAT'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['CAT'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.url(prev, '/cat') && prev) || void 0;
 };
-_qvr.func['CAT[GET]'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['CAT[GET]'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.method(prev, 'GET') && prev) || void 0;
 };
 _qvr.func['CAT[GET][all](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   return (!('id' in prev.query) && prev) || void 0;
 };
@@ -273,9 +310,7 @@ _qvr.func['CAT[GET][all](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   return prev
     .end(prev.res)
@@ -286,9 +321,7 @@ _qvr.func['CAT[GET][id](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   return ('id' in prev.query && prev) || void 0;
 };
@@ -296,28 +329,34 @@ _qvr.func['CAT[GET][id](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
-  if (json[prev.query.id]) {
-    prev.end(prev.res).status(200).send(json[prev.query.id]);
-  } else {
-    prev.end(prev.res).status(404).send({ message: 'Cat not found!' });
-  }
+  prev.tryCatch(
+    () => {
+      if (!json[prev.query.id]) {
+        throw new Error('Cat not found');
+      } else {
+        prev.end(prev.res).status(200).send(json[prev.query.id]);
+      }
+    },
+    message => prev.end(prev.res).status(404).send({ message })
+  );
 };
-_qvr.func['CAT[POST]'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['CAT[POST]'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.method(prev, 'POST') && prev) || void 0;
 };
 _qvr.func['CAT[POST](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   if (!prev.body)
     return void prev
@@ -336,9 +375,7 @@ _qvr.func['CAT[POST](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
@@ -347,7 +384,12 @@ _qvr.func['CAT[POST](send)'] = async (
   await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
   prev.end(prev.res).status(200).send({ message: 'Cat added!' });
 };
-_qvr.func['CAT[PUT]'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['CAT[PUT]'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (
     (prev.match.method(prev, 'PUT') && 'id' in prev.query && prev) || void 0
   );
@@ -356,9 +398,7 @@ _qvr.func['CAT[PUT](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   if (!prev.body)
     return void prev
@@ -377,9 +417,7 @@ _qvr.func['CAT[PUT](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const { id } = prev.query;
@@ -393,16 +431,19 @@ _qvr.func['CAT[PUT](send)'] = async (
   await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
   prev.end(prev.res).status(200).send({ message: 'Cat updated!' });
 };
-_qvr.func['CAT[DELETE]'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['CAT[DELETE]'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.method(prev, 'DELETE') && prev) || void 0;
 };
 _qvr.func['CAT[DELETE](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   return (
     ('id' in prev.query && prev) ||
@@ -413,9 +454,7 @@ _qvr.func['CAT[DELETE](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
@@ -426,19 +465,27 @@ _qvr.func['CAT[DELETE](send)'] = async (
   await prev.fs.writeFile(prev.DB_PATH, prev.toString(json));
   prev.end(prev.res).status(200).send({ message: 'Cat deleted!' });
 };
-_qvr.func['AGE'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['AGE'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.url(prev, '/age') && prev) || void 0;
 };
-_qvr.func['AGE[POST]'] = async (prev, current, parent, nodes, memo, goTo) => {
+_qvr.func['AGE[POST]'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+) => {
   return (prev.match.method(prev, 'POST') && prev) || void 0;
 };
 _qvr.func['AGE[POST](validate)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   prev.body = prev.toJSON(prev.body);
   if (!prev.body)
@@ -458,9 +505,7 @@ _qvr.func['AGE[POST](send)'] = async (
   prev,
   current,
   parent,
-  nodes,
-  memo,
-  goTo
+  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
 ) => {
   const today = new Date();
   const birthDate = prev.date;

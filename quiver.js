@@ -6,7 +6,9 @@ const library = `const _qvr = {
   func: {}, 
   nodes: {},
   root: null,
-  dfs: async (node, prev, parent = null) => {
+  visited: {},
+  goTo: async (key, prev, parent = null) => {
+      const node = _qvr.nodes[key];
       if (!node) return;
       let result;
       if (typeof _qvr.func[node.key] === 'function')
@@ -14,19 +16,23 @@ const library = `const _qvr = {
           prev,
           node.key,
           parent,
-          _qvr.nodes,
-          _qvr.memo,
-          _qvr.dfs);
+          _qvr);
       if (result !== undefined && node.next) {
         node.next.forEach(n => {
-          _qvr.dfs(_qvr.nodes[n], result, node.key);
+          _qvr.goTo(n, result, node.key);
         });
       }
     },
     wrap: (callback = res => res) =>
       _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))),
-    setAsRoot: (node) => _qvr.root = node,
-    run: (args) => _qvr.dfs(_qvr.root, {...args, quiver: _qvr })
+    setAsRoot: (nodeKey) => _qvr.root = nodeKey,
+    run: (args) => _qvr.goTo(_qvr.root, args),
+    visit: (current, callback) => {
+      if (!_qvr.visited[current]) {
+			  callback();
+				_qvr.visited[current] = true;
+			}
+    }
   }`;
 
 const monolithArr = [];
@@ -37,7 +43,7 @@ export default async (file, files = []) => {
     console.log(`\n^____${file}____\n`);
     const buildCode = `${library}
 _qvr.nodes = ${JSON.stringify(graph)};
-_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root'))
+_qvr.setAsRoot(Object.values(_qvr.nodes).find(node => node.type === 'root').key)
 ${main}
 _qvr.run();
 export default _qvr`;
@@ -60,7 +66,7 @@ export default _qvr`;
   _qvr.nodes = ${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
   )};
-_qvr.setAsRoot(_qvr.nodes["${root}"]);
+_qvr.setAsRoot(_qvr.nodes["${root}"].key);
 ${monolithArr.join('\n')}
 _qvr.run();
 export default _qvr`;
@@ -130,11 +136,12 @@ export default _qvr`;
     let compiledCode = '';
     arrows.forEach((lambda, index) => {
       if (lambda.length === 2) {
+        const key = lambda[0].trim();
         createTreeMap(treeMap, lambda[0]);
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${lambda[0].trim()}"] = async (prev, current, parent, nodes, memo, goTo) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${key}"] = async (prev, current, parent, { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {

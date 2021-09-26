@@ -6,11 +6,13 @@ CAT -> prev.match.url(prev, "/cat") && prev || void 0
 			CAT[GET][id](send) -> 
 				data := await prev.fs.readFile(prev.DB_PATH, "utf8")
 				json := prev.toJSON(data)
-				if (json[prev.query.id]) {
-					prev.end(prev.res).status(200).send(json[prev.query.id])
-				} else {
-					prev.end(prev.res).status(404).send({ message: "Cat not found!"})
-				}
+				prev.tryCatch(()=> { 
+					if(!json[prev.query.id]) {
+						throw new Error("Cat not found");
+					} else {
+						prev.end(prev.res).status(200).send(json[prev.query.id])
+					}
+				}, (message) => prev.end(prev.res).status(404).send({message}))	
 
 	CAT[POST] -> prev.match.method(prev, "POST") && prev || void 0
 		CAT[POST](validate) -> 
