@@ -16,7 +16,7 @@ SERVER ->
 		end: (res) => ({
 				status: (status) => res.writeHead(status, 
 					{ "Content-Type": "application/json" }) && 
-					{ send: (data) => res.end(JSON.stringify(data)) }
+					{ send: (data) => void(res.end(JSON.stringify(data))) }
 		}),
 		toJSON: (json,...args) => JSON.parse(json,...args),
 		toString: (json,...args) => JSON.stringify(json,...args),
@@ -46,8 +46,9 @@ SERVER ->
 			if (method !== "GET" && body) {
 				req.body = body
 			}
+			restart()
 			req.query = query
-			goTo(getRoot(), { method, req, res, init })
+		  goTo(getRoot(), { method, req, res, init })
 		})
 	}
 

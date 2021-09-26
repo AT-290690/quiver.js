@@ -5,4 +5,4 @@ begin -> 10
 	mult -> args * 22
 		multRes -> goTo("log", args)
 		toAdd -> visit(key).goTo("add", args)
-log -> console.log(args)
+log -> args

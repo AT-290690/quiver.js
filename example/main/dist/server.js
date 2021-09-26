@@ -4,18 +4,33 @@ const _qvr = {
   nodes: {},
   root: null,
   visited: {},
+  output: [],
   goTo: async (key, args, prev = null) => {
     const node = _qvr.nodes[key];
     if (!node) return;
     let result;
-    if (typeof _qvr.func[node.key] === 'function')
+    if (typeof _qvr.func[node.key] === 'function') {
       result = await _qvr.func[node.key](args, node.key, prev, node.next, _qvr);
-    if (result !== undefined && node.next) {
-      node.next.forEach(n => {
-        _qvr.goTo(n, result, node.key, _qvr.nodes[n]?.next ?? []);
-      });
+    }
+    if (result !== undefined) {
+      if (node.next.length === 0) {
+        _qvr.output.push({ result, at: node.key, from: node.prev });
+      } else {
+        for (const n of node.next) {
+          await _qvr.goTo(n, result, node.key, _qvr.nodes[n].next);
+        }
+      }
     }
   },
+  reset: () => {
+    _qvr.restart();
+    _qvr.memo = {};
+  },
+  restart: () => {
+    _qvr.output = [];
+    _qvr.visited = {};
+  },
+  out: () => _qvr.output,
   wrap: (callback = res => res) =>
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
@@ -29,9 +44,12 @@ const _qvr = {
     } else {
       return { goTo: () => undefined, visit: _qvr.visit };
     }
+  },
+  leave: key => {
+    delete _qvr.visited[key];
   }
 };
-_qvr.nodes = {
+_qvr.nodes = Object.freeze({
   SERVER: { key: 'SERVER', next: [], prev: null, level: 0, type: 'root' },
   AGE: { key: 'AGE', next: ['AGE[POST]'], prev: null, level: 0, type: 'root' },
   'AGE[POST]': {
@@ -161,14 +179,25 @@ _qvr.nodes = {
     type: 'leaf'
   },
   REQUEST: { key: 'REQUEST', next: [], prev: null, level: 0, type: 'root' }
-};
-_qvr.setRoot(_qvr.nodes['SERVER'].key);
+});
 _qvr.func['SERVER'] = async (
   args,
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const init = {
     imports: {
@@ -187,7 +216,7 @@ _qvr.func['SERVER'] = async (
     end: res => ({
       status: status =>
         res.writeHead(status, { 'Content-Type': 'application/json' }) && {
-          send: data => res.end(JSON.stringify(data))
+          send: data => void res.end(JSON.stringify(data))
         }
     }),
     toJSON: (json, ...args) => JSON.parse(json, ...args),
@@ -221,6 +250,7 @@ _qvr.func['SERVER'] = async (
       if (method !== 'GET' && body) {
         req.body = body;
       }
+      restart();
       req.query = query;
       goTo(getRoot(), { method, req, res, init });
     });
@@ -246,7 +276,19 @@ _qvr.func['AGE'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.url(args, '/age') && args) || void 0;
 };
@@ -255,7 +297,19 @@ _qvr.func['AGE[POST]'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.method(args, 'POST') && args) || void 0;
 };
@@ -264,7 +318,19 @@ _qvr.func['AGE[POST](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   args.body = args.toJSON(args.body);
   if (!args.body)
@@ -285,7 +351,19 @@ _qvr.func['AGE[POST](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const today = new Date();
   const birthDate = args.date;
@@ -301,7 +379,19 @@ _qvr.func['CAT'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.url(args, '/cat') && args) || void 0;
 };
@@ -310,7 +400,19 @@ _qvr.func['CAT[GET]'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.method(args, 'GET') && args) || void 0;
 };
@@ -319,7 +421,19 @@ _qvr.func['CAT[GET][all](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (!('id' in args.query) && args) || void 0;
 };
@@ -328,7 +442,19 @@ _qvr.func['CAT[GET][all](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return args
     .end(args.res)
@@ -340,7 +466,19 @@ _qvr.func['CAT[GET][id](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return ('id' in args.query && args) || void 0;
 };
@@ -349,7 +487,19 @@ _qvr.func['CAT[GET][id](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
   const json = args.toJSON(data);
@@ -369,7 +519,19 @@ _qvr.func['CAT[POST]'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.method(args, 'POST') && args) || void 0;
 };
@@ -378,7 +540,19 @@ _qvr.func['CAT[POST](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   if (!args.body)
     return void args
@@ -398,7 +572,19 @@ _qvr.func['CAT[POST](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
   const json = args.toJSON(data);
@@ -412,7 +598,19 @@ _qvr.func['CAT[PUT]'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (
     (args.match.method(args, 'PUT') && 'id' in args.query && args) || void 0
@@ -423,7 +621,19 @@ _qvr.func['CAT[PUT](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   if (!args.body)
     return void args
@@ -443,7 +653,19 @@ _qvr.func['CAT[PUT](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
   const { id } = args.query;
@@ -462,7 +684,19 @@ _qvr.func['CAT[DELETE]'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (args.match.method(args, 'DELETE') && args) || void 0;
 };
@@ -471,7 +705,19 @@ _qvr.func['CAT[DELETE](validate)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   return (
     ('id' in args.query && args) ||
@@ -483,7 +729,19 @@ _qvr.func['CAT[DELETE](send)'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const data = await args.fs.readFile(args.DB_PATH, 'utf8');
   const json = args.toJSON(data);
@@ -499,7 +757,19 @@ _qvr.func['REQUEST'] = async (
   key,
   prev,
   next,
-  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+  {
+    nodes,
+    memo,
+    visited,
+    visit,
+    leave,
+    goTo,
+    wrap,
+    setRoot,
+    getRoot,
+    restart,
+    out
+  }
 ) => {
   const { method, req, res, init } = args;
   const {
@@ -539,5 +809,9 @@ _qvr.func['REQUEST'] = async (
   };
   goTo(routes[url.split('?')[0]], service);
 };
-_qvr.goTo(_qvr.root);
-export default _qvr;
+export default async () => {
+  _qvr.setRoot(_qvr.nodes['SERVER'].key);
+  _qvr.reset();
+  await _qvr.goTo(_qvr.root);
+  return _qvr.out();
+};

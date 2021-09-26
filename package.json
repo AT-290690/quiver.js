@@ -7,8 +7,9 @@
     "module": "node example/module.js",
     "monolith": "node example/monolith.js",
     "main": "node example/main.js",
-    "start": "node example/main/dist/server.js",
-    "cats": "node example/module/dist/cats.js"
+    "cats": "node example/main/index.js",
+    "example_1": "node example/mono/index.js",
+    "example_2": "node example/module/index.js"
   },
   "type": "module",
   "author": "",

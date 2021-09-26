@@ -23,4 +23,4 @@ m0 -> args.map(x => x * 2)
 amp -> args.reduce((acc, x) => acc += Math.abs(x), 0)
 	amp1 -> goTo("logger", args)
 
-logger -> console.log(args)
+logger -> args

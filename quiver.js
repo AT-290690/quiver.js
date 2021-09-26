@@ -6,23 +6,39 @@ const library = `const _qvr = {
   nodes: {},
   root: null,
   visited: {},
+  output: [],
   goTo: async (key, args, prev = null) => {
       const node = _qvr.nodes[key];
       if (!node) return;
       let result;
-      if (typeof _qvr.func[node.key] === 'function')
+      if (typeof _qvr.func[node.key] === 'function') {
           result = await _qvr.func[node.key](
           args,
           node.key,
           prev,
           node.next,
           _qvr);
-      if (result !== undefined && node.next) {
-        node.next.forEach(n => {
-          _qvr.goTo(n, result, node.key, _qvr.nodes[n]?.next ?? []);
-        });
       }
+      if (result !== undefined) {
+        if(node.next.length === 0) {
+          _qvr.output.push({ result,  at: node.key,  from: node.prev });
+        } else {
+          for (const n of node.next) {
+            await _qvr.goTo(n, result, node.key, _qvr.nodes[n].next);
+          }
+        }
+       
+      } 
     },
+    reset: () => {
+      _qvr.restart();
+      _qvr.memo = {};
+    },
+    restart: () => {
+      _qvr.output = [];
+      _qvr.visited = {};
+    },
+    out: () => _qvr.output,
     wrap: (callback = res => res) =>
       _qvr.func.forEach((fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))),
     setRoot: (key) => _qvr.root = key,
@@ -34,7 +50,8 @@ const library = `const _qvr = {
 			} else {
         return { goTo: () => undefined, visit: _qvr.visit }
       }
-    }
+    },
+    leave: (key) => { delete _qvr.visited[key] }
   }`;
 const logBoldMessage = msg => console.log('\x1b[1m', msg);
 const logErrorMessage = msg =>
@@ -75,11 +92,14 @@ const compile = async (file, files = []) => {
   const buildModular = async (main, graph) => {
     logWarningMessage(`\n< ${file} >\n`);
     const buildCode = `${library}
-_qvr.nodes = ${JSON.stringify(graph)};
-_qvr.setRoot(Object.values(_qvr.nodes).find(node => node.type === 'root').key)
+_qvr.nodes = Object.freeze(${JSON.stringify(graph)});
 ${main}
-_qvr.goTo(_qvr.root);
-export default _qvr`;
+export default async () => {
+  _qvr.setRoot(Object.values(_qvr.nodes).find(node => node.type === 'root').key);
+  _qvr.reset();
+  await _qvr.goTo(_qvr.root);
+  return _qvr.out();
+}`;
     const path = file.split('/');
     const filename = path.pop().split('.go')[0];
     const dir = path.join('/');
@@ -104,13 +124,16 @@ export default _qvr`;
       ).key;
       logWarningMessage(`\n< [${root}] ${files.join(' -> ')} >\n`);
       const buildCode = `${library}
-  _qvr.nodes = ${JSON.stringify(
+  _qvr.nodes = Object.freeze(${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
-  )};
-_qvr.setRoot(_qvr.nodes["${root}"].key);
+  )});
 ${monolithArr.join('\n')}
-_qvr.goTo(_qvr.root);
-export default _qvr`;
+export default async () => {
+  _qvr.setRoot(_qvr.nodes["${root}"].key);
+  _qvr.reset();
+  await _qvr.goTo(_qvr.root);
+  return _qvr.out();
+}`;
       const dubs = new Set();
       monolithNodes.forEach(collection => {
         const array = Object.values(collection);
@@ -215,7 +238,7 @@ export default _qvr`;
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }) => {\n${
+        compiledCode += `${startBrace}_qvr.func["${key}"] = async (args, key, prev, next, { nodes, memo, visited, visit, leave, goTo, wrap, setRoot, getRoot, restart, out }) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
