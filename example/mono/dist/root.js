@@ -20,12 +20,14 @@ const _qvr = {
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
     ),
-  setAsRoot: nodeKey => (_qvr.root = nodeKey),
-  run: args => _qvr.goTo(_qvr.root, args),
-  visit: (current, callback) => {
+  setRoot: nodeKey => (_qvr.root = nodeKey),
+  getRoot: () => _qvr.root,
+  visit: current => {
     if (!_qvr.visited[current]) {
-      callback();
       _qvr.visited[current] = true;
+      return { goTo: _qvr.goTo, visit: _qvr.visit };
+    } else {
+      return { goTo: () => undefined, visit: _qvr.visit };
     }
   }
 };
@@ -44,6 +46,8 @@ _qvr.nodes = {
   e1: { key: 'e1', next: ['f1'], prev: 'd1', level: 5, type: 'branch' },
   f1: { key: 'f1', next: ['g1'], prev: 'e1', level: 6, type: 'branch' },
   g1: { key: 'g1', next: [], prev: 'f1', level: 7, type: 'leaf' },
+  amp: { key: 'amp', next: ['amp1'], prev: null, level: 0, type: 'root' },
+  amp1: { key: 'amp1', next: [], prev: 'amp', level: 1, type: 'leaf' },
   m0: { key: 'm0', next: ['m1'], prev: null, level: 0, type: 'root' },
   m1: { key: 'm1', next: ['m2'], prev: 'm0', level: 1, type: 'branch' },
   m2: {
@@ -55,16 +59,14 @@ _qvr.nodes = {
   },
   m3: { key: 'm3', next: [], prev: 'm2', level: 3, type: 'leaf' },
   toAmp: { key: 'toAmp', next: [], prev: 'm2', level: 3, type: 'leaf' },
-  logger: { key: 'logger', next: [], prev: null, level: 0, type: 'root' },
-  amp: { key: 'amp', next: ['amp1'], prev: null, level: 0, type: 'root' },
-  amp1: { key: 'amp1', next: [], prev: 'amp', level: 1, type: 'leaf' }
+  logger: { key: 'logger', next: [], prev: null, level: 0, type: 'root' }
 };
-_qvr.setAsRoot(_qvr.nodes['root'].key);
+_qvr.setRoot(_qvr.nodes['root'].key);
 _qvr.func['root'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return [];
 };
@@ -72,7 +74,7 @@ _qvr.func['a0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(1) || prev;
 };
@@ -80,7 +82,7 @@ _qvr.func['b0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(2) || prev;
 };
@@ -88,7 +90,7 @@ _qvr.func['c0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(3) || prev;
 };
@@ -96,7 +98,7 @@ _qvr.func['d0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(4) || prev;
 };
@@ -104,7 +106,7 @@ _qvr.func['e0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(5) || prev;
 };
@@ -112,7 +114,7 @@ _qvr.func['f0'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return prev.length < 20 ? goTo('a0', prev) : prev;
 };
@@ -120,7 +122,7 @@ _qvr.func['a1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(-1) || prev;
 };
@@ -128,7 +130,7 @@ _qvr.func['b1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(-2) || prev;
 };
@@ -136,7 +138,7 @@ _qvr.func['c1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(-3) || prev;
 };
@@ -144,7 +146,7 @@ _qvr.func['d1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(-4) || prev;
 };
@@ -152,7 +154,7 @@ _qvr.func['e1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return void prev.push(-5) || prev;
 };
@@ -160,7 +162,7 @@ _qvr.func['f1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return prev.length < 20 ? goTo('a1', prev) : prev;
 };
@@ -168,63 +170,15 @@ _qvr.func['g1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return goTo('m0', prev);
-};
-_qvr.func['m0'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return prev.map(x => x * 2);
-};
-_qvr.func['m1'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return prev.map(x => x * 3);
-};
-_qvr.func['m2'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return prev.map(x => x * 4);
-};
-_qvr.func['m3'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return goTo('logger', prev);
-};
-_qvr.func['toAmp'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return goTo('amp', prev);
-};
-_qvr.func['logger'] = async (
-  prev,
-  current,
-  parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
-) => {
-  return console.log(prev);
 };
 _qvr.func['amp'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return prev.reduce((acc, x) => (acc += Math.abs(x)), 0);
 };
@@ -232,9 +186,57 @@ _qvr.func['amp1'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return goTo('logger', prev);
 };
-_qvr.run();
+_qvr.func['m0'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return prev.map(x => x * 2);
+};
+_qvr.func['m1'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return prev.map(x => x * 3);
+};
+_qvr.func['m2'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return prev.map(x => x * 4);
+};
+_qvr.func['m3'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return goTo('logger', prev);
+};
+_qvr.func['toAmp'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return goTo('amp', prev);
+};
+_qvr.func['logger'] = async (
+  prev,
+  current,
+  parent,
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
+) => {
+  return console.log(prev);
+};
+_qvr.goTo(_qvr.root);
 export default _qvr;

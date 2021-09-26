@@ -20,12 +20,14 @@ const _qvr = {
     _qvr.func.forEach(
       (fn, i) => (_qvr.func[i] = (...args) => callback(fn(...args)))
     ),
-  setAsRoot: nodeKey => (_qvr.root = nodeKey),
-  run: args => _qvr.goTo(_qvr.root, args),
-  visit: (current, callback) => {
+  setRoot: nodeKey => (_qvr.root = nodeKey),
+  getRoot: () => _qvr.root,
+  visit: current => {
     if (!_qvr.visited[current]) {
-      callback();
       _qvr.visited[current] = true;
+      return { goTo: _qvr.goTo, visit: _qvr.visit };
+    } else {
+      return { goTo: () => undefined, visit: _qvr.visit };
     }
   }
 };
@@ -160,12 +162,12 @@ _qvr.nodes = {
     type: 'leaf'
   }
 };
-_qvr.setAsRoot(_qvr.nodes['SERVER'].key);
+_qvr.setRoot(_qvr.nodes['SERVER'].key);
 _qvr.func['SERVER'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const init = {
     imports: {
@@ -219,7 +221,7 @@ _qvr.func['SERVER'] = async (
         req.body = body;
       }
       req.query = query;
-      run({ method, req, res, init });
+      goTo(getRoot(), { method, req, res, init });
     });
   };
 
@@ -236,13 +238,13 @@ _qvr.func['SERVER'] = async (
       `{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`
     );
   });
-  setAsRoot('REQUEST');
+  setRoot('REQUEST');
 };
 _qvr.func['REQUEST'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const { method, req, res, init } = prev;
   const {
@@ -286,7 +288,7 @@ _qvr.func['CAT'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.url(prev, '/cat') && prev) || void 0;
 };
@@ -294,7 +296,7 @@ _qvr.func['CAT[GET]'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.method(prev, 'GET') && prev) || void 0;
 };
@@ -302,7 +304,7 @@ _qvr.func['CAT[GET][all](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (!('id' in prev.query) && prev) || void 0;
 };
@@ -310,7 +312,7 @@ _qvr.func['CAT[GET][all](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return prev
     .end(prev.res)
@@ -321,7 +323,7 @@ _qvr.func['CAT[GET][id](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return ('id' in prev.query && prev) || void 0;
 };
@@ -329,7 +331,7 @@ _qvr.func['CAT[GET][id](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
@@ -348,7 +350,7 @@ _qvr.func['CAT[POST]'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.method(prev, 'POST') && prev) || void 0;
 };
@@ -356,7 +358,7 @@ _qvr.func['CAT[POST](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   if (!prev.body)
     return void prev
@@ -375,7 +377,7 @@ _qvr.func['CAT[POST](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
@@ -388,7 +390,7 @@ _qvr.func['CAT[PUT]'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (
     (prev.match.method(prev, 'PUT') && 'id' in prev.query && prev) || void 0
@@ -398,7 +400,7 @@ _qvr.func['CAT[PUT](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   if (!prev.body)
     return void prev
@@ -417,7 +419,7 @@ _qvr.func['CAT[PUT](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const { id } = prev.query;
@@ -435,7 +437,7 @@ _qvr.func['CAT[DELETE]'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.method(prev, 'DELETE') && prev) || void 0;
 };
@@ -443,7 +445,7 @@ _qvr.func['CAT[DELETE](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (
     ('id' in prev.query && prev) ||
@@ -454,7 +456,7 @@ _qvr.func['CAT[DELETE](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const data = await prev.fs.readFile(prev.DB_PATH, 'utf8');
   const json = prev.toJSON(data);
@@ -469,7 +471,7 @@ _qvr.func['AGE'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.url(prev, '/age') && prev) || void 0;
 };
@@ -477,7 +479,7 @@ _qvr.func['AGE[POST]'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   return (prev.match.method(prev, 'POST') && prev) || void 0;
 };
@@ -485,7 +487,7 @@ _qvr.func['AGE[POST](validate)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   prev.body = prev.toJSON(prev.body);
   if (!prev.body)
@@ -505,7 +507,7 @@ _qvr.func['AGE[POST](send)'] = async (
   prev,
   current,
   parent,
-  { nodes, memo, visited, visit, goTo, run, wrap, setAsRoot }
+  { nodes, memo, visited, visit, goTo, wrap, setRoot, getRoot }
 ) => {
   const today = new Date();
   const birthDate = prev.date;
@@ -516,5 +518,5 @@ _qvr.func['AGE[POST](send)'] = async (
   }
   return prev.end(prev.res).status(200).send(age);
 };
-_qvr.run();
+_qvr.goTo(_qvr.root);
 export default _qvr;

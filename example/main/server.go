@@ -47,7 +47,7 @@ SERVER ->
 				req.body = body
 			}
 			req.query = query
-			run({ method, req, res, init })
+			goTo(getRoot(), { method, req, res, init })
 		})
 	}
 
@@ -62,5 +62,5 @@ SERVER ->
 			await writeFile(init.DB_DIR + init.DB_FILE,
 	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 	})
-	setAsRoot("REQUEST");
+	setRoot("REQUEST");
 	
