@@ -52,17 +52,17 @@ const logErrorIndentationLevel = (node, file, line) =>
   console.log(
     '\x1b[31m',
     '\x1b[1m',
-    `  At file: ${file} line: ${line} indentation: ${node.level}`,
+    `  At file: ${file} line: ${line + 1} indentation: ${node.level}`,
     '\x1b[0m'
   );
 
-const logErrorAlreadyExists = (node, file) =>
-  console.log('\x1b[31m', '\x1b[1m', `^ ${node.key} already exist!`) ||
-  console.log('\x1b[31m', `     Near ${node.prev}`) ||
+const logErrorAlreadyExists = (node, file, line) =>
+  console.log('\x1b[31m', '\x1b[1m', `${node.key} already exist!`) ||
+  console.log('\x1b[31m', `   Near ${node.prev}`) ||
   console.log(
     '\x1b[31m',
     '\x1b[1m',
-    `    file: ${file} indentation: ${node.level}`,
+    `  file: ${file} line: ${line + 1} indentation: ${node.level}`,
     '\x1b[0m'
   );
 
@@ -70,8 +70,9 @@ const monolithArr = [];
 const monolithNodes = [];
 let errorCount = 0;
 export default async (file, files = []) => {
+  console.log('\x1b[1m', '\x1b[34m', `\n < ${file} >\n`, '\x1b[0m');
   const buildModular = async (main, graph) => {
-    logWarningMessage(`\n^ ${file} \n`);
+    logWarningMessage(`\n< ${file} >\n`);
     const buildCode = `${library}
 _qvr.nodes = ${JSON.stringify(graph)};
 _qvr.setRoot(Object.values(_qvr.nodes).find(node => node.type === 'root').key)
@@ -85,8 +86,12 @@ export default _qvr`;
     await writeFile(`./${dir}/dist/${filename}.js`, buildCode);
     logSuccessMessage(`${filename}.js is generated!`);
     errorCount
-      ? logErrorMessage(`Found ${errorCount} errors!`)
-      : logSuccessMessage(`No erros found!`);
+      ? logErrorMessage(
+          errorCount === 1
+            ? `Found ${errorCount} error!`
+            : `Found ${errorCount} errors!`
+        )
+      : logSuccessMessage(`No errors found!`);
     errorCount = 0;
   };
   const buildMonolithic = async (main, graph) => {
@@ -96,7 +101,7 @@ export default _qvr`;
       const root = Object.values(monolithNodes[0]).find(
         node => node.type === 'root'
       ).key;
-      logWarningMessage(`\n[${root}]^ ${files.join(' -> ')}\n`);
+      logWarningMessage(`\n< [${root}] ${files.join(' -> ')} >\n`);
       const buildCode = `${library}
   _qvr.nodes = ${JSON.stringify(
     monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
@@ -107,12 +112,13 @@ _qvr.goTo(_qvr.root);
 export default _qvr`;
       const dubs = new Set();
       monolithNodes.forEach(collection => {
-        Object.values(collection).forEach(node => {
-          if (dubs.has(node.key)) {
-            logErrorAlreadyExists(node, file);
+        const array = Object.values(collection);
+        array.forEach((current, index) => {
+          if (dubs.has(current.key)) {
+            logErrorAlreadyExists(current, file, index);
             errorCount++;
           } else {
-            dubs.add(node.key);
+            dubs.add(current.key);
           }
         });
       });
@@ -126,8 +132,12 @@ export default _qvr`;
       );
       logSuccessMessage(`${files[0].split('.go')[0]}.js is generated!`);
       errorCount
-        ? logErrorMessage(`Found ${errorCount} errors!`)
-        : logSuccessMessage(`No erros found!`);
+        ? logErrorMessage(
+            errorCount === 1
+              ? `Found ${errorCount} error!`
+              : `Found ${errorCount} errors!`
+          )
+        : logSuccessMessage(`No errors found!`);
       errorCount = 0;
       monolithArr.length = 0;
       monolithNodes.length = 0;
@@ -151,7 +161,8 @@ export default _qvr`;
       };
       prev = current;
     } else {
-      logErrorAlreadyExists({ key: current, prev, level }, file);
+      const line = Object.values(tree).findIndex(node => node.key === current);
+      logErrorAlreadyExists({ key: current, prev, level }, file, line);
       errorCount++;
     }
   };

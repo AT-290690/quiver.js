@@ -4,7 +4,11 @@ const { readdir } = fs.promises;
 
 const dir = './example/module/';
 
-const files = await readdir(dir);
-files
-  .filter(file => file?.split('.').pop() === 'go')
-  .forEach((file, _, files) => compile(dir + file));
+const files = (await readdir(dir)).filter(
+  file => file?.split('.').pop() === 'go'
+);
+(async () => {
+  for (const file of files) {
+    await compile(dir + file);
+  }
+})();
