@@ -1,3 +1,7 @@
-import compile from './quiver/quiver.js';
+import { quiver } from './quiver/quiver.js';
 
-compile('./', 'main.go');
+quiver({
+  dir: './',
+  root: 'main.go',
+  indentBy: '\t'
+});

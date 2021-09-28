@@ -1,5 +1,0 @@
-m0 -> args.map(x => x * 2)
-	m1 -> args.map(x => x * 3)
-		m2 -> args.map(x => x * 4)
-			m3 -> goTo("logger", args)
-			toAmp -> goTo("amp", args)

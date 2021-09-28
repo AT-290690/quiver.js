@@ -1,1 +1,0 @@
-logger -> console.log(args)
