@@ -1,68 +1,91 @@
 import * as fs from 'fs';
 const { readFile, mkdir, writeFile, readdir, access } = fs.promises;
-const quiverObject = `export const qvr = {
-  memo: {},
-  func: {},
-  nodes: {},
-  root: null,
-  visited: {},
-  output: []
-};
-qvr.tramp =
-  fn =>
-  (...args) => {
-    let result = fn(...args);
-    while (typeof result === 'function') {
-      result = result();
-    }
-    return result;
-  };
-qvr.goTo = async (key, args, prev = null) => {
-  const node = qvr.nodes[key];
-  if (!node) return;
-  let result;
-  if (typeof qvr.func[node.key] === 'function') {
-    result = await qvr.func[node.key](args, node.key, prev, node.next, qvr);
+
+const quiverObject = `
+export class Quiver {
+  memo = {};
+  func = {};
+  nodes = {};
+  root = null;
+  visited = {};
+  output = [];
+
+  setNodes(nodes) {
+    this.nodes = Object.freeze(nodes);
   }
-  if (result !== undefined) {
-    if (node.next.length === 0) {
-      qvr.output.push({ result, at: node.key, from: node.prev });
-    } else {
-      for (const n of node.next) {
-        await qvr.goTo(n, result, node.key, qvr.nodes[n].next);
+
+  async goTo(key, args, prev = null) {
+    const node = this.nodes[key];
+    if (!node) return;
+    let result;
+    if (typeof this.func[node.key] === 'function') {
+      result = await this.func[node.key](args, node.key, prev, node.next, this);
+    }
+    if (result !== undefined) {
+      if (node.next.length === 0) {
+        this.output.push({ result, at: node.key, from: node.prev });
+      } else {
+        for (const n of node.next) {
+          await this.goTo(n, result, node.key, this.nodes[n].next);
+        }
       }
     }
   }
-};
-qvr.reset = () => {
-  qvr.restart();
-  qvr.memo = {};
-};
-qvr.restart = () => {
-  qvr.output = [];
-  qvr.visited = {};
-};
-qvr.out = () => qvr.output;
-qvr.setNodes = nodes => (qvr.nodes = Object.freeze(nodes));
-qvr.setRoot = key => (qvr.root = key);
-qvr.getRoot = () => qvr.root;
-qvr.visit = key => {
-  if (!qvr.visited[key]) {
-    qvr.visited[key] = true;
-    return { goTo: qvr.goTo, visit: qvr.visit };
-  } else {
-    return { goTo: () => undefined, visit: qvr.visit };
+
+  tramp(fn) {
+    (...args) => {
+      let result = fn(...args);
+      while (typeof result === 'function') {
+        result = result();
+      }
+      return result;
+    };
   }
-};
-qvr.leave = key => {
-  delete qvr.visited[key];
-};
-qvr.shortCircuit = callback => {
-  const result = callback();
-  return result ? result : undefined;
-};
-qvr.ifNotVisited = (key, callback) =>
-  key in qvr.visited ? undefined : callback();`;
+
+  reset() {
+    this.restart();
+    this.memo = {};
+  }
+
+  restart() {
+    this.output = [];
+    this.visited = {};
+  }
+
+  out() {
+    return this.output;
+  }
+
+  setRoot(key) {
+    this.root = key;
+  }
+
+  getRoot() {
+    return this.root;
+  }
+
+  visit(key) {
+    if (!this.visited[key]) {
+      this.visited[key] = true;
+      return { goTo: this.goTo, visit: this.visit };
+    } else {
+      return { goTo: () => undefined, visit: this.visit };
+    }
+  }
+
+  leave(key) {
+    delete this.visited[key];
+  }
+
+  shortCircuit(callback) {
+    const result = callback();
+    return result ? result : undefined;
+  }
+
+  ifNotVisited(key, callback) {
+    return key in _qvr.visited ? undefined : callback();
+  }
+}`;
 
 const logBoldMessage = msg => console.log('\x1b[1m', msg);
 const logErrorMessage = msg =>
@@ -103,6 +126,7 @@ const compile = async (file, files = [], indentBy = '\t', quiverModule) => {
   const buildModular = async (main, graph) => {
     logWarningMessage(`\n< ${file} >\n`);
     const buildCode = `${quiverModule}
+const qvr = new Quiver();
 qvr.setNodes(${JSON.stringify(graph)});
 ${main}
 export default async () => {
@@ -135,9 +159,10 @@ export default async () => {
       ).key;
       logWarningMessage(`\n< [${root}] ${files.join(' -> ')} >\n`);
       const buildCode = `${quiverModule}
-  qvr.setNodes(${JSON.stringify(
-    monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
-  )});
+const qvr = new Quiver();
+qvr.setNodes(${JSON.stringify(
+        monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
+      )});
 ${monolithArr.join('\n')}
 export default async () => {
   qvr.setRoot(qvr.nodes["${root}"].key);
@@ -272,7 +297,7 @@ export default async () => {
 };
 
 export const quiver = async ({ dir, root, indentBy }) => {
-  const quiverModule = `import { qvr } from './qvr/qvr.js'`;
+  const quiverModule = `import { Quiver } from './qvr/qvr.js'`;
   let monolithic = true;
   const allFiles = await readdir(dir);
   if (!root) {
