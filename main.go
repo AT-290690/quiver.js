@@ -1,2 +1,4 @@
-root -> "Hello"
-	child -> args + " World!"
+hello -> "Hello"
+	sp -> value + " "
+		world -> value + "World"
+			! -> value + "!"

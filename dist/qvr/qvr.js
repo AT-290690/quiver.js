@@ -15,16 +15,15 @@ export class Quiver {
     const node = this.nodes[key];
     if (!node) return;
     let result;
-    if (typeof this.func[node.key] === 'function') {
+    if (this.func[node.key]) {
       result = await this.func[node.key](args, node.key, prev, node.next, this);
     }
-    if (result !== undefined) {
-      if (node.next.length === 0) {
-        this.output.push({ result, at: node.key, from: node.prev });
-      } else {
-        for (const n of node.next) {
-          await this.goTo(n, result, node.key, this.nodes[n].next);
-        }
+    if (result === undefined) return;
+    if (node.type === 'leaf') {
+      this.output.push({ result, at: node.key, from: node.prev });
+    } else {
+      for (const n of node.next) {
+        await this.goTo(n, result, node.key, this.nodes[n].next);
       }
     }
   }
