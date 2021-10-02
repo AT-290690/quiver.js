@@ -15,18 +15,19 @@ export class Quiver {
   }
 
   async goTo(key, args, prev = null) {
+    if (this.visited[key]) return;
     const node = this.nodes[key];
     if (!node) return;
     let result;
     if (this.func[node.key]) {
-      result = await this.func[node.key](args, node.key, prev, node.next, this);
+      result = await this.func[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
-    if (node.type === 'leaf') {
+    if (node.type === 'leaf' || node.type === 'root' && node.next.length === 0) {
       this.output.push({ result, at: node.key, from: node.prev });
     } else {
       for (const n of node.next) {
-        await this.goTo(n, result, node.key, this.nodes[n].next);
+        await this.goTo(n, result, node.key);
       }
     }
   }
@@ -66,9 +67,6 @@ export class Quiver {
   visit(key) {
     if (!this.visited[key]) {
       this.visited[key] = true;
-      return { goTo: this.goTo, visit: this.visit };
-    } else {
-      return { goTo: () => undefined, visit: this.visit };
     }
   }
 
@@ -82,7 +80,7 @@ export class Quiver {
   }
 
   ifNotVisited(key, callback) {
-    return key in _qvr.visited ? undefined : callback();
+    return key in this.visited ? undefined : callback();
   }
 }`;
 
@@ -273,7 +271,7 @@ export default async () => {
         const expression = lambda[1]?.trim();
         const body = expression ? 'return ' + expression : '';
         let startBrace = index !== 0 ? '}\n' : '';
-        compiledCode += `${startBrace}qvr.func["${key}"] = async (value, key, prev, next, { nodes, memo, visited, visit, ifNotVisited, leave, goTo, setRoot, getRoot, restart, out, shortCircuit, tramp }) => {\n${
+        compiledCode += `${startBrace}qvr.func["${key}"] = async (value, key, prev, next) => {\n${
           body ? body + '\n' : ''
         }`;
       } else {
