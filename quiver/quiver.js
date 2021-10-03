@@ -25,6 +25,7 @@ export class Quiver {
     if (result === undefined) return;
     if (node.type === 'leaf' || node.type === 'root' && node.next.length === 0) {
       this.output.push({ result, at: node.key, from: node.prev });
+      return result;
     } else {
       for (const n of node.next) {
         await this.goTo(n, result, node.key);

@@ -19,7 +19,7 @@ next - array of children
 qvr.nodes - adj list
 qvr.memo - object containing stuff
 qvr.visited - object containing visited nodes
-qvr.visit(key) - visit add node to visited - return goTo
+qvr.visit(key) - visit add node to visited
 qvr.ifNotVisited(key, callback) - call a function if node is not visited
 qvr.shortCircuit(callback) - if a function returns false - stop recursing
 qvr.leave(key) - remove node from visited
