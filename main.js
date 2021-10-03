@@ -1,2 +1,2 @@
 import main from './dist/main.js';
-main().then(out => console.log(out));
+main(true).then(out => console.log(out));

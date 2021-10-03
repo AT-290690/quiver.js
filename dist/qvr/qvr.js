@@ -4,6 +4,7 @@ export class Quiver {
   func = {};
   nodes = {};
   root = null;
+  logOn = false;
   visited = {};
   output = [];
 
@@ -20,8 +21,19 @@ export class Quiver {
       result = await this.func[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
-    if (node.type === 'leaf' || node.type === 'root' && node.next.length === 0) {
-      this.output.push({ result, at: node.key, from: node.prev });
+    if (
+      node.type === 'leaf' ||
+      (node.type === 'root' && node.next.length === 0)
+    ) {
+      if (this.logOn) {
+        this.output.push({ result, at: node.key, from: node.prev });
+      } else {
+        this.output.push({
+          result: 'Log is turned off!',
+          at: node.key,
+          from: node.prev
+        });
+      }
       return result;
     } else {
       for (const n of node.next) {

@@ -7,6 +7,7 @@ export class Quiver {
   func = {};
   nodes = {};
   root = null;
+  logOn = false;
   visited = {};
   output = [];
 
@@ -23,8 +24,19 @@ export class Quiver {
       result = await this.func[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
-    if (node.type === 'leaf' || node.type === 'root' && node.next.length === 0) {
-      this.output.push({ result, at: node.key, from: node.prev });
+    if (
+      node.type === 'leaf' ||
+      (node.type === 'root' && node.next.length === 0)
+    ) {
+      if (this.logOn) {
+        this.output.push({ result, at: node.key, from: node.prev });
+      } else {
+        this.output.push({
+          result: 'Log is turned off!',
+          at: node.key,
+          from: node.prev
+        });
+      }
       return result;
     } else {
       for (const n of node.next) {
@@ -127,12 +139,14 @@ const compile = async (file, files = [], indentBy = '\t', quiverModule) => {
 const qvr = new Quiver();
 qvr.setNodes(${JSON.stringify(graph)});
 ${main}
-export default async () => {
+export default async (logging = false) => {
+  qvr.logOn = logging;
   qvr.setRoot(Object.values(qvr.nodes).find(node => node.type === 'root').key);
   qvr.reset();
   await qvr.goTo(qvr.root);
   return qvr.out();
 }`;
+
     const path = file.split('/');
     const filename = path.pop().split('.go')[0];
     const dir = path.join('/');
@@ -162,7 +176,8 @@ qvr.setNodes(${JSON.stringify(
         monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
       )});
 ${monolithArr.join('\n')}
-export default async () => {
+export default async (logging = false) => {
+  qvr.logOn = logging;
   qvr.setRoot(qvr.nodes["${root}"].key);
   qvr.reset();
   await qvr.goTo(qvr.root);
