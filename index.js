@@ -1,4 +1,4 @@
-import { quiver } from './quiver/quiver.js';
+import { quiver } from './quiver/index.js';
 
 quiver({
   dir: './',

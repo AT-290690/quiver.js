@@ -1,4 +1,4 @@
-export class Quiver {
+export const quiverObject = `export class Quiver {
   memo = {};
   func = {};
   nodes = {};
@@ -86,4 +86,4 @@ export class Quiver {
   ifNotVisited(key, callback) {
     return key in this.visited ? undefined : callback();
   }
-}
+}`;
