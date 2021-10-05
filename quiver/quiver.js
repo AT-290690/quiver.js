@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 const { readFile, mkdir, writeFile, readdir, access } = fs.promises;
 
-const quiverObject = `
-export class Quiver {
+const quiverObject = `export class Quiver {
   memo = {};
   func = {};
   nodes = {};
@@ -30,13 +29,7 @@ export class Quiver {
     ) {
       if (this.logOn) {
         this.output.push({ result, at: node.key, from: node.prev });
-      } else {
-        this.output.push({
-          result: 'Log is turned off!',
-          at: node.key,
-          from: node.prev
-        });
-      }
+      } 
       return result;
     } else {
       for (const n of node.next) {
@@ -66,6 +59,7 @@ export class Quiver {
   }
 
   out() {
+    if(!this.logOn) return 'Log is turned off!'
     return this.output;
   }
 
