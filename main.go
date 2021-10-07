@@ -1,4 +1,6 @@
-hello -> "Hello"
+hello -> 
+  @: collection = 3
+	<- "Hello"
 	sp -> :: + " "
 		world -> :: + "World"
 			! -> :: + "!"
@@ -8,4 +10,4 @@ result -> { x: :: + 1, y: 13 }
 				{ x, y } := ::
 				#("log",6) // blocked!
 				<- x * y
-log -> console.log(::) || ::
+log -> console.log(::) || console.log(@:collection)
