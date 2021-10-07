@@ -10,12 +10,13 @@ export const settings = {
   quiverModule: `import { Quiver } from './qvr/qvr.js'`,
   languageUnaryTokens: {
     '<- ': 'return ',
-    '#': 'qvr.goTo',
-    '!#': 'qvr.visit',
+    ' #': 'qvr.goTo',
+    ' !#': ' qvr.visit',
     '::': '__value',
     'k::': '__key',
     'p::': '__prev',
-    'n::': '__next'
+    'n::': '__next',
+    '@:': 'qvr.memo.'
   }
 };
 const parse = (source, tokens) => {
