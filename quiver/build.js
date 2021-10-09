@@ -12,7 +12,7 @@ const { mkdir, writeFile } = fs.promises;
 
 const monolithArr = [];
 const monolithNodes = [];
-let errorCount = 0;
+export const errors = { count: 0 };
 export const build = async (main, graph) => {
   monolithNodes.push(graph);
   monolithArr.push(main);
@@ -40,7 +40,7 @@ return qvr.out();
       array.forEach((current, index) => {
         if (dubs.has(current.key)) {
           logErrorAlreadyExists(current, settings.file, index);
-          errorCount++;
+          errors.count++;
         } else {
           dubs.add(current.key);
         }
@@ -55,14 +55,14 @@ return qvr.out();
       buildCode
     );
     logSuccessMessage(`${settings.files[0].split('.go')[0]}.js is generated!`);
-    errorCount
+    errors.count
       ? logErrorMessage(
-          errorCount === 1
-            ? `Found ${errorCount} error!`
-            : `Found ${errorCount} errors!`
+          errors.count === 1
+            ? `Found ${errors.count} error!`
+            : `Found ${errors.count} errors!`
         )
       : logSuccessMessage(`No errors found!`);
-    errorCount = 0;
+    errors.count = 0;
     monolithArr.length = 0;
     monolithNodes.length = 0;
   }
