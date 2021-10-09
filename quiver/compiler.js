@@ -12,6 +12,7 @@ export const settings = {
     '<- ': 'return ',
     '#': 'qvr.goTo',
     '!#': 'qvr.visit',
+    ':::': '__value.',
     '::': '__value',
     'k::': '__key',
     'p::': '__prev',
