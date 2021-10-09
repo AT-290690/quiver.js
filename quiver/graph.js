@@ -7,6 +7,7 @@ import {
   logErrorAlreadyExists
 } from './logg.js';
 import { settings } from './compiler.js';
+import { errors } from './build.js';
 
 const backTrack = (node, parent, tree) =>
   node &&
@@ -36,7 +37,7 @@ export const createTreeMap = (tree, line) => {
   } else {
     const line = Object.values(tree).findIndex(node => node.key === current);
     logErrorAlreadyExists({ key: current, prev, level }, settings.file, line);
-    errorCount++;
+    errors.count++;
   }
 };
 
@@ -60,7 +61,7 @@ export const traverse = tree => {
           node => node.key === current.key
         );
         logErrorIndentationLevel(current, settings.file, line);
-        errorCount++;
+        errors.count++;
       }
     }
   });
