@@ -1,7 +1,7 @@
 import { quiver } from './quiver/index.js';
 
 quiver({
-  dir: './',
+  dir: '',
   root: 'main.go',
   indentBy: '\t'
 });
