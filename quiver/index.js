@@ -10,7 +10,7 @@ export const quiver = async ({ dir, root, indentBy }) => {
     dir = '/';
   }
 
-  const allFiles = await readdir(dir);
+  const allFiles = await readdir('.' + dir);
   if (!root) {
     monolithic = false;
     root = allFiles.find(file => file?.split('.').pop() === 'go');
