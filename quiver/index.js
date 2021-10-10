@@ -4,6 +4,12 @@ import { compile } from './compiler.js';
 
 export const quiver = async ({ dir, root, indentBy }) => {
   let monolithic = true;
+  if (dir) {
+    dir = '/' + dir + '/';
+  } else {
+    dir = '/';
+  }
+
   const allFiles = await readdir(dir);
   if (!root) {
     monolithic = false;
@@ -16,6 +22,6 @@ export const quiver = async ({ dir, root, indentBy }) => {
   const merge = monolithic ? files : [];
 
   for (const file of files) {
-    await compile(dir ? './' + dir + '/' + file : './' + file, merge, indentBy);
+    await compile(dir + file, merge, indentBy);
   }
 };
