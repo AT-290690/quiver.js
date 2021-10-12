@@ -56,11 +56,12 @@ const compileToJs = async () => {
   return { main: compiledCode, graph: treeMap };
 };
 
-export const compile = async (file, files = [], indentBy = '\t') => {
+export const compile = async (file, files = [], indentBy = '\t', mime) => {
   console.log('\x1b[1m', '\x1b[34m', `\n < ${file} >\n`, '\x1b[0m');
   settings.file = '.' + file;
   settings.files = files;
   settings.indentBy = indentBy;
+  settings.mime = mime;
   const { main, graph } = await compileToJs();
   await build(main, graph);
 };

@@ -23,7 +23,7 @@ return { x: VALUE + 1, y: 13 }
 }
 __qvr.func["out"] = async (VALUE, KEY, PREV, NEXT) => {
 const { x } = VALUE
-MEMO.date = new Date()
+MEMO["date"] = new Date()
 await __qvr.go("log")(await __qvr.go('keys')())
 return x * VALUE.y
 }

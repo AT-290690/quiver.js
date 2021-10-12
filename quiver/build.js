@@ -50,12 +50,14 @@ return __qvr.out();
     const dir = path.join('/');
     await mkdir(`${dir}/dist`, { recursive: true });
     await writeFile(
-      `${dir}/dist/${settings.files[0].split('.go')[0]}.js`,
+      `${dir}/dist/${settings.files[0].split('.go')[0]}.${settings.mime}`,
       `import { Quiver } from '${path
         .map(() => '../')
         .join('')}quiver/quiver.js';\n` + buildCode
     );
-    logSuccessMessage(`${settings.files[0].split('.go')[0]}.js is generated!`);
+    logSuccessMessage(
+      `${settings.files[0].split('.go')[0]}.${settings.mime} is generated!`
+    );
     errors.count
       ? logErrorMessage(
           errors.count === 1
