@@ -4,7 +4,7 @@ export class Quiver {
   root = null;
   logOn = false;
   visited = {};
-  output = [];
+  output = {};
 
   setNodes(nodes) {
     this.nodes = Object.freeze(nodes);
@@ -22,13 +22,10 @@ export class Quiver {
     }
     if (result === undefined) return;
     if (
-      node.type === 'leaf' ||
+      (this.logOn && node.type === 'leaf') ||
       (node.type === 'root' && node.next.length === 0)
     ) {
-      if (this.logOn) {
-        this.output.push({ result, at: node.key, from: node.prev });
-      }
-      return result;
+      this.output[node.key] = { result, at: node.key, from: node.prev };
     } else {
       for (const n of node.next) {
         await this.goTo(n, result, node.key);
@@ -51,7 +48,7 @@ export class Quiver {
   }
 
   restart() {
-    this.output = [];
+    this.output = {};
     this.visited = {};
   }
 

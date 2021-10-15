@@ -26,12 +26,11 @@ __qvr.setNodes(${JSON.stringify(
 const NODES = __qvr.nodes;
 const MEMO = {};
 ${monolithArr.join('\n')}
-export default async (logging = false) => {
+export default (logging = false) => {
 __qvr.logOn = logging;
 __qvr.setRoot(__qvr.nodes["${root}"].key);
 __qvr.reset();
-await __qvr.goTo(__qvr.root);
-return __qvr.out();
+__qvr.goTo(__qvr.root);
 }`;
     const dubs = new Set();
     monolithNodes.forEach(collection => {
