@@ -26,8 +26,7 @@ __qvr.setNodes(${JSON.stringify(
 const NODES = __qvr.nodes;
 const MEMO = {};
 ${monolithArr.join('\n')}
-export default (logging = false) => {
-__qvr.logOn = logging;
+export default () => {
 __qvr.setRoot(__qvr.nodes["${root}"].key);
 __qvr.reset();
 __qvr.goTo(__qvr.root);

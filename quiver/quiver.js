@@ -83,4 +83,65 @@ export class Quiver {
   ifNotVisited(key, callback) {
     return key in this.visited ? undefined : callback();
   }
+
+  test = {
+    setup: (key, VALUE) => {
+      this.logOn = true;
+      const root = this.root;
+      this.setRoot(key);
+      this.goTo(root, VALUE);
+    },
+    fail: (desc, a, b) => {
+      console.log(
+        '\x1b[31m',
+        `FAIL: ${desc}`,
+        '\x1b[32m',
+        `\n\tExpected: ${typeof a === 'object' ? JSON.stringify(a) : a}`,
+        '\x1b[31m',
+        `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
+        '\x1b[0m'
+      );
+    },
+    success: desc => {
+      console.log('\x1b[32m', `SUCCESS: ${desc}`, '\x1b[0m');
+    },
+    isEqual: (a, b) => {
+      const typeA = typeof a,
+        typeB = typeof b;
+      if (typeA !== typeB) return false;
+      if (typeA === 'number' || typeA === 'string' || typeA === 'boolean')
+        return a === b;
+      if (typeA === 'object') {
+        const isArrayA = Array.isArray(typeA),
+          isArrayB = Array.isArray(typeB);
+        if (isArrayA !== isArrayB) return false;
+        if (isArrayA && isArrayB) {
+          return a.every((item, index) => this.test.isEqual(item, b[index]));
+        } else {
+          for (const key in a) {
+            if (!this.test.isEqual(a[key], b[key])) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+    },
+    root: root => ({
+      with: inp => ({
+        leaf: leaf => ({
+          with: expected => ({
+            should: async desc =>
+              await this.goTo(root, inp).then(() =>
+                this.output[leaf]?.result === undefined
+                  ? this.test.fail(desc, expected, this.output[leaf]?.result)
+                  : this.test.isEqual(this.output[leaf].result, expected)
+                  ? this.test.success(desc)
+                  : this.test.fail(desc, expected, this.output[leaf].result)
+              )
+          })
+        })
+      })
+    })
+  };
 }
