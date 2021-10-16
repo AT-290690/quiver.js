@@ -2,10 +2,7 @@ export class Quiver {
   func = {};
   nodes = {};
   root = null;
-  logOn = false;
   visited = {};
-  output = {};
-
   setNodes(nodes) {
     this.nodes = Object.freeze(nodes);
   }
@@ -22,14 +19,16 @@ export class Quiver {
     }
     if (result === undefined) return;
     if (
-      (this.logOn && node.type === 'leaf') ||
+      node.type === 'leaf' ||
       (node.type === 'root' && node.next.length === 0)
     ) {
-      this.output[node.key] = { result, at: node.key, from: node.prev };
+      return result;
     } else {
+      const out = {};
       for (const n of node.next) {
-        await this.goTo(n, result, node.key);
+        out[n] = await this.goTo(n, result, node.key);
       }
+      return out;
     }
   }
 
@@ -48,13 +47,7 @@ export class Quiver {
   }
 
   restart() {
-    this.output = {};
     this.visited = {};
-  }
-
-  out() {
-    if (!this.logOn) return 'Log is turned off!';
-    return this.output;
   }
 
   setRoot(key) {
@@ -86,7 +79,6 @@ export class Quiver {
 
   test = {
     setup: (key, VALUE) => {
-      this.logOn = true;
       const root = this.root;
       this.setRoot(key);
       this.goTo(root, VALUE);
@@ -109,13 +101,15 @@ export class Quiver {
       const typeA = typeof a,
         typeB = typeof b;
       if (typeA !== typeB) return false;
-      if (typeA === 'number' || typeA === 'string' || typeA === 'boolean')
+      if (typeA === 'number' || typeA === 'string' || typeA === 'boolean') {
         return a === b;
+      }
       if (typeA === 'object') {
-        const isArrayA = Array.isArray(typeA),
-          isArrayB = Array.isArray(typeB);
+        const isArrayA = Array.isArray(a),
+          isArrayB = Array.isArray(b);
         if (isArrayA !== isArrayB) return false;
         if (isArrayA && isArrayB) {
+          if (a.length !== b.length) return false;
           return a.every((item, index) => this.test.isEqual(item, b[index]));
         } else {
           for (const key in a) {
@@ -135,16 +129,16 @@ export class Quiver {
       return this.test.tracePath(this.nodes[leaf].prev, out);
     },
     root: root => ({
-      with: inp => ({
+      input: inp => ({
         leaf: leaf => ({
-          with: expected => ({
+          output: expected => ({
             should: async desc =>
-              await this.goTo(root, inp).then(() =>
-                this.output[leaf]?.result === undefined
-                  ? this.test.fail(desc, expected, this.output[leaf]?.result)
-                  : this.test.isEqual(this.output[leaf].result, expected)
+              await this.goTo(root, inp).then(res =>
+                res[leaf] === undefined
+                  ? this.test.fail(desc, expected, res[leaf])
+                  : this.test.isEqual(res[leaf], expected)
                   ? this.test.success(desc)
-                  : this.test.fail(desc, expected, this.output[leaf].result) ??
+                  : this.test.fail(desc, expected, res[leaf]) ??
                     console.log(`\t${this.test.tracePath(leaf)}`)
               )
           })

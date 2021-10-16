@@ -3,35 +3,50 @@ TEST ->
 	{ test } := __qvr
 
 	await test.
-	root("START").with(5)
-	.leaf("TO_NUMBER").with(500)
-	.should("Return correct number")
+	root("TWO_SUM").input({ nums: [2, 7, 11, 15], target: 9 })
+	.leaf("OUT").output([0, 1])
+	.should("Return correct sum")
+ 
+	await test.
+	root("TWO_SUM").input({ nums: [3, 2, 4], target: 6 })
+	.leaf("OUT").output([1, 2])
+	.should("Return correct sum")
 
 	await test.
-	root("START").with(2)
-	.leaf("TO_BOOLEAN").with(true)
-	.should("Return correct boolean")
+	root("TWO_SUM").input({ nums: [3, 3], target: 6 })
+	.leaf("OUT").output([0, 1])
+	.should("Return correct sum")
 
 	await test.
-	root("START").with(10)
-	.leaf("END").with({"b":20,"c":0,"a":10})
-	.should("Return correct object")
+	root("TWO_SUM").input({ nums: [-3, 4, 3, 90], target: 0 })
+	.leaf("OUT").output([0, 2])
+	.should("Return correct sum")
 
-	await test.
-	root("START").with(10)
-	.leaf("BB").with({"b":120,"c":20,"a":10,"x":100})
-	.should("Return correct object")
+	console.log(await #("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
 
-	await test.
-	root("START").with(10)
-	.leaf("ARRAY").with([20, 0, 10])
-	.should("Return correct array")
+TWO_SUM ->
+	{ nums, target } := VALUE
+	/*
+		Iterate the numbers and store diff from
+		target as key of the dictionary
+	*/
+	<- { nums, dict: nums.reduce((acc, item, index) => {
+		key := target - nums[index]
+		acc[key] = index
+		<- acc
+	}, {}) }
 
-START -> { a: VALUE }
-	END -> { b: VALUE.a * 2 , c: VALUE.a - 10, ...VALUE }
-	AA1 -> { b: VALUE.a * 12 , c: VALUE.a + 10, ...VALUE }
-		BB ->  { ...VALUE, x: 100 }
-	TO_ARRAY -> { b: VALUE.a * 2 , c: VALUE.a - 10, ...VALUE }
-		ARRAY -> Object.values(VALUE)
-	TO_NUMBER -> VALUE.a * 100
-	TO_BOOLEAN -> VALUE.a % 2 === 0
+	OUT -> 
+		{ nums, dict } := VALUE
+		/*
+			Access dictionary and push indexes in 
+			output array
+		*/
+		<- nums.reduce((acc, item, index) => {
+			key := nums[index]
+			if (dict[key] !== undefined && dict[key] !== index) {
+				acc.push(index)
+				dict[key] = index // in case of a duplicate
+			}
+			<- acc
+		}, [])
