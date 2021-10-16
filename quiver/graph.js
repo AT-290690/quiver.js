@@ -10,12 +10,11 @@ import { settings } from './compiler.js';
 import { errors } from './build.js';
 
 const backTrack = (node, parent, tree) =>
-  node &&
-  parent &&
-  node.prev !== null &&
-  (node.level - 1 === parent.level
+  node && parent && node.prev !== null && node.level - 1 === parent.level
     ? parent
-    : backTrack(node, tree[parent.prev], tree));
+    : node.level !== 0
+    ? backTrack(node, tree[parent.prev], tree)
+    : null;
 
 let prev = null;
 export const createTreeMap = (tree, line) => {

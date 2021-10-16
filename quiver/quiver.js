@@ -103,7 +103,7 @@ export class Quiver {
       );
     },
     success: desc => {
-      console.log('\x1b[32m', `SUCCESS: ${desc}`, '\x1b[0m');
+      console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
     },
     isEqual: (a, b) => {
       const typeA = typeof a,
@@ -127,6 +127,13 @@ export class Quiver {
         }
       }
     },
+    tracePath: (leaf, out = '') => {
+      out = out === '' ? leaf : leaf + ' -> ' + out;
+      if (!this.nodes[leaf].prev) {
+        return out;
+      }
+      return this.test.tracePath(this.nodes[leaf].prev, out);
+    },
     root: root => ({
       with: inp => ({
         leaf: leaf => ({
@@ -137,7 +144,8 @@ export class Quiver {
                   ? this.test.fail(desc, expected, this.output[leaf]?.result)
                   : this.test.isEqual(this.output[leaf].result, expected)
                   ? this.test.success(desc)
-                  : this.test.fail(desc, expected, this.output[leaf].result)
+                  : this.test.fail(desc, expected, this.output[leaf].result) ??
+                    console.log(`\t${this.test.tracePath(leaf)}`)
               )
           })
         })

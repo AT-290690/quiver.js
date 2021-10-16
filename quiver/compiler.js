@@ -61,7 +61,7 @@ export const compile = async (file, files = [], indentBy = '\t', mime) => {
   settings.file = '.' + file;
   settings.files = files;
   settings.indentBy = indentBy;
-  settings.mime = mime;
+  settings.mime = mime ?? 'js';
   const { main, graph } = await compileToJs();
   await build(main, graph);
 };
