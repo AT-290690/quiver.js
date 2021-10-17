@@ -1,39 +1,39 @@
 /* 
+Example 1
 Solving two sum problem
 and demonstrating graph testing
 */
->>>>
+>>->
 TEST -> 
-
-	await >>-> test
+	await <-<< test
 	.root("TWO_SUM")
 	.input({ nums: [2, 7, 11, 15], target: 9 })
 	.leaf("OUT")
 	.output([0, 1])
 	.should("Return correct sum")
 
-	await >>-> test
+	await <-<< test
 	.root("TWO_SUM")
 	.input({ nums: [3, 2, 4], target: 6 })
 	.leaf("OUT")
 	.output([1, 2])
 	.should("Return correct sum")
 
-	await >>-> test
+	await <-<< test
 	.root("TWO_SUM")
 	.input({ nums: [3, 3], target: 6 })
 	.leaf("OUT")
 	.output([0, 1])
 	.should("Return correct sum")
 
-	await >>-> test
+	await <-<< test
 	.root("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 0 })
 	.leaf("OUT")
 	.output([0, 2])
 	.should("Return correct sum")
 
-	console.log(await >>-> go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
+	<-<< log(await <-<< go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
 
 TWO_SUM ->
 	{ nums, target } := value

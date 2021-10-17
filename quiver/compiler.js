@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import { createTreeMap, traverse } from './graph.js';
-import { build } from './build.js';
+import { build, errors } from './build.js';
+import { logErrorMessage } from './logg.js';
 const { readFile } = fs.promises;
-
 export const settings = {
   file: '',
   files: [],
   indentBy: '\t',
   unaryTokens: {
     '<- ': 'return ',
-    '>>->': '__qvr.'
+    '<-<<': '__qvr.'
   }
 };
 const parse = (source, tokens) => {
@@ -26,8 +26,17 @@ const parse = (source, tokens) => {
 
 const compileToJs = async () => {
   const mainGraphFile = await readFile(settings.file, 'utf8');
-  if (!mainGraphFile.trim()) return;
-  const codeSplit = mainGraphFile.split('>>>>');
+  if (!mainGraphFile.trim()) {
+    errors.count++;
+    logErrorMessage('Nothing to compile.');
+    return { main: '', graph: {} };
+  }
+  const codeParts = mainGraphFile.split('>>->');
+  if (codeParts.length > 2) {
+    errors.count++;
+    logErrorMessage('There can only be one js block on the top of each file');
+  }
+  const codeSplit = codeParts.length === 1 ? ['', codeParts[0]] : codeParts;
   const arrows = codeSplit[1]
     .trim()
     .split('\n')
@@ -65,5 +74,8 @@ export const compile = async (file, files = [], indentBy = '\t', mime) => {
   settings.indentBy = indentBy;
   settings.mime = mime ?? 'js';
   const { main, graph } = await compileToJs();
+  if (!main) {
+    return;
+  }
   await build(main, graph);
 };

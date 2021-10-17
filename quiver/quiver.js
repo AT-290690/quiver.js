@@ -1,6 +1,7 @@
 export class Quiver {
   func = {};
   nodes = {};
+  current;
   root = null;
   visited = {};
   setNodes(nodes) {
@@ -12,6 +13,7 @@ export class Quiver {
   async goTo(key, args, prev = null) {
     if (this.visited[key]) return;
     const node = this.nodes[key];
+    this.current = node;
     if (!node) return;
     let result;
     if (this.func[node.key]) {
@@ -76,7 +78,14 @@ export class Quiver {
   ifNotVisited(key, callback) {
     return key in this.visited ? undefined : callback();
   }
-
+  log(...msg) {
+    console.log(
+      '\x1b[2m',
+      `at Node ["${this.current.key}"] from ["${this.current.prev}"]`,
+      '\x1b[0m'
+    );
+    console.log(...msg);
+  }
   test = {
     fail: (desc, a, b) => {
       console.log(

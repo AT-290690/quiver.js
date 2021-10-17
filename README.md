@@ -3,38 +3,7 @@
 JavaScript parser for graph based pipe development
 
 ```
-HELLO -> "Hello"
-  SPACE -> args + " "
-    WORLD -> args + "World"
-      PRINT -> console.log(args)
 
-
-async (args, key, prev, next) => ...
--> declare node
-<- return
-:= assign (with const)
-value - result of prev node
-key - current node key
-next - array of children
-qvr.nodes - adj list
-qvr.memo - object containing stuff
-qvr.visited - object containing visited nodes
-qvr.visit(key) - visit add node to visited
-qvr.ifNotVisited(key, callback) - call a function if node is not visited
-qvr.shortCircuit(callback) - if a function returns false - stop recursing
-qvr.leave(key) - remove node from visited
-qvr.goTo(key, args) - dfs from specific node
-qvr.setRoot(key) - sets the root to desired
-qvr.restart() - resets memo, visited and output
-qvr.out() - returns output array
-
-
-- 0 > HELLO
-- 1 >   SPACE
-- 2 >     WORLD
-- 3 >       PRINT
-
-nesting with levels
 ```
 
 ```json

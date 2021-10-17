@@ -4,7 +4,11 @@
   "description": "",
   "main": "quiver.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node playground/main.js",
+    "exp0": "node examples/exp0_hello_world/main.js",
+    "exp1": "node examples/exp1_two_sum/main.js",
+    "exp2": "node examples/exp2_server/main.js",
+    "exp3": "node examples/exp3_recursion/main.js",
     "qvr": "node index.js"
   },
   "type": "module",

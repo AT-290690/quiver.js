@@ -1,6 +1,6 @@
 import { quiver } from './quiver/index.js';
 quiver({
-  dir: '',
+  dir: 'playground',
   root: 'main.go',
   indentBy: '\t'
 });
