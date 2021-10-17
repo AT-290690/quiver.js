@@ -23,8 +23,6 @@ export const build = async (main, graph) => {
 __qvr.setNodes(${JSON.stringify(
       monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
     )});
-const NODES = __qvr.nodes;
-const MEMO = {};
 ${monolithArr.join('\n')}
 export default () => {
 __qvr.setRoot(__qvr.nodes["${root}"].key);

@@ -78,11 +78,6 @@ export class Quiver {
   }
 
   test = {
-    setup: (key, VALUE) => {
-      const root = this.root;
-      this.setRoot(key);
-      this.goTo(root, VALUE);
-    },
     fail: (desc, a, b) => {
       console.log(
         '\x1b[31m',

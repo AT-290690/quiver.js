@@ -13,7 +13,7 @@ const backTrack = (node, parent, tree) =>
   node && parent && node.prev !== null && node.level - 1 === parent.level
     ? parent
     : node.level !== 0
-    ? backTrack(node, tree[parent.prev], tree)
+    ? parent.prev && backTrack(node, tree[parent.prev], tree)
     : null;
 
 let prev = null;
@@ -44,9 +44,10 @@ export const traverse = tree => {
   const values = Object.values(tree);
   values.forEach(current => {
     const parent = backTrack(current, tree[current.prev], tree);
-    if (!parent) {
+    if (!parent && current.level === 0) {
       current.prev = null;
-    } else if (parent) {
+    }
+    if (parent) {
       parent.next.push(current.key);
       current.prev = parent.key;
       if (current.next.length === 0) {
@@ -56,6 +57,7 @@ export const traverse = tree => {
         parent.type = 'branch';
       }
     } else if (current.level !== 0) {
+      console.log(current.prev);
       const diff = current.level - tree[current.prev]?.level;
       if (diff !== 1) {
         const line = Object.values(tree).findIndex(

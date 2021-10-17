@@ -9,9 +9,7 @@ export const settings = {
   indentBy: '\t',
   unaryTokens: {
     '<- ': 'return ',
-    '#': '__qvr.go',
-    '#!': '__qvr.leave',
-    '!#': '__qvr.visit'
+    '>>->': '__qvr.'
   }
 };
 const parse = (source, tokens) => {
@@ -29,7 +27,11 @@ const parse = (source, tokens) => {
 const compileToJs = async () => {
   const mainGraphFile = await readFile(settings.file, 'utf8');
   if (!mainGraphFile.trim()) return;
-  const arrows = mainGraphFile.split('\n').map(line => line.split('->'));
+  const codeSplit = mainGraphFile.split('>>>>');
+  const arrows = codeSplit[1]
+    .trim()
+    .split('\n')
+    .map(line => line.split(' ->'));
   const treeMap = {};
   let compiledCode = '';
   arrows.forEach((lambda, index) => {
@@ -39,7 +41,7 @@ const compileToJs = async () => {
       const expression = parse(lambda[1]?.trim(), settings.unaryTokens);
       const body = expression ? 'return ' + expression : '';
       let startBrace = index !== 0 ? '}\n' : '';
-      compiledCode += `${startBrace}__qvr.func["${key}"] = async (VALUE, KEY, PREV, NEXT) => {\n${
+      compiledCode += `${startBrace}__qvr.func["${key}"] = async (value, key, prev, next) => {\n${
         body ? body + '\n' : ''
       }`;
     } else {
@@ -53,7 +55,7 @@ const compileToJs = async () => {
   });
   compiledCode += ';';
   traverse(treeMap);
-  return { main: compiledCode, graph: treeMap };
+  return { main: codeSplit[0] + '\n' + compiledCode, graph: treeMap };
 };
 
 export const compile = async (file, files = [], indentBy = '\t', mime) => {
