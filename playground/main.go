@@ -64,7 +64,7 @@ npm/yarn start to run code
 */
 
 // A separator between js and quiver code
->>-> 
+>>->
 MY_NODE -> ["Hello"," ", "World", "!"]
 	JOIN -> 
 		[hello, space, world, mark] := value

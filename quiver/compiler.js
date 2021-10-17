@@ -15,13 +15,9 @@ export const settings = {
 const parse = (source, tokens) => {
   const rgx = Object.keys(tokens).join('|');
   const TokenRgx = new RegExp(rgx, 'g');
-  return source.replace(TokenRgx, matched => {
-    if (tokens[matched]) {
-      return tokens[matched];
-    } else {
-      return matched;
-    }
-  });
+  return source.replace(TokenRgx, matched =>
+    tokens[matched] ? tokens[matched] : matched
+  );
 };
 
 const compileToJs = async () => {

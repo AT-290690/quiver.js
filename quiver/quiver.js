@@ -4,13 +4,55 @@ export class Quiver {
   current;
   root = null;
   visited = {};
+
   setNodes(nodes) {
     this.nodes = Object.freeze(nodes);
   }
+
+  path(nodes) {
+    const Nodes = {};
+    let prev = null;
+    const qvr = new Quiver();
+    nodes.forEach((n, index, array) => {
+      Nodes[n] = {
+        key: n,
+        next: [],
+        type: 'branch'
+      };
+      qvr.func[n] = this.func[n];
+      if (index === 0) {
+        Nodes[n].type = 'root';
+      } else if (index === array.length - 1) {
+        Nodes[n].type = 'leaf';
+      }
+      if (Nodes[prev]) {
+        Nodes[prev].next = [n];
+      }
+      Nodes[n].prev = prev;
+      prev = n;
+    });
+    qvr.setNodes(Nodes);
+    qvr.setRoot(nodes[0]);
+    return qvr;
+  }
+
+  trace(root, leaf, out = []) {
+    out = out.length === 0 ? [leaf] : [leaf, ...out];
+    if (this.nodes[leaf].prev === root) {
+      return [root, ...out];
+    }
+    if (!this.nodes[leaf].prev) {
+      this.test.fail(`Couldn't find node parent`, root, out[0]);
+      return out;
+    }
+    return this.trace(root, this.nodes[leaf].prev, out);
+  }
+
   go(key) {
     return args => this.goTo(key, args);
   }
-  async goTo(key, args, prev = null) {
+
+  async goTo(key, args, prev = null, out = {}) {
     if (this.visited[key]) return;
     const node = this.nodes[key];
     this.current = node;
@@ -24,14 +66,14 @@ export class Quiver {
       node.type === 'leaf' ||
       (node.type === 'root' && node.next.length === 0)
     ) {
+      out[key] = result;
       return result;
     } else {
-      const out = {};
       for (const n of node.next) {
-        out[n] = await this.goTo(n, result, node.key);
+        await this.goTo(n, result, node.key, out);
       }
-      return out;
     }
+    return out;
   }
 
   tramp(fn) {
@@ -78,6 +120,7 @@ export class Quiver {
   ifNotVisited(key, callback) {
     return key in this.visited ? undefined : callback();
   }
+
   log(...msg) {
     console.log(
       '\x1b[2m',
@@ -86,68 +129,85 @@ export class Quiver {
     );
     console.log(...msg);
   }
-  test = {
-    fail: (desc, a, b) => {
-      console.log(
-        '\x1b[31m',
-        `FAIL: ${desc}`,
-        '\x1b[32m',
-        `\n\tExpected: ${typeof a === 'object' ? JSON.stringify(a) : a}`,
-        '\x1b[31m',
-        `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
-        '\x1b[0m'
-      );
-    },
-    success: desc => {
-      console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
-    },
-    isEqual: (a, b) => {
-      const typeA = typeof a,
-        typeB = typeof b;
-      if (typeA !== typeB) return false;
-      if (typeA === 'number' || typeA === 'string' || typeA === 'boolean') {
-        return a === b;
-      }
-      if (typeA === 'object') {
-        const isArrayA = Array.isArray(a),
-          isArrayB = Array.isArray(b);
-        if (isArrayA !== isArrayB) return false;
-        if (isArrayA && isArrayB) {
-          if (a.length !== b.length) return false;
-          return a.every((item, index) => this.test.isEqual(item, b[index]));
-        } else {
-          for (const key in a) {
-            if (!this.test.isEqual(a[key], b[key])) {
-              return false;
-            }
-          }
-          return true;
+
+  test() {
+    const test = {
+      fail: (desc, a, b) => {
+        console.log(
+          '\x1b[31m',
+          `FAIL: ${desc}`,
+          '\x1b[32m',
+          `\n\tExpected: ${typeof a === 'object' ? JSON.stringify(a) : a}`,
+          '\x1b[31m',
+          `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
+          '\x1b[0m'
+        );
+      },
+      success: desc => {
+        console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
+      },
+      isEqual: (a, b) => {
+        const typeA = typeof a,
+          typeB = typeof b;
+        if (typeA !== typeB) return false;
+        if (typeA === 'number' || typeA === 'string' || typeA === 'boolean') {
+          return a === b;
         }
-      }
-    },
-    tracePath: (leaf, out = '') => {
-      out = out === '' ? leaf : leaf + ' -> ' + out;
-      if (!this.nodes[leaf].prev) {
-        return out;
-      }
-      return this.test.tracePath(this.nodes[leaf].prev, out);
-    },
-    root: root => ({
-      input: inp => ({
-        leaf: leaf => ({
+        if (typeA === 'object') {
+          const isArrayA = Array.isArray(a),
+            isArrayB = Array.isArray(b);
+          if (isArrayA !== isArrayB) return false;
+          if (isArrayA && isArrayB) {
+            if (a.length !== b.length) return false;
+            return a.every((item, index) => test.isEqual(item, b[index]));
+          } else {
+            for (const key in a) {
+              if (!test.isEqual(a[key], b[key])) {
+                return false;
+              }
+            }
+            return true;
+          }
+        }
+      },
+      e2e: root => ({
+        input: inp => ({
           output: expected => ({
-            should: async desc =>
+            should: async desc => {
               await this.goTo(root, inp).then(res =>
-                res[leaf] === undefined
-                  ? this.test.fail(desc, expected, res[leaf])
-                  : this.test.isEqual(res[leaf], expected)
-                  ? this.test.success(desc)
-                  : this.test.fail(desc, expected, res[leaf]) ??
-                    console.log(`\t${this.test.tracePath(leaf)}`)
-              )
+                res === undefined
+                  ? test.fail(desc, expected, res)
+                  : test.isEqual(res, expected)
+                  ? test.success(desc)
+                  : test.fail(desc, expected, res)
+              );
+            }
+          })
+        })
+      }),
+      root: root => ({
+        input: inp => ({
+          leaf: leaf => ({
+            output: expected => ({
+              should: async desc => {
+                const path = this.trace(root, leaf);
+                const qvr = this.path(path);
+                await qvr
+                  .goTo(root, inp)
+                  .then(res =>
+                    res[leaf] === undefined
+                      ? test.fail(desc, expected, res[leaf])
+                      : test.isEqual(res[leaf], expected)
+                      ? test.success(desc)
+                      : test.fail(desc, expected, res[leaf]) ??
+                        console.log(`\t${path.map(n => `[${n}]`).join('->')}`)
+                  );
+              }
+            })
           })
         })
       })
-    })
-  };
+    };
+    return test;
+  }
 }

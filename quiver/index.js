@@ -9,7 +9,6 @@ export const quiver = async ({ dir, root, indentBy, mime }) => {
   } else {
     dir = '/';
   }
-  console.log(dir);
   const allFiles = await readdir('.' + dir);
   if (!root) {
     monolithic = false;
