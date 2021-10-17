@@ -24,10 +24,10 @@ __qvr.setNodes(${JSON.stringify(
       monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
     )});
 ${monolithArr.join('\n')}
-export default () => {
+export default (value) => {
 __qvr.setRoot(__qvr.nodes["${root}"].key);
 __qvr.reset();
-__qvr.goTo(__qvr.root);
+__qvr.goTo(__qvr.root, value);
 }`;
     const dubs = new Set();
     monolithNodes.forEach(collection => {
