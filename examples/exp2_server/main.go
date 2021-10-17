@@ -46,9 +46,9 @@ SERVER ->
 			if (method !== "GET" && body) {
 				req.body = body
 			}
-			<-<< restart()
+			quiv.restart()
 			req.query = query
-		  <-<< go(<-<< getRoot())({ method, req, res, init })
+		  quiv.go(quiv.getRoot())({ method, req, res, init })
 		})
 	}
 
@@ -61,4 +61,4 @@ SERVER ->
 			await writeFile(init.DB_DIR + init.DB_FILE,
 	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 	})
-	<-<< setRoot("REQUEST")
+	quiv.setRoot("REQUEST")

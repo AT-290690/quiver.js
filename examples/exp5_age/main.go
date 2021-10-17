@@ -14,4 +14,4 @@ AGE -> { birthDate: new Date(value), today: new Date() }
 				age - 1 : age
 
 			PRINT -> 
-				<-<< log(value)
+				quiv.log(value)

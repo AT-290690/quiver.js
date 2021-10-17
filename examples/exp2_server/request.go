@@ -10,4 +10,4 @@ REQUEST ->
 			method, body, query: queries, res, url, 
 			match, end, toJSON, toString, tryCatch, DB_PATH: DB_DIR + DB_FILE 
 		}
-		<-<< go(routes[url.split("?")[0]])(service)
+		quiv.go(routes[url.split("?")[0]])(service)

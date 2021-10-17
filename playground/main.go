@@ -69,4 +69,4 @@ MY_NODE -> ["Hello"," ", "World", "!"]
 	JOIN -> 
 		[hello, space, world, mark] := value
 		<- hello + space + world + mark
-	PRINT -> <-<< log(value)
+	PRINT -> quiv.log(value)

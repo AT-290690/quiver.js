@@ -5,9 +5,9 @@ and demonstrating graph testing
 */
 >>->
 TEST -> 
-	{ root, e2e } := <-<< test();
+	{ root, e2e } := quiv.test();
 
-	<-<< log(await <-<< go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
+	quiv.log(await quiv.go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
 
 	await root("TWO_SUM")
 	.input({ nums: [2, 7, 11, 15], target: 9 })

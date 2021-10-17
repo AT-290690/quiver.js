@@ -1,16 +1,6 @@
 import { Quiver } from '../../quiver/quiver.js';
-const __qvr = new Quiver();
-__qvr.setNodes({
-  MY_NODE: {
-    key: 'MY_NODE',
-    next: ['JOIN', 'PRINT'],
-    prev: null,
-    level: 0,
-    type: 'root'
-  },
-  JOIN: { key: 'JOIN', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
-  PRINT: { key: 'PRINT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
-});
+const quiv = new Quiver();
+quiv.setNodes({"MY_NODE":{"key":"MY_NODE","next":["JOIN","PRINT"],"prev":null,"level":0,"type":"root"},"JOIN":{"key":"JOIN","next":[],"prev":"MY_NODE","level":1,"type":"leaf"},"PRINT":{"key":"PRINT","next":[],"prev":"MY_NODE","level":1,"type":"leaf"}});
 /*
 Tutorial:
 
@@ -78,18 +68,18 @@ npm/yarn start to run code
 
 // A separator between js and quiver code
 
-__qvr.func['MY_NODE'] = async (value, key, prev, next) => {
-  return ['Hello', ' ', 'World', '!'];
+quiv.func["MY_NODE"] = async (value, key, prev, next) => {
+return ["Hello"," ", "World", "!"]
+}
+quiv.func["JOIN"] = async (value, key, prev, next) => {
+const [hello, space, world, mark] = value
+return hello + space + world + mark
+}
+quiv.func["PRINT"] = async (value, key, prev, next) => {
+return quiv.log(value)
 };
-__qvr.func['JOIN'] = async (value, key, prev, next) => {
-  const [hello, space, world, mark] = value;
-  return hello + space + world + mark;
-};
-__qvr.func['PRINT'] = async (value, key, prev, next) => {
-  return __qvr.log(value);
-};
-export default () => {
-  __qvr.setRoot(__qvr.nodes['MY_NODE'].key);
-  __qvr.reset();
-  __qvr.goTo(__qvr.root);
-};
+export default (value) => {
+quiv.setRoot(quiv.nodes["MY_NODE"].key);
+quiv.reset();
+quiv.goTo(quiv.root, value);
+}

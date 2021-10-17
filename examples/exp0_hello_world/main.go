@@ -8,4 +8,4 @@ HELLO ->
 	SPACE -> value + " "
 		WORLD -> value + "World"
 			! -> value + "!"
-				PRINT -> <-<< log(value)
+				PRINT -> quiv.log(value)

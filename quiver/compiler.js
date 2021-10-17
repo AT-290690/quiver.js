@@ -7,11 +7,9 @@ export const settings = {
   file: '',
   files: [],
   indentBy: '\t',
-  unaryTokens: {
-    '<- ': 'return ',
-    '<-<<': '__qvr.'
-  }
+  namespace: '__qvr'
 };
+
 const parse = (source, tokens) => {
   const rgx = Object.keys(tokens).join('|');
   const TokenRgx = new RegExp(rgx, 'g');
@@ -46,7 +44,9 @@ const compileToJs = async () => {
       const expression = parse(lambda[1]?.trim(), settings.unaryTokens);
       const body = expression ? 'return ' + expression : '';
       let startBrace = index !== 0 ? '}\n' : '';
-      compiledCode += `${startBrace}__qvr.func["${key}"] = async (value, key, prev, next) => {\n${
+      compiledCode += `${startBrace}${
+        settings.namespace
+      }.func["${key}"] = async (value, key, prev, next) => {\n${
         body ? body + '\n' : ''
       }`;
     } else {
@@ -63,12 +63,23 @@ const compileToJs = async () => {
   return { main: codeSplit[0] + '\n' + compiledCode, graph: treeMap };
 };
 
-export const compile = async (file, files = [], indentBy = '\t', mime) => {
+export const compile = async (
+  file,
+  files = [],
+  indentBy = '\t',
+  mime,
+  namespace
+) => {
   console.log('\x1b[1m', '\x1b[34m', `\n < ${file} >\n`, '\x1b[0m');
   settings.file = '.' + file;
   settings.files = files;
   settings.indentBy = indentBy;
   settings.mime = mime ?? 'js';
+  settings.namespace = namespace;
+  settings.unaryTokens = {
+    '<- ': 'return ',
+    '<-::': `await ${settings.namespace}.`
+  };
   const { main, graph } = await compileToJs();
   if (!main) {
     return;

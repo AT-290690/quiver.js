@@ -19,15 +19,15 @@ export const build = async (main, graph) => {
       node => node.type === 'root'
     ).key;
     logWarningMessage(`\n< [${root}] ${settings.files.join(' -> ')} >\n`);
-    const buildCode = `const __qvr = new Quiver();
-__qvr.setNodes(${JSON.stringify(
+    const buildCode = `const ${settings.namespace} = new Quiver();
+${settings.namespace}.setNodes(${JSON.stringify(
       monolithNodes.reduce((acc, item) => ({ ...acc, ...item }), {})
     )});
 ${monolithArr.join('\n')}
 export default (value) => {
-__qvr.setRoot(__qvr.nodes["${root}"].key);
-__qvr.reset();
-__qvr.goTo(__qvr.root, value);
+${settings.namespace}.setRoot(${settings.namespace}.nodes["${root}"].key);
+${settings.namespace}.reset();
+${settings.namespace}.goTo(${settings.namespace}.root, value);
 }`;
     const dubs = new Set();
     monolithNodes.forEach(collection => {

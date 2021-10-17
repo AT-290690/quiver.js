@@ -10,7 +10,8 @@
     "exp2": "node examples/exp2_server/main.js",
     "exp3": "node examples/exp3_recursion/main.js",
     "exp4": "node examples/exp4_paths/main.js",
-    "qvr": "node index.js"
+    "exp5": "node examples/exp5_age/main.js",
+    "quiv": "node index.js"
   },
   "type": "module",
   "author": "",
