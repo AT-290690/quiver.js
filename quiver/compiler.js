@@ -77,8 +77,7 @@ export const compile = async (
   settings.mime = mime ?? 'js';
   settings.namespace = namespace;
   settings.unaryTokens = {
-    '<- ': 'return ',
-    '<-::': `await ${settings.namespace}.`
+    '<- ': 'return '
   };
   const { main, graph } = await compileToJs();
   if (!main) {
