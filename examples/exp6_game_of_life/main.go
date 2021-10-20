@@ -24,23 +24,16 @@ GAME_OF_LIFE ->
 					for (let y = 0; y < row; y++) {
 
 							// Count the nearby population
-							numAlive := await quiv.func["IS_ALIVE"]({ x: x - 1, y: y - 1, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x, y: y - 1, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x: x - 1, y, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x: x + 1, y, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x: x - 1, y: y + 1, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x, y: y + 1, col, row, gameObjects }) 
-							+ await quiv.func["IS_ALIVE"]({ x: x + 1, y: y + 1, col, row, gameObjects })
-							
-							centerIndex := await quiv.func["GRID_TO_INDEX"]({ x, y, col })
+							numAlive := await quiv.func["IS_ALIVE"]({ x, y, col, row, gameObjects })
+							centerIndex := x + (y * col)
 
-							if (numAlive === 2){
+							if (numAlive === 2) {
 									// Do nothing
 									gameObjects[centerIndex].nextAlive = gameObjects[centerIndex].alive
-							}else if (numAlive === 3){
+							} else if (numAlive === 3) {
 									// Make alive
 									gameObjects[centerIndex].nextAlive = true
-							}else{
+							} else {
 									// Make dead
 									gameObjects[centerIndex].nextAlive = false
 							}
@@ -70,15 +63,18 @@ CREATE_CELL ->
 // Make random cells alive
 <- { x, y, alive: Math.random() > 0.5 }
 
-GRID_TO_INDEX ->
-	{ x, y, col } := value
-<- x + (y * col)
-
 IS_ALIVE ->
 	{ x, y, col, row, gameObjects } := value
-	
-		if (x < 0 || x >= col || y < 0 || y >= row) {
-			<- false
-		} 
-	<- gameObjects[await quiv.func["GRID_TO_INDEX"]({ x, y, col })].alive ? 1 : 0
-
+	<- [
+			{ xd: -1, yd: -1 },
+			{ xd: 0, yd: -1 },
+			{ xd: -1, yd: 0 },
+			{ xd: 1, yd: 0 },
+			{ xd: -1, yd: 1 },
+			{ xd: 0, yd: 1 },
+			{ xd: 1, yd: 1 }
+		].reduce((result, { xd, yd }) => {
+			X := x + xd
+			Y := y + yd 
+			<- result + ((X < 0 || X >= col || Y < 0 || Y >= row) || !gameObjects[X + (Y * col)].alive ? 0 : 1)
+		}, 0)
