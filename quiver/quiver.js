@@ -42,7 +42,11 @@ export class Quiver {
       return [root, ...out];
     }
     if (!this.nodes[leaf].prev) {
-      this.test.fail(`Couldn't find node parent`, root, out[0]);
+      console.log(
+        '\x1b[31m',
+        `FAIL: Couldn't find node parent [${root}]`,
+        '\x1b[0m'
+      );
       return out;
     }
     return this.trace(root, this.nodes[leaf].prev, out);
@@ -84,14 +88,6 @@ export class Quiver {
       }
       return result;
     };
-  }
-
-  reset() {
-    this.restart();
-  }
-
-  restart() {
-    this.visited = {};
   }
 
   setRoot(key) {
@@ -161,6 +157,7 @@ export class Quiver {
             if (a.length !== b.length) return false;
             return a.every((item, index) => test.isEqual(item, b[index]));
           } else {
+            if (Object.keys(a).length !== Object.keys(b).length) return false;
             for (const key in a) {
               if (!test.isEqual(a[key], b[key])) {
                 return false;

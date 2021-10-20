@@ -26,7 +26,7 @@ ${settings.namespace}.setNodes(${JSON.stringify(
 ${monolithArr.join('\n')}
 export default (value) => {
 ${settings.namespace}.setRoot(${settings.namespace}.nodes["${root}"].key);
-${settings.namespace}.reset();
+${settings.namespace}.visited = {};
 ${settings.namespace}.goTo(${settings.namespace}.root, value);
 }`;
     const dubs = new Set();

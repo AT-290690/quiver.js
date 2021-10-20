@@ -1,6 +1,6 @@
 import { quiver } from './quiver/index.js';
 quiver({
-  dir: 'examples/exp6_game_of_life',
+  dir: 'blank',
   root: 'main.go',
   indentBy: '\t',
   namespace: 'quiv'
