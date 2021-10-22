@@ -189,16 +189,16 @@ export class Quiver {
               should: async desc => {
                 const path = this.trace(root, leaf);
                 const qvr = this.path(path);
-                await qvr
-                  .goTo(root, inp)
-                  .then(res =>
-                    res[leaf] === undefined
-                      ? test.fail(desc, expected, res[leaf])
-                      : test.isEqual(res[leaf], expected)
-                      ? test.success(desc)
-                      : test.fail(desc, expected, res[leaf]) ??
-                        console.log(`\t${path.map(n => `[${n}]`).join('->')}`)
-                  );
+                await qvr.goTo(root, inp).then(res => {
+                  if (res === undefined)
+                    return test.fail(desc, expected, 'Short Circuited');
+                  return res[leaf] === undefined
+                    ? test.fail(desc, expected, res[leaf])
+                    : test.isEqual(res[leaf], expected)
+                    ? test.success(desc)
+                    : test.fail(desc, expected, res[leaf]) ??
+                      console.log(`\t${path.map(n => `[${n}]`).join('->')}`);
+                });
               }
             })
           })
