@@ -6,7 +6,7 @@ MY_NODE -> value * 10
 {
   MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
 }
-__qvr.func['MY_NODE'] = async (value, key, prev, next) => {
+__qvr.arrows['MY_NODE'] = async (value, key, prev, next) => {
   return value * 10;
 };
 --------------------------------------------------
@@ -33,18 +33,18 @@ MY_NODE -> { num : 10, by: 3 }
   SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
   MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
 }
-__qvr.func['MY_NODE'] = async (value, key, prev, next) => {
+__qvr.arrows['MY_NODE'] = async (value, key, prev, next) => {
   return { num: 10, by: 3 };
 };
-__qvr.func['ADD'] = async (value, key, prev, next) => {
+__qvr.arrows['ADD'] = async (value, key, prev, next) => {
   const { num, by } = value;
   return num + value;
 };
-__qvr.func['SUB'] = async (value, key, prev, next) => {
+__qvr.arrows['SUB'] = async (value, key, prev, next) => {
   const { num, by } = value;
   return num - by;
 };
-__qvr.func['MULT'] = async (value, key, prev, next) => {
+__qvr.arrows['MULT'] = async (value, key, prev, next) => {
   const { num, by } = value;
   return num * by;
 };

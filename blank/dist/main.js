@@ -7,27 +7,28 @@ quiv.setNodes({"TEST":{"key":"TEST","next":[],"prev":null,"level":0,"type":"root
  write code below
 */
 
-quiv.func["TEST"] = async (value, key, prev, next) => {
+quiv.arrows["TEST"] = async (value, key, prev, next) => {
 const { root } = quiv.test()
 
 root('BEFORE_START')
-.input(4)
+.input(3)
 .leaf('END')
 .output(10)
 .should('Do math stuff')
 
 }
-quiv.func["BEFORE_START"] = async (value, key, prev, next) => {
-if(!(typeof value === 'number' && value <= 10 && value >= 3)) return void 0
-return value
+quiv.arrows["BEFORE_START"] = async (value, key, prev, next) => {
+return value === void 0 ?
+void 0 : !(typeof value === 'number' && value <= 10 && value >= 3) ?
+void 0 : value
 }
-quiv.func["START"] = async (value, key, prev, next) => {
+quiv.arrows["START"] = async (value, key, prev, next) => {
 return value + 1
 }
-quiv.func["MID"] = async (value, key, prev, next) => {
+quiv.arrows["MID"] = async (value, key, prev, next) => {
 return value + 5
 }
-quiv.func["END"] = async (value, key, prev, next) => {
+quiv.arrows["END"] = async (value, key, prev, next) => {
 return value * 2
 };
 export default (value) => {

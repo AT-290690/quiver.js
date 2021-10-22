@@ -12,7 +12,7 @@ GAME_OF_LIFE ->
 			{ row, col, gameObjects, context } := value
 				for (let y = 0; y < row; y++) {
 						for (let x = 0; x < col; x++) {
-								gameObjects.push(await quiv.func["CREATE_CELL"]({ x, y }))
+								gameObjects.push(await quiv.arrows["CREATE_CELL"]({ x, y }))
 						}
 				}
 				<- value
@@ -24,7 +24,7 @@ GAME_OF_LIFE ->
 					for (let y = 0; y < row; y++) {
 
 							// Count the nearby population
-							numAlive := await quiv.func["IS_ALIVE"]({ x, y, col, row, gameObjects })
+							numAlive := await quiv.arrows["IS_ALIVE"]({ x, y, col, row, gameObjects })
 							centerIndex := x + (y * col)
 
 							if (numAlive === 2) {

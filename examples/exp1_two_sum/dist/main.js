@@ -7,7 +7,7 @@ Solving two sum problem
 and demonstrating graph testing
 */
 
-quiv.func["TEST"] = async (value, key, prev, next) => {
+quiv.arrows["TEST"] = async (value, key, prev, next) => {
 const { root, e2e } = quiv.test();
 
 quiv.log(await quiv.go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
@@ -54,7 +54,7 @@ and demonstrating graph testing`, EXIT: "Program has stopped!" })
 .should("E2E - Return the correct outputs")
 
 }
-quiv.func["TWO_SUM"] = async (value, key, prev, next) => {
+quiv.arrows["TWO_SUM"] = async (value, key, prev, next) => {
 const { nums, target } = value
 /*
 Iterate the numbers and store diff from
@@ -67,7 +67,7 @@ return acc
 }, {}) }
 
 }
-quiv.func["OUT"] = async (value, key, prev, next) => {
+quiv.arrows["OUT"] = async (value, key, prev, next) => {
 const { nums, dict } = value
 /*
 Access dictionary and push indexes in
@@ -82,17 +82,17 @@ dict[key] = index // in case of a duplicate
 return acc
 }, [])
 }
-quiv.func["DESC"] = async (value, key, prev, next) => {
+quiv.arrows["DESC"] = async (value, key, prev, next) => {
 return `Solving two sum problem
 for numbers ${value.nums}
 with target ${value.target}
 and demonstrating graph testing`
 }
-quiv.func["EXIT"] = async (value, key, prev, next) => {
+quiv.arrows["EXIT"] = async (value, key, prev, next) => {
 return "Program has stopped!"
 };
 export default (value) => {
 quiv.setRoot(quiv.nodes["TEST"].key);
-quiv.reset();
+quiv.visited = {};
 quiv.goTo(quiv.root, value);
 }

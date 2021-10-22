@@ -46,7 +46,7 @@ const compileToJs = async () => {
       let startBrace = index !== 0 ? '}\n' : '';
       compiledCode += `${startBrace}${
         settings.namespace
-      }.func["${key}"] = async (value, key, prev, next) => {\n${
+      }.arrows["${key}"] = async (value, key, prev, next) => {\n${
         body ? body + '\n' : ''
       }`;
     } else {

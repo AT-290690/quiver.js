@@ -1,5 +1,5 @@
 export class Quiver {
-  func = {};
+  arrows = {};
   nodes = {};
   current;
   root = null;
@@ -19,7 +19,7 @@ export class Quiver {
         next: [],
         type: 'branch'
       };
-      qvr.func[n] = this.func[n];
+      qvr.arrows[n] = this.arrows[n];
       if (index === 0) {
         Nodes[n].type = 'root';
       } else if (index === array.length - 1) {
@@ -62,8 +62,8 @@ export class Quiver {
     this.current = node;
     if (!node) return;
     let result;
-    if (this.func[node.key]) {
-      result = await this.func[node.key](args, node.key, prev, node.next);
+    if (this.arrows[node.key]) {
+      result = await this.arrows[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
     if (
