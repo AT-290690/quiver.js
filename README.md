@@ -3,7 +3,7 @@
 JavaScript parser for graph based pipe development
 
 ```
-yarn/npm qvr to compile
+yarn/npm quiv to compile
 
 ```
 
