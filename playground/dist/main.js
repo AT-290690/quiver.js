@@ -80,6 +80,6 @@ return quiv.log(value)
 };
 export default (value) => {
 quiv.setRoot(quiv.nodes["MY_NODE"].key);
-quiv.reset();
+quiv.visited = {};
 quiv.goTo(quiv.root, value);
 }
