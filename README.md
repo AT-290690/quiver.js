@@ -3,6 +3,7 @@
 JavaScript parser for graph based pipe development
 
 ```
+yarn/npm quiv to compile
 
 ```
 
