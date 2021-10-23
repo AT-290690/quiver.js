@@ -8,4 +8,4 @@ HELLO ->
 	SPACE -> value + " "
 		WORLD -> value + "World"
 			! -> value + "!"
-				PRINT -> quiv.log(value)
+				PRINT -> ::log(value)

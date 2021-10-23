@@ -17,7 +17,16 @@ const parse = (source, tokens) => {
     tokens[matched] ? tokens[matched] : matched
   );
 };
-
+const parseExpressionDerives = (expression, tokens, arrow) => {
+  let output = expression;
+  if (tokens.includes('!')) {
+    output = `${settings.namespace}.visit("${arrow}");${expression}`;
+  }
+  if (tokens.includes('void')) {
+    output = `void(${output})`;
+  }
+  return output;
+};
 const compileToJs = async () => {
   const mainGraphFile = await readFile(settings.file, 'utf8');
   if (!mainGraphFile.trim()) {
@@ -39,21 +48,27 @@ const compileToJs = async () => {
   let compiledCode = '';
   arrows.forEach((lambda, index) => {
     if (lambda.length === 2) {
-      const key = lambda[0].trim();
-      createTreeMap(treeMap, lambda[0]);
+      const [key, ...tokens] = lambda[0].trim().split(' ');
+      createTreeMap(
+        treeMap,
+        !tokens.length ? lambda[0] : lambda[0].split(tokens[0])[0]
+      );
       const expression = parse(lambda[1]?.trim(), settings.unaryTokens);
-      const body = expression ? 'return ' + expression : '';
+
+      const body = expression
+        ? 'return ' + parseExpressionDerives(expression, tokens, key)
+        : parseExpressionDerives('', tokens, key);
       let startBrace = index !== 0 ? '}\n' : '';
-      compiledCode += `${startBrace}${
-        settings.namespace
-      }.arrows["${key}"] = async (value, key, prev, next) => {\n${
-        body ? body + '\n' : ''
-      }`;
+      compiledCode += `${startBrace}${settings.namespace}.arrows["${key}"] =${
+        tokens.includes('*') ? ' async' : ''
+      } (value, key, prev, next) => {\n${body ? body + '\n' : ''}`;
     } else {
       const body = parse(lambda[0]?.trim(), settings.unaryTokens).split(':=');
+
       if (body?.length > 1) {
         body[0] = 'const ' + body[0] + '=';
       }
+
       compiledCode += body ? body.join('') + '\n' : '';
     }
     if (compiledCode && index === arrows.length - 1) compiledCode += '}';
@@ -77,7 +92,9 @@ export const compile = async (
   settings.mime = mime ?? 'js';
   settings.namespace = namespace;
   settings.unaryTokens = {
-    '<- ': 'return '
+    '<- ': 'return ',
+    '~': ' await ',
+    '::': `${settings.namespace}.`
   };
   const { main, graph } = await compileToJs();
   if (!main) {

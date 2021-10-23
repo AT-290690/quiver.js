@@ -5,13 +5,14 @@
 */
 >>->
 TEST -> 
-	{ root } := quiv.test()
+	{ root } := ::test()
 	
 	root('BEFORE_START')
-	.input(3)
+	.input(4)
 	.leaf('END')
 	.output(10)
 	.should('Do math stuff')
+
 
 BEFORE_START -> 
 	<- value === void 0 ? 

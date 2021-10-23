@@ -1,8 +1,5 @@
 import {
   logBoldMessage,
-  logErrorMessage,
-  logSuccessMessage,
-  logWarningMessage,
   logErrorIndentationLevel,
   logErrorAlreadyExists
 } from './logg.js';

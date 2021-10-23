@@ -1,12 +1,12 @@
-start ->
- traces := [quiv.trace("g","e"), quiv.trace("g","l"), quiv.trace("b","asad")]
- paths := traces.map((t) => quiv.path(t))
- quiv.log(await quiv.goTo("g", 5))
- quiv.log(await paths[0].goTo("g", 5))
+start * ->
+ traces := [::trace("g","e"), ::trace("g","l"),::trace("b","asad")]
+ paths := traces.map((t) => ::path(t))
+ ::log(~ ::go("g")(5))
+ ::log(~ paths[0].go("g")(5))
 
- quiv.log(await paths[0].goTo("g", 25))
- quiv.log(await paths[1].goTo("g", 15))
- quiv.log(await paths[2].goTo("b", 13))
+ ::log(~ paths[0].goTo("g", 25))
+ ::log(~ paths[1].goTo("g", 15))
+ ::log(~ paths[2].goTo("b", 13))
 
 a -> value
 g -> value

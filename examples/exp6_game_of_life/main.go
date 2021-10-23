@@ -2,60 +2,62 @@
 
 GAME_OF_LIFE -> 
    { col, row, width, height } := value
+	 
   // The page has loaded, start the game
 		canvas := document.getElementById('canvas')
 		context := canvas.getContext('2d')
-		gameObjects := []
-		<- { col, row, width, height, canvas, context, gameObjects }
+		cells := []
+		<- { col, row, width, height, canvas, context, cells }
 
 	CREATE_GRID -> 
-			{ row, col, gameObjects, context } := value
+			{ row, col, cells, context } := value
 				for (let y = 0; y < row; y++) {
 						for (let x = 0; x < col; x++) {
-								gameObjects.push(await quiv.arrows["CREATE_CELL"]({ x, y }))
+								cells.push(::arrows["CREATE_CELL"]({ x, y }))
 						}
 				}
 				<- value
 		GAME_LOOP -> value
 			CHECK_SURROUNDINGS ->
-				{ col, row, gameObjects } := value
+				{ col, row, cells } := value
 
 				for (let x = 0; x < col; x++) {
 					for (let y = 0; y < row; y++) {
 
 							// Count the nearby population
-							numAlive := await quiv.arrows["IS_ALIVE"]({ x, y, col, row, gameObjects })
+							numAlive := ::arrows["IS_ALIVE"]({ x, y, col, row, cells })
 							centerIndex := x + (y * col)
 
 							if (numAlive === 2) {
 									// Do nothing
-									gameObjects[centerIndex].nextAlive = gameObjects[centerIndex].alive
+									cells[centerIndex].nextAlive = cells[centerIndex].alive
 							} else if (numAlive === 3) {
 									// Make alive
-									gameObjects[centerIndex].nextAlive = true
+									cells[centerIndex].nextAlive = true
 							} else {
 									// Make dead
-									gameObjects[centerIndex].nextAlive = false
+									cells[centerIndex].nextAlive = false
 							}
 					}
 				}
 
 				// Apply the new state to the cells
-				for (let i = 0; i < gameObjects.length; i++) {
-					gameObjects[i].alive = gameObjects[i].nextAlive
+				for (let i = 0; i < cells.length; i++) {
+					cells[i].alive = cells[i].nextAlive
 				}
 				<- value
 				DRAW -> 
-				{ context, width, height, canvas, gameObjects } := value
+				{ context, width, height, canvas, cells } := value
+				
 				// Clear the screen
 				context.clearRect(0, 0, canvas.width, canvas.height)
-				for (let i = 0; i < gameObjects.length; i++) {
-					{ x, y, alive } := 	gameObjects[i]
+				for (let i = 0; i < cells.length; i++) {
+					{ x, y, alive } := 	cells[i]
 					context.fillStyle = alive ? '#ff8080' : '#303030'
 					context.fillRect(x * width, y * height, width, height)
 				}
 				// The loop function has reached it's end, keep requesting new frames
-				setTimeout(() =>	window.requestAnimationFrame(() => quiv.go("GAME_LOOP")(value)), 150)
+				setTimeout(() =>	window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
 
 CREATE_CELL ->
 { x, y } := value		
@@ -64,7 +66,7 @@ CREATE_CELL ->
 <- { x, y, alive: Math.random() > 0.5 }
 
 IS_ALIVE ->
-	{ x, y, col, row, gameObjects } := value
+	{ x, y, col, row, cells } := value
 	<- [
 			{ xd: -1, yd: -1 },
 			{ xd: 0, yd: -1 },
@@ -76,5 +78,5 @@ IS_ALIVE ->
 		].reduce((result, { xd, yd }) => {
 			X := x + xd
 			Y := y + yd 
-			<- result + ((X < 0 || X >= col || Y < 0 || Y >= row) || !gameObjects[X + (Y * col)].alive ? 0 : 1)
+			<- result + ((X < 0 || X >= col || Y < 0 || Y >= row) || !cells[X + (Y * col)].alive ? 0 : 1)
 		}, 0)

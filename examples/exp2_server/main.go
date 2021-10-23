@@ -3,7 +3,7 @@ const { mkdir, writeFile, access, readFile } = FS.promises
 import URL from "url"
 import http from "http"
 >>->
-SERVER ->
+SERVER * ->
 		init := { 
 		routes: {
 			"/cat": "CAT",
@@ -31,6 +31,7 @@ SERVER ->
 		}
 
 		PORT := 8075
+
 		start := (req, res) => {
 			method := req.method
 			urlParsed := URL.parse(req.url)
@@ -46,19 +47,19 @@ SERVER ->
 			if (method !== "GET" && body) {
 				req.body = body
 			}
-			quiv.restart()
+
 			req.query = query
-		  quiv.go(quiv.getRoot())({ method, req, res, init })
+		  ::go(::getRoot())({ method, req, res, init })
 		})
 	}
 
 		server := http.createServer()
-		server.listen(PORT, () => console.log("http://localhost:" + PORT))
+		server.listen(PORT, () => ::log("http://localhost:" + PORT))
 		server.on("request", start)
 		
-	await access(init.DB_DIR + init.DB_FILE).catch(async () => {
+	~ access(init.DB_DIR + init.DB_FILE).catch(async () => {
 			await mkdir(init.DB_DIR, { recursive: true } )
 			await writeFile(init.DB_DIR + init.DB_FILE,
 	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
 	})
-	quiv.setRoot("REQUEST")
+	::setRoot("REQUEST")

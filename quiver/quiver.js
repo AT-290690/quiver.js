@@ -79,6 +79,29 @@ export class Quiver {
     }
     return out;
   }
+  async goTo(key, args, prev = null, out = {}) {
+    if (this.visited[key]) return;
+    const node = this.nodes[key];
+    this.current = node;
+    if (!node) return;
+    let result;
+    if (this.arrows[node.key]) {
+      result = await this.arrows[node.key](args, node.key, prev, node.next);
+    }
+    if (result === undefined) return;
+    if (
+      node.type === 'leaf' ||
+      (node.type === 'root' && node.next.length === 0)
+    ) {
+      out[key] = result;
+      return result;
+    } else {
+      for (const n of node.next) {
+        await this.goTo(n, result, node.key, out);
+      }
+    }
+    return out;
+  }
 
   tramp(fn) {
     (...args) => {
@@ -173,7 +196,7 @@ export class Quiver {
             should: async desc => {
               await this.goTo(root, inp).then(res =>
                 res === undefined
-                  ? test.fail(desc, expected, res)
+                  ? test.fail(desc, expected, 'Short Circuited')
                   : test.isEqual(res, expected)
                   ? test.success(desc)
                   : test.fail(desc, expected, res)
@@ -190,10 +213,8 @@ export class Quiver {
                 const path = this.trace(root, leaf);
                 const qvr = this.path(path);
                 await qvr.goTo(root, inp).then(res => {
-                  if (res === undefined)
-                    return test.fail(desc, expected, 'Short Circuited');
-                  return res[leaf] === undefined
-                    ? test.fail(desc, expected, res[leaf])
+                  return res === undefined || res[leaf] === undefined
+                    ? test.fail(desc, expected, 'Short Circuited')
                     : test.isEqual(res[leaf], expected)
                     ? test.success(desc)
                     : test.fail(desc, expected, res[leaf]) ??

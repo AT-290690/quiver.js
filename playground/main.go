@@ -6,7 +6,7 @@ MY_NODE -> value * 10
 {
   MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
 }
-__qvr.arrows['MY_NODE'] = async (value, key, prev, next) => {
+__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
   return value * 10;
 };
 --------------------------------------------------
@@ -33,18 +33,18 @@ MY_NODE -> { num : 10, by: 3 }
   SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
   MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
 }
-__qvr.arrows['MY_NODE'] = async (value, key, prev, next) => {
+__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
   return { num: 10, by: 3 };
 };
-__qvr.arrows['ADD'] = async (value, key, prev, next) => {
+__qvr.arrows['ADD'] = * (value, key, prev, next) => {
   const { num, by } = value;
   return num + value;
 };
-__qvr.arrows['SUB'] = async (value, key, prev, next) => {
+__qvr.arrows['SUB'] = * (value, key, prev, next) => {
   const { num, by } = value;
   return num - by;
 };
-__qvr.arrows['MULT'] = async (value, key, prev, next) => {
+__qvr.arrows['MULT'] = * (value, key, prev, next) => {
   const { num, by } = value;
   return num * by;
 };
@@ -53,7 +53,7 @@ Nesting is achieved by indentation
 Nodes with one indentation below another node
 become children (next) of that node 
 Default indentations are tabs (size 2)
-
+:: - quiver methods
 The code bellow does not work as expected.
 It should print Hello World! 
 Can you fix it?
@@ -69,4 +69,4 @@ MY_NODE -> ["Hello"," ", "World", "!"]
 	JOIN -> 
 		[hello, space, world, mark] := value
 		<- hello + space + world + mark
-	PRINT -> quiv.log(value)
+	PRINT -> ::log(value)

@@ -5,35 +5,35 @@ and demonstrating graph testing
 */
 >>->
 TEST -> 
-	{ root, e2e } := quiv.test();
+	{ root, e2e } := ::test();
 
-	quiv.log(await quiv.go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
+	::log(::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
 
-	await root("TWO_SUM")
+	root("TWO_SUM")
 	.input({ nums: [2, 7, 11, 15], target: 9 })
 	.leaf("OUT")
 	.output([0, 1])
 	.should("Return correct sum")
 
-	await root("TWO_SUM")
+	root("TWO_SUM")
 	.input({ nums: [3, 2, 4], target: 6 })
 	.leaf("OUT")
 	.output([1, 2])
 	.should("Return correct sum")
 
-	await root("TWO_SUM")
+	root("TWO_SUM")
 	.input({ nums: [3, 3], target: 6 })
 	.leaf("OUT")
 	.output([0, 1])
 	.should("Return correct sum")
 
-	await root("TWO_SUM")
+	root("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 0 })
 	.leaf("OUT")
 	.output([0, 2])
 	.should("Return correct sum")
 
-	await root("TWO_SUM")
+	root("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 7 })
 	.leaf("DESC")
 	.output(`Solving two sum problem
@@ -42,7 +42,7 @@ TEST ->
 	and demonstrating graph testing`)
 	.should("Should print the correct description")
 
-	await e2e("TWO_SUM")
+	e2e("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 0 })
 	.output({ OUT: [ 0, 2 ],DESC: `Solving two sum problem
 	for numbers ${[-3, 4, 3, 90]}
