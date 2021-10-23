@@ -11,6 +11,9 @@
     "exp3": "node examples/exp3_recursion/main.js",
     "exp4": "node examples/exp4_paths/main.js",
     "exp5": "node examples/exp5_age/main.js",
+    "exp6": "live-server .",
+    "exp7": "node examples/exp7_last_arrow_rec/main.js",
+    "exp8": "node examples/exp8_last_go_rec/main.js",
     "quiv": "node index.js"
   },
   "type": "module",

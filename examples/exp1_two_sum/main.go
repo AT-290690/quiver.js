@@ -5,10 +5,8 @@ and demonstrating graph testing
 */
 >>->
 TEST -> 
-	{ root, e2e } := ::test();
-
-	::log(::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
-
+	{ root, e2e } := ::test
+	
 	root("TWO_SUM")
 	.input({ nums: [2, 7, 11, 15], target: 9 })
 	.leaf("OUT")
@@ -50,8 +48,9 @@ TEST ->
 	and demonstrating graph testing`, EXIT: "Program has stopped!" })
 	.should("E2E - Return the correct outputs")
 
-TWO_SUM ->
-	{ nums, target } := value
+	::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => ::log(res))
+
+TWO_SUM :: { nums, target } ->
 	/*
 		Iterate the numbers and store diff from
 		target as key of the dictionary
@@ -62,8 +61,7 @@ TWO_SUM ->
 		<- acc
 	}, {}) }
 
-	OUT -> 
-	{ nums, dict } := value
+	OUT :: { nums, dict } -> 
 	/*
 		Access dictionary and push indexes in 
 		output array

@@ -8,9 +8,7 @@ and demonstrating graph testing
 */
 
 quiv.arrows["TEST"] = (value, key, prev, next) => {
-const { root, e2e } = quiv.test();
-
-quiv.log(quiv.go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }))
+const { root, e2e } = quiv.test
 
 root("TWO_SUM")
 .input({ nums: [2, 7, 11, 15], target: 9 })
@@ -53,9 +51,12 @@ with target ${0}
 and demonstrating graph testing`, EXIT: "Program has stopped!" })
 .should("E2E - Return the correct outputs")
 
+quiv.go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => quiv.log(res))
+
 }
 quiv.arrows["TWO_SUM"] = (value, key, prev, next) => {
-const { nums, target } = value
+const {nums,target} = value;
+
 /*
 Iterate the numbers and store diff from
 target as key of the dictionary
@@ -68,7 +69,8 @@ return acc
 
 }
 quiv.arrows["OUT"] = (value, key, prev, next) => {
-const { nums, dict } = value
+const {nums,dict} = value;
+
 /*
 Access dictionary and push indexes in
 output array

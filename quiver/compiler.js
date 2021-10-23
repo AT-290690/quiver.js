@@ -17,13 +17,30 @@ const parse = (source, tokens) => {
     tokens[matched] ? tokens[matched] : matched
   );
 };
-const parseExpressionDerives = (expression, tokens, arrow) => {
+const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   let output = expression;
+  const index = dirtyTokens.findIndex(dt => dt === '::');
+  const tokens = dirtyTokens.slice(0, index);
+  const params = dirtyTokens.slice(index);
   if (tokens.includes('!')) {
-    output = `${settings.namespace}.visit("${arrow}");${expression}`;
+    output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
   }
   if (tokens.includes('void')) {
     output = `void(${output})`;
+  }
+  if (params.find(t => t.includes('{'))) {
+    const vars = params.join(' ').trim().split('{')[1].split('}')[0].split(',');
+    output = `const {${vars
+      .map(x => x.trim())
+      .filter(Boolean)
+      .join(',')}} = value;\n${output}`;
+  }
+  if (params.find(t => t.includes('['))) {
+    const vars = params.join(' ').trim().split('[')[1].split(']')[0].split(',');
+    output = `const [${vars
+      .map(x => x.trim())
+      .filter(Boolean)
+      .join(',')}] = value;\n${output}`;
   }
   return output;
 };

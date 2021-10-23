@@ -149,83 +149,80 @@ export class Quiver {
     console.log(...msg);
   }
 
-  test() {
-    const test = {
-      fail: (desc, a, b) => {
-        console.log(
-          '\x1b[31m',
-          `FAIL: ${desc}`,
-          '\x1b[32m',
-          `\n\tExpected: ${typeof a === 'object' ? JSON.stringify(a) : a}`,
-          '\x1b[31m',
-          `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
-          '\x1b[0m'
-        );
-      },
-      success: desc => {
-        console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
-      },
-      isEqual: (a, b) => {
-        const typeA = typeof a,
-          typeB = typeof b;
-        if (typeA !== typeB) return false;
-        if (typeA === 'number' || typeA === 'string' || typeA === 'boolean') {
-          return a === b;
-        }
-        if (typeA === 'object') {
-          const isArrayA = Array.isArray(a),
-            isArrayB = Array.isArray(b);
-          if (isArrayA !== isArrayB) return false;
-          if (isArrayA && isArrayB) {
-            if (a.length !== b.length) return false;
-            return a.every((item, index) => test.isEqual(item, b[index]));
-          } else {
-            if (Object.keys(a).length !== Object.keys(b).length) return false;
-            for (const key in a) {
-              if (!test.isEqual(a[key], b[key])) {
-                return false;
-              }
+  test = {
+    fail: (desc, a, b) => {
+      console.log(
+        '\x1b[31m',
+        `FAIL: ${desc}`,
+        '\x1b[32m',
+        `\n\tExpected: ${typeof a === 'object' ? JSON.stringify(a) : a}`,
+        '\x1b[31m',
+        `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
+        '\x1b[0m'
+      );
+    },
+    success: desc => {
+      console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
+    },
+    isEqual: (a, b) => {
+      const typeA = typeof a,
+        typeB = typeof b;
+      if (typeA !== typeB) return false;
+      if (typeA === 'number' || typeA === 'string' || typeA === 'boolean') {
+        return a === b;
+      }
+      if (typeA === 'object') {
+        const isArrayA = Array.isArray(a),
+          isArrayB = Array.isArray(b);
+        if (isArrayA !== isArrayB) return false;
+        if (isArrayA && isArrayB) {
+          if (a.length !== b.length) return false;
+          return a.every((item, index) => this.test.isEqual(item, b[index]));
+        } else {
+          if (Object.keys(a).length !== Object.keys(b).length) return false;
+          for (const key in a) {
+            if (!this.test.isEqual(a[key], b[key])) {
+              return false;
             }
-            return true;
           }
+          return true;
         }
-      },
-      e2e: root => ({
-        input: inp => ({
+      }
+    },
+    e2e: root => ({
+      input: inp => ({
+        output: expected => ({
+          should: async desc => {
+            await this.goTo(root, inp).then(res =>
+              res === undefined
+                ? this.test.fail(desc, expected, 'Short Circuited')
+                : this.test.isEqual(res, expected)
+                ? this.test.success(desc)
+                : this.test.fail(desc, expected, res)
+            );
+          }
+        })
+      })
+    }),
+    root: root => ({
+      input: inp => ({
+        leaf: leaf => ({
           output: expected => ({
             should: async desc => {
-              await this.goTo(root, inp).then(res =>
-                res === undefined
-                  ? test.fail(desc, expected, 'Short Circuited')
-                  : test.isEqual(res, expected)
-                  ? test.success(desc)
-                  : test.fail(desc, expected, res)
-              );
+              const path = this.trace(root, leaf);
+              const qvr = this.path(path);
+              await qvr.goTo(root, inp).then(res => {
+                return res === undefined || res[leaf] === undefined
+                  ? this.test.fail(desc, expected, 'Short Circuited')
+                  : this.test.isEqual(res[leaf], expected)
+                  ? this.test.success(desc)
+                  : this.test.fail(desc, expected, res[leaf]) ??
+                    console.log(`\t${path.map(n => `[${n}]`).join('->')}`);
+              });
             }
-          })
-        })
-      }),
-      root: root => ({
-        input: inp => ({
-          leaf: leaf => ({
-            output: expected => ({
-              should: async desc => {
-                const path = this.trace(root, leaf);
-                const qvr = this.path(path);
-                await qvr.goTo(root, inp).then(res => {
-                  return res === undefined || res[leaf] === undefined
-                    ? test.fail(desc, expected, 'Short Circuited')
-                    : test.isEqual(res[leaf], expected)
-                    ? test.success(desc)
-                    : test.fail(desc, expected, res[leaf]) ??
-                      console.log(`\t${path.map(n => `[${n}]`).join('->')}`);
-                });
-              }
-            })
           })
         })
       })
-    };
-    return test;
-  }
+    })
+  };
 }

@@ -3,20 +3,21 @@ const quiv = new Quiver();
 quiv.setNodes({"GAME_OF_LIFE":{"key":"GAME_OF_LIFE","next":["CREATE_GRID"],"prev":null,"level":0,"type":"root"},"CREATE_GRID":{"key":"CREATE_GRID","next":["GAME_LOOP"],"prev":"GAME_OF_LIFE","level":1,"type":"branch"},"GAME_LOOP":{"key":"GAME_LOOP","next":["CHECK_SURROUNDINGS"],"prev":"CREATE_GRID","level":2,"type":"branch"},"CHECK_SURROUNDINGS":{"key":"CHECK_SURROUNDINGS","next":["DRAW"],"prev":"GAME_LOOP","level":3,"type":"branch"},"DRAW":{"key":"DRAW","next":[],"prev":"CHECK_SURROUNDINGS","level":4,"type":"leaf"},"CREATE_CELL":{"key":"CREATE_CELL","next":[],"prev":null,"level":0,"type":"root"},"IS_ALIVE":{"key":"IS_ALIVE","next":[],"prev":null,"level":0,"type":"root"}});
 
 quiv.arrows["GAME_OF_LIFE"] = (value, key, prev, next) => {
-const { col, row, width, height } = value
+const {col,row,width,height} = value;
 
 // The page has loaded, start the game
 const canvas = document.getElementById('canvas')
 const context = canvas.getContext('2d')
-const gameObjects = []
-return { col, row, width, height, canvas, context, gameObjects }
+const cells = []
+return { col, row, width, height, canvas, context, cells }
 
 }
 quiv.arrows["CREATE_GRID"] = (value, key, prev, next) => {
-const { row, col, gameObjects, context } = value
+const {row,col,cells,context} = value;
+
 for (let y = 0; y < row; y++) {
 for (let x = 0; x < col; x++) {
-gameObjects.push(quiv.arrows["CREATE_CELL"]({ x, y }))
+cells.push(quiv.arrows["CREATE_CELL"]({ x, y }))
 }
 }
 return value
@@ -25,41 +26,41 @@ quiv.arrows["GAME_LOOP"] = (value, key, prev, next) => {
 return value
 }
 quiv.arrows["CHECK_SURROUNDINGS"] = (value, key, prev, next) => {
-const { col, row, gameObjects } = value
+const {col,row,cells} = value;
 
 for (let x = 0; x < col; x++) {
 for (let y = 0; y < row; y++) {
 
 // Count the nearby population
-const numAlive = quiv.arrows["IS_ALIVE"]({ x, y, col, row, gameObjects })
+const numAlive = quiv.arrows["IS_ALIVE"]({ x, y, col, row, cells })
 const centerIndex = x + (y * col)
 
 if (numAlive === 2) {
 // Do nothing
-gameObjects[centerIndex].nextAlive = gameObjects[centerIndex].alive
+cells[centerIndex].nextAlive = cells[centerIndex].alive
 } else if (numAlive === 3) {
 // Make alive
-gameObjects[centerIndex].nextAlive = true
+cells[centerIndex].nextAlive = true
 } else {
 // Make dead
-gameObjects[centerIndex].nextAlive = false
+cells[centerIndex].nextAlive = false
 }
 }
 }
 
 // Apply the new state to the cells
-for (let i = 0; i < gameObjects.length; i++) {
-gameObjects[i].alive = gameObjects[i].nextAlive
+for (let i = 0; i < cells.length; i++) {
+cells[i].alive = cells[i].nextAlive
 }
 return value
 }
 quiv.arrows["DRAW"] = (value, key, prev, next) => {
-const { context, width, height, canvas, gameObjects } = value
+const {context,width,height,canvas,cells} = value;
 
 // Clear the screen
 context.clearRect(0, 0, canvas.width, canvas.height)
-for (let i = 0; i < gameObjects.length; i++) {
-const { x, y, alive } = 	gameObjects[i]
+for (let i = 0; i < cells.length; i++) {
+const { x, y, alive } = 	cells[i]
 context.fillStyle = alive ? '#ff8080' : '#303030'
 context.fillRect(x * width, y * height, width, height)
 }
@@ -68,14 +69,16 @@ setTimeout(() =>	window.requestAnimationFrame(() => quiv.go("GAME_LOOP")(value))
 
 }
 quiv.arrows["CREATE_CELL"] = (value, key, prev, next) => {
-const { x, y } = value
+const {x,y} = value;
+
 // Store the position of this cell in the grid
 // Make random cells alive
 return { x, y, alive: Math.random() > 0.5 }
 
 }
 quiv.arrows["IS_ALIVE"] = (value, key, prev, next) => {
-const { x, y, col, row, gameObjects } = value
+const {x,y,col,row,cells} = value;
+
 return [
 { xd: -1, yd: -1 },
 { xd: 0, yd: -1 },
@@ -87,7 +90,7 @@ return [
 ].reduce((result, { xd, yd }) => {
 const X = x + xd
 const Y = y + yd
-return result + ((X < 0 || X >= col || Y < 0 || Y >= row) || !gameObjects[X + (Y * col)].alive ? 0 : 1)
+return result + ((X < 0 || X >= col || Y < 0 || Y >= row) || !cells[X + (Y * col)].alive ? 0 : 1)
 }, 0)
 };
 export default (value) => {

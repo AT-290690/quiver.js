@@ -1,16 +1,13 @@
 
 
-GAME_OF_LIFE -> 
-   { col, row, width, height } := value
-	 
+GAME_OF_LIFE :: { col, row, width, height } -> 
   // The page has loaded, start the game
 		canvas := document.getElementById('canvas')
 		context := canvas.getContext('2d')
 		cells := []
 		<- { col, row, width, height, canvas, context, cells }
 
-	CREATE_GRID -> 
-			{ row, col, cells, context } := value
+	CREATE_GRID :: { row, col, cells, context } -> 
 				for (let y = 0; y < row; y++) {
 						for (let x = 0; x < col; x++) {
 								cells.push(::arrows["CREATE_CELL"]({ x, y }))
@@ -18,9 +15,7 @@ GAME_OF_LIFE ->
 				}
 				<- value
 		GAME_LOOP -> value
-			CHECK_SURROUNDINGS ->
-				{ col, row, cells } := value
-
+			CHECK_SURROUNDINGS :: { col, row, cells } ->
 				for (let x = 0; x < col; x++) {
 					for (let y = 0; y < row; y++) {
 
@@ -46,9 +41,7 @@ GAME_OF_LIFE ->
 					cells[i].alive = cells[i].nextAlive
 				}
 				<- value
-				DRAW -> 
-				{ context, width, height, canvas, cells } := value
-				
+				DRAW :: { context, width, height, canvas, cells } -> 				
 				// Clear the screen
 				context.clearRect(0, 0, canvas.width, canvas.height)
 				for (let i = 0; i < cells.length; i++) {
@@ -59,14 +52,12 @@ GAME_OF_LIFE ->
 				// The loop function has reached it's end, keep requesting new frames
 				setTimeout(() =>	window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
 
-CREATE_CELL ->
-{ x, y } := value		
+CREATE_CELL :: { x, y } ->
 // Store the position of this cell in the grid
 // Make random cells alive
 <- { x, y, alive: Math.random() > 0.5 }
 
-IS_ALIVE ->
-	{ x, y, col, row, cells } := value
+IS_ALIVE :: { x, y, col, row, cells } ->
 	<- [
 			{ xd: -1, yd: -1 },
 			{ xd: 0, yd: -1 },

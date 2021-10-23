@@ -13,7 +13,8 @@ quiv.arrows["RECURSION"] = (value, key, prev, next) => {
 return { ...value, count: !value.count ? 0 : value.count }
 }
 quiv.arrows["ADD_TIMES"] = async (value, key, prev, next) => {
-const { number, n, val, count } = value
+const {number,n,val,count} = value;
+
 return n > value.count ?
 (  await  quiv.go("RECURSION")
 ({ number: number * val, count: ++value.count, val, n }))
