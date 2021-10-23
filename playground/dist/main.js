@@ -68,13 +68,16 @@ npm/yarn start to run code
 
 // A separator between js and quiver code
 
+quiv.tokens["MY_NODE"] = []
 quiv.arrows["MY_NODE"] = (value, key, prev, next) => {
 return ["Hello"," ", "World", "!"]
 }
+quiv.tokens["JOIN"] = ["::","[hello","space","world","mark]"]
 quiv.arrows["JOIN"] = (value, key, prev, next) => {
 const [hello,space,world,mark] = value;
 return hello + space + world + mark
 }
+quiv.tokens["PRINT"] = []
 quiv.arrows["PRINT"] = (value, key, prev, next) => {
 return quiv.log(value)
 };
