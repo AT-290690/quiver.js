@@ -33,7 +33,7 @@ TEST ->
 
 	root("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 7 })
-	.leaf("DESC")
+	.leaf("DESCRIPTION")
 	.output(`Solving two sum problem
 	for numbers ${[-3, 4, 3, 90]} 
 	with target ${7}
@@ -42,7 +42,7 @@ TEST ->
 
 	e2e("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 0 })
-	.output({ OUT: [ 0, 2 ],DESC: `Solving two sum problem
+	.output({ OUT: [ 0, 2 ], DESCRIPTION: `Solving two sum problem
 	for numbers ${[-3, 4, 3, 90]}
 	with target ${0}
 	and demonstrating graph testing`, EXIT: "Program has stopped!" })
@@ -50,23 +50,17 @@ TEST ->
 
 	::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => ::log(res))
 
-TWO_SUM :: { nums, target } ->
-	/*
-		Iterate the numbers and store diff from
-		target as key of the dictionary
-	*/
-	<- { nums, target, dict: nums.reduce((acc, item, index) => {
-		key := target - nums[index]
-		acc[key] = index
-		<- acc
-	}, {}) }
+TWO_SUM :: { nums, target } -> { 
+			nums, 
+			target, 
+			dict: nums.reduce((acc, item, index) => {
+			key := target - nums[index]
+			acc[key] = index
+			<- acc
+		}, {}) 
+	}
 
-	OUT :: { nums, dict } -> 
-	/*
-		Access dictionary and push indexes in 
-		output array
-	*/
-	<- nums.reduce((acc, item, index) => {
+	OUT :: { nums, dict } -> nums.reduce((acc, item, index) => {
 		key := nums[index]
 		if (dict[key] !== undefined && dict[key] !== index) {
 			acc.push(index)
@@ -74,8 +68,11 @@ TWO_SUM :: { nums, target } ->
 		}
 		<- acc
 	}, [])
-	DESC -> `Solving two sum problem
-	for numbers ${value.nums} 
-	with target ${value.target}
+
+	DESCRIPTION :: { nums, target } -> 
+	<- `Solving two sum problem
+	for numbers ${nums} 
+	with target ${target}
 	and demonstrating graph testing`
+	
 	EXIT -> "Program has stopped!"

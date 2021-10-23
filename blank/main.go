@@ -4,4 +4,6 @@
  write code below
 */
 >>->
-HELLO -> ::log("HELLO WORLD")
+MAIN -> { name: 'Quiver' }
+	HELLO :: { name } -> `Hello world, this program is written in ${name}`
+		LOG -> ::log(value)

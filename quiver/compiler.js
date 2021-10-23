@@ -25,9 +25,6 @@ const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   if (tokens.includes('!')) {
     output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
   }
-  if (tokens.includes('void')) {
-    output = `void(${output})`;
-  }
   if (params.find(t => t.includes('{'))) {
     const vars = params.join(' ').trim().split('{')[1].split('}')[0].split(',');
     output = `const {${vars
@@ -73,7 +70,7 @@ const compileToJs = async () => {
       const expression = parse(lambda[1]?.trim(), settings.unaryTokens);
 
       const body = expression
-        ? 'return ' + parseExpressionDerives(expression, tokens, key)
+        ? parseExpressionDerives('return ' + expression, tokens, key)
         : parseExpressionDerives('', tokens, key);
       let startBrace = index !== 0 ? '}\n' : '';
       compiledCode += `${startBrace}${settings.namespace}.arrows["${key}"] =${

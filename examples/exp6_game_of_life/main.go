@@ -52,13 +52,10 @@ GAME_OF_LIFE :: { col, row, width, height } ->
 				// The loop function has reached it's end, keep requesting new frames
 				setTimeout(() =>	window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
 
-CREATE_CELL :: { x, y } ->
-// Store the position of this cell in the grid
-// Make random cells alive
-<- { x, y, alive: Math.random() > 0.5 }
 
-IS_ALIVE :: { x, y, col, row, cells } ->
-	<- [
+CREATE_CELL :: { x, y } -> { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
+
+IS_ALIVE :: { x, y, col, row, cells } -> [
 			{ xd: -1, yd: -1 },
 			{ xd: 0, yd: -1 },
 			{ xd: -1, yd: 0 },

@@ -2,8 +2,7 @@ START * ->
 	result := ~ ::go("LAST")([1, 2, 3])
 	::log(result["REC"])
 
-LAST :: [ first, ...rest ] ->
-	<- { first, rest }
+LAST :: [ first, ...rest ] -> { first, rest }
 	NULL :: { first } -> 
 		if (first === undefined) <- null
 	ONE :: { first, rest } -> 

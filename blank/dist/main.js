@@ -1,25 +1,24 @@
 import { Quiver } from '../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({"START":{"key":"START","next":[],"prev":null,"level":0,"type":"root"},"LAST":{"key":"LAST","next":[],"prev":null,"level":0,"type":"root"}});
+quiv.setNodes({"MAIN":{"key":"MAIN","next":["HELLO"],"prev":null,"level":0,"type":"root"},"HELLO":{"key":"HELLO","next":["LOG"],"prev":"MAIN","level":1,"type":"branch"},"LOG":{"key":"LOG","next":[],"prev":"HELLO","level":2,"type":"leaf"}});
 /*
- yarn qvr - to compile
+ yarn quiv - to compile
  node ./blank/dist/main.js - to start
  write code below
 */
 
-quiv.arrows["START"] = async (value, key, prev, next) => {
-const result =  await  quiv.go("LAST")([])
-quiv.log(result)
-
+quiv.arrows["MAIN"] = (value, key, prev, next) => {
+return { name: 'Quiver' }
 }
-quiv.arrows["LAST"] = (value, key, prev, next) => {
-const [first, ...rest] = value
-if (quiv.test.isEqual(value, [])) return null
-if (quiv.test.isEqual(rest, [])) return first
-return quiv.arrows["LAST"](rest)
+quiv.arrows["HELLO"] = (value, key, prev, next) => {
+const {name} = value;
+return `Hello world, this program is written in ${name}`
+}
+quiv.arrows["LOG"] = (value, key, prev, next) => {
+return quiv.log(value)
 };
 export default (value) => {
-quiv.setRoot(quiv.nodes["START"].key);
+quiv.setRoot(quiv.nodes["MAIN"].key);
 quiv.visited = {};
 quiv.goTo(quiv.root, value);
 }

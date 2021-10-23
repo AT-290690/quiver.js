@@ -67,18 +67,15 @@ context.fillRect(x * width, y * height, width, height)
 // The loop function has reached it's end, keep requesting new frames
 setTimeout(() =>	window.requestAnimationFrame(() => quiv.go("GAME_LOOP")(value)), 150)
 
+
 }
 quiv.arrows["CREATE_CELL"] = (value, key, prev, next) => {
 const {x,y} = value;
-
-// Store the position of this cell in the grid
-// Make random cells alive
-return { x, y, alive: Math.random() > 0.5 }
+return { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
 
 }
 quiv.arrows["IS_ALIVE"] = (value, key, prev, next) => {
 const {x,y,col,row,cells} = value;
-
 return [
 { xd: -1, yd: -1 },
 { xd: 0, yd: -1 },

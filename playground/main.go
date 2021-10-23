@@ -4,10 +4,10 @@ Tutorial:
 MY_NODE -> value * 10
 -----------------compiles to----------------------
 {
-  MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
+	MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
 }
 __qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
-  return value * 10;
+	return value * 10;
 };
 --------------------------------------------------
 MY_NODE -> { num : 10, by: 3 }
@@ -22,31 +22,31 @@ MY_NODE -> { num : 10, by: 3 }
 		<- num * by
 -----------------compiles to----------------------
 {
-  MY_NODE: {
-    key: 'MY_NODE',
-    next: ['ADD', 'SUB', 'MULT'],
-    prev: null,
-    level: 0,
-    type: 'root'
-  },
-  ADD: { key: 'ADD', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
-  SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
-  MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
+	MY_NODE: {
+		key: 'MY_NODE',
+		next: ['ADD', 'SUB', 'MULT'],
+		prev: null,
+		level: 0,
+		type: 'root'
+	},
+	ADD: { key: 'ADD', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
+	SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
+	MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
 }
 __qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
-  return { num: 10, by: 3 };
+	return { num: 10, by: 3 };
 };
 __qvr.arrows['ADD'] = * (value, key, prev, next) => {
-  const { num, by } = value;
-  return num + value;
+	const { num, by } = value;
+	return num + value;
 };
 __qvr.arrows['SUB'] = * (value, key, prev, next) => {
-  const { num, by } = value;
-  return num - by;
+	const { num, by } = value;
+	return num - by;
 };
 __qvr.arrows['MULT'] = * (value, key, prev, next) => {
-  const { num, by } = value;
-  return num * by;
+	const { num, by } = value;
+	return num * by;
 };
 --------------------------------------------------
 Nesting is achieved by indentation
@@ -66,7 +66,5 @@ npm/yarn start to run code
 // A separator between js and quiver code
 >>->
 MY_NODE -> ["Hello"," ", "World", "!"]
-	JOIN -> 
-		[hello, space, world, mark] := value
-		<- hello + space + world + mark
+	JOIN :: [hello, space, world, mark] -> hello + space + world + mark
 	PRINT -> ::log(value)
