@@ -14,6 +14,7 @@
     "exp6": "live-server .",
     "exp7": "node examples/exp7_last_arrow_rec/main.js",
     "exp8": "node examples/exp8_last_go_rec/main.js",
+    "exp9": "node examples/exp9_doc_based/main.js",
     "quiv": "node index.js"
   },
   "type": "module",

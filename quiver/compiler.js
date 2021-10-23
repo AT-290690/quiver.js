@@ -20,8 +20,9 @@ const parse = (source, tokens) => {
 const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   let output = expression;
   const index = dirtyTokens.findIndex(dt => dt === '::');
-  const tokens = dirtyTokens.slice(0, index);
   const params = dirtyTokens.slice(index);
+  const tokens = index === -1 ? params : dirtyTokens.slice(0, index);
+
   if (tokens.includes('!')) {
     output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
   }
@@ -73,7 +74,11 @@ const compileToJs = async () => {
         ? parseExpressionDerives('return ' + expression, tokens, key)
         : parseExpressionDerives('', tokens, key);
       let startBrace = index !== 0 ? '}\n' : '';
-      compiledCode += `${startBrace}${settings.namespace}.arrows["${key}"] =${
+      compiledCode += `${startBrace}${
+        settings.namespace
+      }.tokens["${key}"] = ${JSON.stringify(
+        tokens.map(t => t.split(',')[0])
+      )}\n${settings.namespace}.arrows["${key}"] =${
         tokens.includes('*') ? ' async' : ''
       } (value, key, prev, next) => {\n${body ? body + '\n' : ''}`;
     } else {

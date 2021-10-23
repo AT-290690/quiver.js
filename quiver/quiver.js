@@ -4,6 +4,7 @@ export class Quiver {
   current;
   root = null;
   visited = {};
+  tokens = {};
 
   setNodes(nodes) {
     this.nodes = Object.freeze(nodes);
