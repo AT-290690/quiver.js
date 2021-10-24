@@ -5,7 +5,7 @@ and demonstrating graph testing
 */
 >>->
 TEST -> 
-	{ root, e2e } := ::test
+	{ root, tree } := ::test
 	
 	root("TWO_SUM")
 	.input({ nums: [2, 7, 11, 15], target: 9 })
@@ -40,7 +40,7 @@ TEST ->
 	and demonstrating graph testing`)
 	.should("Should print the correct description")
 
-	e2e("TWO_SUM")
+	tree("TWO_SUM")
 	.input({ nums: [-3, 4, 3, 90], target: 0 })
 	.output({ OUT: [ 0, 2 ], DESCRIPTION: `Solving two sum problem
 	for numbers ${[-3, 4, 3, 90]}

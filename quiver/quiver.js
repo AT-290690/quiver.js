@@ -161,9 +161,11 @@ export class Quiver {
         `\n\tRecieved: ${typeof b === 'object' ? JSON.stringify(b) : b}`,
         '\x1b[0m'
       );
+      return false;
     },
     success: desc => {
       console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
+      return true;
     },
     isEqual: (a, b) => {
       const typeA = typeof a,
@@ -190,17 +192,16 @@ export class Quiver {
         }
       }
     },
-    e2e: root => ({
+    tree: root => ({
       input: inp => ({
         output: expected => ({
           should: async desc => {
-            await this.goTo(root, inp).then(res =>
-              res === undefined
-                ? this.test.fail(desc, expected, 'Short Circuited')
-                : this.test.isEqual(res, expected)
-                ? this.test.success(desc)
-                : this.test.fail(desc, expected, res)
-            );
+            const res = await this.goTo(root, inp);
+            return res === undefined
+              ? this.test.fail(desc, expected, 'Short Circuited')
+              : this.test.isEqual(res, expected)
+              ? this.test.success(desc)
+              : this.test.fail(desc, expected, res);
           }
         })
       })
@@ -212,14 +213,21 @@ export class Quiver {
             should: async desc => {
               const path = this.trace(root, leaf);
               const qvr = this.path(path);
-              await qvr.goTo(root, inp).then(res => {
-                return res === undefined || res[leaf] === undefined
+              const res = await qvr.goTo(root, inp);
+
+              const output =
+                res === undefined || res[leaf] === undefined
                   ? this.test.fail(desc, expected, 'Short Circuited')
                   : this.test.isEqual(res[leaf], expected)
                   ? this.test.success(desc)
-                  : this.test.fail(desc, expected, res[leaf]) ??
-                    console.log(`\t${path.map(n => `[${n}]`).join('->')}`);
-              });
+                  : this.test.fail(desc, expected, res[leaf]);
+              if (!output)
+                console.log(
+                  '\x1b[2m',
+                  `\t${path.map(n => `[${n}]`).join('->')}`,
+                  '\x1b[0m'
+                );
+              return output;
             }
           })
         })
