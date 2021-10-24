@@ -21,8 +21,6 @@ return data
 }
 }
 }),
-toJSON: (json,...args) => JSON.parse(json,...args),
-toString: (json,...args) => JSON.stringify(json,...args),
 tryCatch: (trier, catcher) => {
 let output
 try { output = trier() } catch(err){
@@ -38,11 +36,11 @@ NOT_EXIST: 404
 return quiv.go("TEST")({ SETTINGS })
 };
 
-quiv.tokens["AGE[PARAMS]"] = ["::","{","res","body","end","toJSON","CODES","}"]
+quiv.tokens["AGE[PARAMS]"] = ["::","{","res","body","end","CODES","}"]
 quiv.arrows["AGE[PARAMS]"] = (value, key, prev, next) => {
-const {res,body,end,toJSON,CODES} = value;
+const {res,body,end,CODES} = value;
 
-const data = toJSON(body)
+const data = JSON.parse(body)
 if (!data) return void (end(res).status(CODES.INVALID).send({ message: "No data provided"}))
 const date = new Date(data.date)
 if (!(date.getTime() === date.getTime())) return void(end(res).status(CODES.INVALID).send({ message: "Invalid date!"}))

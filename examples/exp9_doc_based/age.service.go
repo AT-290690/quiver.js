@@ -1,5 +1,5 @@
-AGE[PARAMS] :: { res, body, end, toJSON, CODES } -> 
-	data := toJSON(body) 
+AGE[PARAMS] :: { res, body, end, CODES } -> 
+	data := JSON.parse(body) 
 	if (!data) <- void (end(res).status(CODES.INVALID).send({ message: "No data provided"}))
 	date := new Date(data.date) 
 	if (!(date.getTime() === date.getTime())) <- void(end(res).status(CODES.INVALID).send({ message: "Invalid date!"}))

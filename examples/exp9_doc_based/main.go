@@ -17,8 +17,6 @@ SETTINGS := {
 				}
 			}
 	}),
-	toJSON: (json,...args) => JSON.parse(json,...args),
-	toString: (json,...args) => JSON.stringify(json,...args),
 	tryCatch: (trier, catcher) => {
 		let output
 		try { output = trier() } catch(err){ 
