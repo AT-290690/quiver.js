@@ -12,13 +12,13 @@ REQUEST :: { method, req, res, SETTINGS } ->
 		!match.method(method, "GET")
 		) ?
 		void 0
-		: (~::go("INFO[PARAMS]")(value))["INFO[SEND]"]
+		: (~::go("INFO[PARAMS]")(value))
 
 	AGE * :: { match, url, method } -> (
 		!match.url(url, "/age") ||
 		!match.method(method, "POST")
 		) ?
 		void 0
-		: (~::go("AGE[PARAMS]")(value))["AGE[SEND]"]
+		: (~::go("AGE[PARAMS]")(value))
 
 	

@@ -1,4 +1,4 @@
-AGE[PARAMS] :: { url, res, body, match, method, end, routes, toJSON, tryCatch, toString, CODES } -> 
+AGE[PARAMS] :: { res, body, end, toJSON, CODES } -> 
 	data := toJSON(body) 
 	if (!data) <- void (end(res).status(CODES.INVALID).send({ message: "No data provided"}))
 	date := new Date(data.date) 

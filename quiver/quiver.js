@@ -229,7 +229,26 @@ export class Quiver {
                 );
               return output;
             }
-          })
+          }),
+          fail: async desc => {
+            const path = this.trace(root, leaf);
+            const qvr = this.path(path);
+            const res = await qvr.goTo(root, inp);
+
+            const output = res?.[leaf] === undefined;
+            if (output) {
+              this.test.success(desc);
+            } else {
+              this.test.fail(desc, 'Short Circuit', res[leaf]);
+            }
+            if (!output)
+              console.log(
+                '\x1b[2m',
+                `\t${path.map(n => `[${n}]`).join('->')}`,
+                '\x1b[0m'
+              );
+            return output;
+          }
         })
       })
     })

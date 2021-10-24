@@ -37,9 +37,9 @@ NOT_EXIST: 404
 return quiv.go("TEST")({ SETTINGS })
 };
 
-quiv.tokens["AGE[PARAMS]"] = ["::","{","url","res","body","match","method","end","routes","toJSON","tryCatch","toString","CODES","}"]
+quiv.tokens["AGE[PARAMS]"] = ["::","{","res","body","end","toJSON","CODES","}"]
 quiv.arrows["AGE[PARAMS]"] = (value, key, prev, next) => {
-const {url,res,body,match,method,end,routes,toJSON,tryCatch,toString,CODES} = value;
+const {res,body,end,toJSON,CODES} = value;
 
 const data = toJSON(body)
 if (!data) return void (end(res).status(CODES.INVALID).send({ message: "No data provided"}))
@@ -102,7 +102,7 @@ return (
 !match.method(method, "GET")
 ) ?
 void 0
-: ( await quiv.go("INFO[PARAMS]")(value))["INFO[SEND]"]
+: ( await quiv.go("INFO[PARAMS]")(value))
 
 }
 quiv.tokens["AGE"] = ["*","::","{","match","url","method","}"]
@@ -113,7 +113,7 @@ return (
 !match.method(method, "POST")
 ) ?
 void 0
-: ( await quiv.go("AGE[PARAMS]")(value))["AGE[SEND]"]
+: ( await quiv.go("AGE[PARAMS]")(value))
 };
 
 quiv.tokens["SERVER"] = ["*","!","::","{","SETTINGS","}"]
@@ -188,7 +188,7 @@ query: '',
 url: '/info'
 }
 })
-.output({ "INFO": "Lorem ispum dolor bla bla" })
+.output({ "INFO": {"INFO[SEND]": "Lorem ispum dolor bla bla" }})
 .should('Tree - Send result from INFO leaf')
 
 suites["TREE_AGE_POST_0"] =  await  tree("REQUEST")
@@ -203,7 +203,7 @@ query: '',
 url: '/age'
 }
 })
-.output({ "AGE": 31 })
+.output({ "AGE": { "AGE[SEND]": 31 }})
 .should('Tree - Send result from AGE leaf')
 
 
@@ -221,7 +221,7 @@ url: '/age'
 }
 })
 .leaf("AGE")
-.output(31)
+.output({ "AGE[SEND]": 31 })
 .should("Path - Send correct age")
 
 suites["R2L_AGE_POST_1"] =  await  root("REQUEST")
@@ -237,8 +237,36 @@ url: '/age'
 }
 })
 .leaf("AGE")
-.output(22)
+.output({ "AGE[SEND]": 22 })
 .should("Path - Send correct age")
+
+
+suites["R2L_AGE_POST_1"] =  await  root("REQUEST")
+.input({
+...mockRes,
+method: 'POST',
+req: {
+body: JSON.stringify({
+"date": "03.129.1999"
+}),
+query: '',
+url: '/age'
+}
+})
+.leaf("AGE")
+.fail("Path - Short circuit if invalid date")
+
+suites["R2L_AGE_SERVICE_0"] =  await  root("AGE[PARAMS]")
+.input({
+...mockRes.SETTINGS,
+body: JSON.stringify({
+"date": "03.29.1999"
+}),
+})
+.leaf("AGE[SEND]")
+.output(22)
+.should("Path - Age Service")
+
 
 server["LISTENER"].stop()
 
