@@ -1,6 +1,5 @@
 REQUEST :: { method, req, res, SETTINGS } ->
 	{ body, query, url } := req
-	{ ROUTES } := SETTINGS
 	queries := query?.split("&").map(q => {
 		[key, value] := q.split("=")
 		<- { [key]: value }

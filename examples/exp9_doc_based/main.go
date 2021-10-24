@@ -3,9 +3,6 @@ import http from "http"
 >>->
 SETUP -> 
 SETTINGS := {
-	ROUTES: {
-		"/age": { node: "AGE", protected: false }
-	},
 	PORT: 8075,
 	match: {
 		url: (args, url) => args.split("?")[0] === url,

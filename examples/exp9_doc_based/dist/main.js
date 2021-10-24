@@ -7,9 +7,6 @@ import http from "http"
 quiv.tokens["SETUP"] = []
 quiv.arrows["SETUP"] = (value, key, prev, next) => {
 const SETTINGS = {
-ROUTES: {
-"/age": { node: "AGE", protected: false }
-},
 PORT: 8075,
 match: {
 url: (args, url) => args.split("?")[0] === url,
@@ -90,7 +87,6 @@ quiv.arrows["REQUEST"] = (value, key, prev, next) => {
 const {method,req,res,SETTINGS} = value;
 
 const { body, query, url } = req
-const { ROUTES } = SETTINGS
 const queries = query?.split("&").map(q => {
 const [key, value] = q.split("=")
 return { [key]: value }
