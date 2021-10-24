@@ -18,7 +18,11 @@ method: (args, method) => args === method
 end: (res) => ({
 status: (status) => res.writeHead(status,
 { "Content-Type": "application/json" }) &&
-{ send: (data) => void(res.end(JSON.stringify(data))) }
+{ send: (data) => {
+res.end(JSON.stringify(data))
+return data
+}
+}
 }),
 toJSON: (json,...args) => JSON.parse(json,...args),
 toString: (json,...args) => JSON.stringify(json,...args),
@@ -65,7 +69,7 @@ return { end, res, age, CODES }
 quiv.tokens["AGE[SEND]"] = ["::","{","end","res","age","CODES","}"]
 quiv.arrows["AGE[SEND]"] = (value, key, prev, next) => {
 const {end,res,age,CODES} = value;
-return end(res).status(CODES.SUCCESS).send(age) ?? age
+return end(res).status(CODES.SUCCESS).send(age)
 };
 
 quiv.tokens["INFO[PARAMS]"] = ["::","{","end","res","age","CODES","}"]
@@ -78,7 +82,7 @@ return {...value, info}
 quiv.tokens["INFO[SEND]"] = ["::","{","info","end","res","age","CODES","}"]
 quiv.arrows["INFO[SEND]"] = (value, key, prev, next) => {
 const {info,end,res,age,CODES} = value;
-return end(res).status(CODES.SUCCESS).send(info) ?? info
+return end(res).status(CODES.SUCCESS).send(info)
 };
 
 quiv.tokens["REQUEST"] = ["::","{","method","req","res","SETTINGS","}"]
@@ -167,17 +171,21 @@ quiv.arrows["TEST"] = async (value, key, prev, next) => {
 const {SETTINGS} = value;
 quiv.visit("TEST");
 
-const { tree, root } = quiv.test
+const { tree, root, isEqual, fail, success } = quiv.test
 const mockRes = {
-SETTINGS: {...SETTINGS, end: (res) => ({
-status: (status) => ({ send: (data) => void(JSON.stringify(data)) })
-})
-},
-res: { writeHead: () => {} },
+SETTINGS: {
+...SETTINGS,
+res: { writeHead: () => true, end: () => true },
+}
 }
 const server =  await  quiv.go("SERVER")({ SETTINGS })
 const URL = 'http://localhost:' + SETTINGS.PORT
 const suites = {}
+
+const endUtilResult = mockRes.SETTINGS.end(mockRes.SETTINGS.res).status(200).send(1);
+suites["SETTINGS_END_0"] = isEqual(1, endUtilResult) ?
+success('Equal - End util returns the correct result', 1, endUtilResult) : fail('end utility returns the correct result', 1, endUtilResult)
+
 
 suites["TREE_INFO_GET_0"] =  await  tree("REQUEST")
 .input({
@@ -275,7 +283,8 @@ quiv.leave('SERVER')
 after tests passed start the server
 */
 Object.values(suites).every(test => test) ?
-quiv.go("SERVER")({ SETTINGS }) : console.log('Not all test have passed, server is not started!')
+quiv.go("SERVER")({ SETTINGS }) :
+console.log('Not all test have passed, server is not started!')
 };
 export default (value) => {
 quiv.setRoot(quiv.nodes["SETUP"].key);

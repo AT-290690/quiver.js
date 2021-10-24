@@ -14,7 +14,11 @@ SETTINGS := {
 	end: (res) => ({
 			status: (status) => res.writeHead(status, 
 				{ "Content-Type": "application/json" }) && 
-				{ send: (data) => void(res.end(JSON.stringify(data))) }
+				{ send: (data) => {
+					res.end(JSON.stringify(data)) 
+					<- data
+				}
+			}
 	}),
 	toJSON: (json,...args) => JSON.parse(json,...args),
 	toString: (json,...args) => JSON.stringify(json,...args),

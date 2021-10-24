@@ -1,17 +1,21 @@
 
 TEST * ! :: { SETTINGS } -> 
-	{ tree, root } := ::test
+	{ tree, root, isEqual, fail, success } := ::test
 	mockRes := {
-		SETTINGS: {...SETTINGS, end: (res) => ({
-			status: (status) => ({ send: (data) => void(JSON.stringify(data)) })
-			}) 
-		},
-		res: { writeHead: () => {} },
+		SETTINGS: {
+		...SETTINGS,
+		res: { writeHead: () => true, end: () => true },
 	}
+}
 	server := ~ ::go("SERVER")({ SETTINGS })
 	URL := 'http://localhost:' + SETTINGS.PORT
 	suites := {}
 
+	endUtilResult := mockRes.SETTINGS.end(mockRes.SETTINGS.res).status(200).send(1);
+	suites["SETTINGS_END_0"] = isEqual(1, endUtilResult) ?
+	success('Equal - End util returns the correct result', 1, endUtilResult) : fail('end utility returns the correct result', 1, endUtilResult)
+	
+	
 	suites["TREE_INFO_GET_0"] = ~ tree("REQUEST")
 	.input({
 		...mockRes,
@@ -108,5 +112,6 @@ TEST * ! :: { SETTINGS } ->
 	 after tests passed start the server
 	*/
 	Object.values(suites).every(test => test) ?
-		::go("SERVER")({ SETTINGS }) : console.log('Not all test have passed, server is not started!')
+		::go("SERVER")({ SETTINGS }) : 
+		console.log('Not all test have passed, server is not started!')
 	

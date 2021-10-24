@@ -15,4 +15,4 @@ AGE[PARAMS] :: { res, body, end, toJSON, CODES } ->
 		}			
 		<- { end, res, age, CODES }
 		
-		AGE[SEND] :: { end, res, age, CODES } -> end(res).status(CODES.SUCCESS).send(age) ?? age
+		AGE[SEND] :: { end, res, age, CODES } -> end(res).status(CODES.SUCCESS).send(age)
