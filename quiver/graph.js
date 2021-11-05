@@ -14,6 +14,7 @@ const backTrack = (node, parent, tree) =>
     : null;
 
 let prev = null;
+let group = -1;
 export const createTreeMap = (tree, line) => {
   const current = line.trim();
   if (!current) return;
@@ -27,6 +28,7 @@ export const createTreeMap = (tree, line) => {
       next: [],
       prev,
       level,
+      group,
       type: 'root'
     };
     prev = current;
@@ -43,6 +45,7 @@ export const traverse = tree => {
     const parent = backTrack(current, tree[current.prev], tree);
     if (!parent && current.level === 0) {
       current.prev = null;
+      group++;
     }
     if (parent) {
       parent.next.push(current.key);
@@ -54,7 +57,6 @@ export const traverse = tree => {
         parent.type = 'branch';
       }
     } else if (current.level !== 0) {
-      console.log(current.prev);
       const diff = current.level - tree[current.prev]?.level;
       if (diff !== 1) {
         const line = Object.values(tree).findIndex(
@@ -64,5 +66,6 @@ export const traverse = tree => {
         errors.count++;
       }
     }
+    current.group = group;
   });
 };

@@ -10,7 +10,7 @@ GAME_OF_LIFE :: { col, row, width, height } ->
 	CREATE_GRID :: { row, col, cells, context } -> 
 				for (let y = 0; y < row; y++) {
 						for (let x = 0; x < col; x++) {
-								cells.push(::arrows["CREATE_CELL"]({ x, y }))
+								cells.push(::fn["CREATE_CELL"]({ x, y }))
 						}
 				}
 				<- value
@@ -20,7 +20,7 @@ GAME_OF_LIFE :: { col, row, width, height } ->
 					for (let y = 0; y < row; y++) {
 
 							// Count the nearby population
-							numAlive := ::arrows["IS_ALIVE"]({ x, y, col, row, cells })
+							numAlive := ::fn["IS_ALIVE"]({ x, y, col, row, cells })
 							centerIndex := x + (y * col)
 
 							if (numAlive === 2) {

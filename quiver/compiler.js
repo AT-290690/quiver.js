@@ -74,7 +74,7 @@ const compileToJs = async () => {
         ? parseExpressionDerives('return ' + expression, tokens, key)
         : parseExpressionDerives('', tokens, key);
       let startBrace = index !== 0 ? '}\n' : '';
-      compiledCode += `${startBrace}${settings.namespace}.arrows["${key}"] =${
+      compiledCode += `${startBrace}${settings.namespace}.fn["${key}"] =${
         tokens.includes('*') ? ' async' : ''
       } (value, key, prev, next) => {\n${body ? body + '\n' : ''}`;
     } else {

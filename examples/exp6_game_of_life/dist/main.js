@@ -1,8 +1,8 @@
 import { Quiver } from '../../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({"GAME_OF_LIFE":{"key":"GAME_OF_LIFE","next":["CREATE_GRID"],"prev":null,"level":0,"type":"root"},"CREATE_GRID":{"key":"CREATE_GRID","next":["GAME_LOOP"],"prev":"GAME_OF_LIFE","level":1,"type":"branch"},"GAME_LOOP":{"key":"GAME_LOOP","next":["CHECK_SURROUNDINGS"],"prev":"CREATE_GRID","level":2,"type":"branch"},"CHECK_SURROUNDINGS":{"key":"CHECK_SURROUNDINGS","next":["DRAW"],"prev":"GAME_LOOP","level":3,"type":"branch"},"DRAW":{"key":"DRAW","next":[],"prev":"CHECK_SURROUNDINGS","level":4,"type":"leaf"},"CREATE_CELL":{"key":"CREATE_CELL","next":[],"prev":null,"level":0,"type":"root"},"IS_ALIVE":{"key":"IS_ALIVE","next":[],"prev":null,"level":0,"type":"root"}});
+quiv.setNodes({"GAME_OF_LIFE":{"key":"GAME_OF_LIFE","next":["CREATE_GRID"],"prev":null,"level":0,"group":0,"type":"root"},"CREATE_GRID":{"key":"CREATE_GRID","next":["GAME_LOOP"],"prev":"GAME_OF_LIFE","level":1,"group":0,"type":"branch"},"GAME_LOOP":{"key":"GAME_LOOP","next":["CHECK_SURROUNDINGS"],"prev":"CREATE_GRID","level":2,"group":0,"type":"branch"},"CHECK_SURROUNDINGS":{"key":"CHECK_SURROUNDINGS","next":["DRAW"],"prev":"GAME_LOOP","level":3,"group":0,"type":"branch"},"DRAW":{"key":"DRAW","next":[],"prev":"CHECK_SURROUNDINGS","level":4,"group":0,"type":"leaf"},"CREATE_CELL":{"key":"CREATE_CELL","next":[],"prev":null,"level":0,"group":1,"type":"root"},"IS_ALIVE":{"key":"IS_ALIVE","next":[],"prev":null,"level":0,"group":2,"type":"root"}});
 
-quiv.arrows["GAME_OF_LIFE"] = (value, key, prev, next) => {
+quiv.fn["GAME_OF_LIFE"] = (value, key, prev, next) => {
 const {col,row,width,height} = value;
 
 // The page has loaded, start the game
@@ -12,27 +12,27 @@ const cells = []
 return { col, row, width, height, canvas, context, cells }
 
 }
-quiv.arrows["CREATE_GRID"] = (value, key, prev, next) => {
+quiv.fn["CREATE_GRID"] = (value, key, prev, next) => {
 const {row,col,cells,context} = value;
 
 for (let y = 0; y < row; y++) {
 for (let x = 0; x < col; x++) {
-cells.push(quiv.arrows["CREATE_CELL"]({ x, y }))
+cells.push(quiv.fn["CREATE_CELL"]({ x, y }))
 }
 }
 return value
 }
-quiv.arrows["GAME_LOOP"] = (value, key, prev, next) => {
+quiv.fn["GAME_LOOP"] = (value, key, prev, next) => {
 return value
 }
-quiv.arrows["CHECK_SURROUNDINGS"] = (value, key, prev, next) => {
+quiv.fn["CHECK_SURROUNDINGS"] = (value, key, prev, next) => {
 const {col,row,cells} = value;
 
 for (let x = 0; x < col; x++) {
 for (let y = 0; y < row; y++) {
 
 // Count the nearby population
-const numAlive = quiv.arrows["IS_ALIVE"]({ x, y, col, row, cells })
+const numAlive = quiv.fn["IS_ALIVE"]({ x, y, col, row, cells })
 const centerIndex = x + (y * col)
 
 if (numAlive === 2) {
@@ -54,7 +54,7 @@ cells[i].alive = cells[i].nextAlive
 }
 return value
 }
-quiv.arrows["DRAW"] = (value, key, prev, next) => {
+quiv.fn["DRAW"] = (value, key, prev, next) => {
 const {context,width,height,canvas,cells} = value;
 
 // Clear the screen
@@ -69,12 +69,12 @@ setTimeout(() =>	window.requestAnimationFrame(() => quiv.go("GAME_LOOP")(value))
 
 
 }
-quiv.arrows["CREATE_CELL"] = (value, key, prev, next) => {
+quiv.fn["CREATE_CELL"] = (value, key, prev, next) => {
 const {x,y} = value;
 return { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
 
 }
-quiv.arrows["IS_ALIVE"] = (value, key, prev, next) => {
+quiv.fn["IS_ALIVE"] = (value, key, prev, next) => {
 const {x,y,col,row,cells} = value;
 return [
 { xd: -1, yd: -1 },

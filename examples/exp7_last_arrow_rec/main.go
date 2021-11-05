@@ -5,4 +5,4 @@ START * ->
 LAST :: [first, ...rest] -> 
   if (::test.isEqual(value, [])) <- null
 	if (::test.isEqual(rest, [])) <- first
-	<- ::arrows["LAST"](rest)
+	<- ::fn["LAST"](rest)

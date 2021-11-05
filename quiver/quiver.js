@@ -1,5 +1,5 @@
 export class Quiver {
-  arrows = {};
+  fn = {};
   nodes = {};
   current;
   root = null;
@@ -19,7 +19,7 @@ export class Quiver {
         next: [],
         type: 'branch'
       };
-      qvr.arrows[n] = this.arrows[n];
+      qvr.fn[n] = this.fn[n];
       if (index === 0) {
         Nodes[n].type = 'root';
       } else if (index === array.length - 1) {
@@ -62,8 +62,8 @@ export class Quiver {
     this.current = node;
     if (!node) return;
     let result;
-    if (this.arrows[node.key]) {
-      result = await this.arrows[node.key](args, node.key, prev, node.next);
+    if (this.fn[node.key]) {
+      result = await this.fn[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
     if (
@@ -79,14 +79,15 @@ export class Quiver {
     }
     return out;
   }
+
   async goTo(key, args, prev = null, out = {}) {
     if (this.visited[key]) return;
     const node = this.nodes[key];
     this.current = node;
     if (!node) return;
     let result;
-    if (this.arrows[node.key]) {
-      result = await this.arrows[node.key](args, node.key, prev, node.next);
+    if (this.fn[node.key]) {
+      result = await this.fn[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
     if (
@@ -101,6 +102,26 @@ export class Quiver {
       }
     }
     return out;
+  }
+
+  is(root) {
+    return {
+      connected: leaf => {
+        return this.nodes[root].group === this.nodes[leaf].group;
+      },
+      visited: () => {
+        return this.visited[root];
+      },
+      root: () => {
+        return this.nodes[root].type === 'root';
+      },
+      leaf: () => {
+        return this.nodes[root].type === 'leaf';
+      },
+      branch: () => {
+        return this.nodes[root].type === 'branch';
+      }
+    };
   }
 
   tramp(fn) {
@@ -210,6 +231,9 @@ export class Quiver {
         leaf: leaf => ({
           output: expected => ({
             should: async desc => {
+              if (!this.is(root).connected(leaf)) {
+                this.test.fail(desc, expected, 'Nodes are not connected');
+              }
               const path = this.trace(root, leaf);
               const qvr = this.path(path);
               const res = await qvr.goTo(root, inp);

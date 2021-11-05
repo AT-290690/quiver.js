@@ -1,6 +1,6 @@
 import { Quiver } from '../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({"MY_NODE":{"key":"MY_NODE","next":["JOIN","PRINT"],"prev":null,"level":0,"type":"root"},"JOIN":{"key":"JOIN","next":[],"prev":"MY_NODE","level":1,"type":"leaf"},"PRINT":{"key":"PRINT","next":[],"prev":"MY_NODE","level":1,"type":"leaf"}});
+quiv.setNodes({"MY_NODE":{"key":"MY_NODE","next":["JOIN","PRINT"],"prev":null,"level":0,"group":0,"type":"root"},"JOIN":{"key":"JOIN","next":[],"prev":"MY_NODE","level":1,"group":0,"type":"leaf"},"PRINT":{"key":"PRINT","next":[],"prev":"MY_NODE","level":1,"group":0,"type":"leaf"}});
 /*
 Tutorial:
 
@@ -9,7 +9,7 @@ MY_NODE -> value * 10
 {
 	MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
 }
-__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
+__qvr.fn['MY_NODE'] = * (value, key, prev, next) => {
 	return value * 10;
 };
 --------------------------------------------------
@@ -36,18 +36,18 @@ MY_NODE -> { num : 10, by: 3 }
 	SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
 	MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
 }
-__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
+__qvr.fn['MY_NODE'] = * (value, key, prev, next) => {
 	return { num: 10, by: 3 };
 };
-__qvr.arrows['ADD'] = * (value, key, prev, next) => {
+__qvr.fn['ADD'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num + value;
 };
-__qvr.arrows['SUB'] = * (value, key, prev, next) => {
+__qvr.fn['SUB'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num - by;
 };
-__qvr.arrows['MULT'] = * (value, key, prev, next) => {
+__qvr.fn['MULT'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num * by;
 };
@@ -68,17 +68,14 @@ npm/yarn start to run code
 
 // A separator between js and quiver code
 
-quiv.tokens["MY_NODE"] = []
-quiv.arrows["MY_NODE"] = (value, key, prev, next) => {
+quiv.fn["MY_NODE"] = (value, key, prev, next) => {
 return ["Hello"," ", "World", "!"]
 }
-quiv.tokens["JOIN"] = ["::","[hello","space","world","mark]"]
-quiv.arrows["JOIN"] = (value, key, prev, next) => {
+quiv.fn["JOIN"] = (value, key, prev, next) => {
 const [hello,space,world,mark] = value;
 return hello + space + world + mark
 }
-quiv.tokens["PRINT"] = []
-quiv.arrows["PRINT"] = (value, key, prev, next) => {
+quiv.fn["PRINT"] = (value, key, prev, next) => {
 return quiv.log(value)
 };
 export default (value) => {

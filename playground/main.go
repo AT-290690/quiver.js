@@ -6,7 +6,7 @@ MY_NODE -> value * 10
 {
 	MY_NODE: { key: 'MY_NODE', next: [], prev: null, level: 0, type: 'root' }
 }
-__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
+__qvr.fn['MY_NODE'] = * (value, key, prev, next) => {
 	return value * 10;
 };
 --------------------------------------------------
@@ -33,18 +33,18 @@ MY_NODE -> { num : 10, by: 3 }
 	SUB: { key: 'SUB', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' },
 	MULT: { key: 'MULT', next: [], prev: 'MY_NODE', level: 1, type: 'leaf' }
 }
-__qvr.arrows['MY_NODE'] = * (value, key, prev, next) => {
+__qvr.fn['MY_NODE'] = * (value, key, prev, next) => {
 	return { num: 10, by: 3 };
 };
-__qvr.arrows['ADD'] = * (value, key, prev, next) => {
+__qvr.fn['ADD'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num + value;
 };
-__qvr.arrows['SUB'] = * (value, key, prev, next) => {
+__qvr.fn['SUB'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num - by;
 };
-__qvr.arrows['MULT'] = * (value, key, prev, next) => {
+__qvr.fn['MULT'] = * (value, key, prev, next) => {
 	const { num, by } = value;
 	return num * by;
 };
