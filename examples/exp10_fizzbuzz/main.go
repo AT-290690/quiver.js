@@ -1,11 +1,7 @@
 FIZZ_BUZZ -> 250
 	|> -> { 
 		"number": value, 
-		"when": [
-				value % 15 === 0, 
-				value % 3 === 0, 
-				value % 5 === 0
-						].map(Number) 
+		"when": [+(value % 15 === 0), +(value % 3 === 0), +(value % 5 === 0)]
 				} 
 		|> <{ "when": [1, 1, 1] }> :: -> ::log("FizzBuzz")
 		|> <{ "when": [0, 1, 0] }> :: -> ::log("Fizz")	

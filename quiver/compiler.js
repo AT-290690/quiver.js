@@ -68,12 +68,14 @@ const compileToJs = async () => {
     .map(line => line.split(' ->'));
   const treeMap = {};
   let compiledCode = '';
+  let countLambdas = 0;
   arrows.forEach((lambda, index) => {
     if (lambda.length === 2) {
       const [name, ...tokens] = lambda[0].trim().split(' ');
       let key;
       if (name === '|>') {
-        key = 'fn[' + index + ']';
+        key = 'fn[' + countLambdas + ']';
+        countLambdas++;
         lambda[0] = lambda[0].replace('|>', key);
       } else {
         key = name;
