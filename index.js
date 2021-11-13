@@ -1,7 +1,8 @@
 import { quiver } from './quiver/index.js';
 quiver({
-  dir: 'examples/exp2_server',
+  dir: 'blank',
   root: 'main.go',
   indentBy: '\t',
-  namespace: 'quiv'
+  namespace: 'quiv',
+  sync: true
 });

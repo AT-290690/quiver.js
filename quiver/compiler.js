@@ -23,12 +23,11 @@ const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   const params = dirtyTokens.slice(index);
   const tokens = index === -1 ? params : dirtyTokens.slice(0, index);
   if (tokens.find(t => t.includes('<'))) {
-    const vars = JSON.parse(
-      '[' + tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') + ']'
-    );
-    output = `if(!${JSON.stringify(vars)}.some((predicate) => ${
-      settings.namespace
-    }.test.isEqual(predicate, value, { partial: true }))) return undefined;\n${expression}`;
+    const vars =
+      '[' +
+      tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') +
+      ']';
+    output = `if(!${vars}.some((predicate) => ${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) return undefined;\n${expression}`;
   }
   if (tokens.includes('!')) {
     output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
@@ -105,7 +104,8 @@ export const compile = async (
   files = [],
   indentBy = '\t',
   mime,
-  namespace
+  namespace,
+  sync = false
 ) => {
   console.log('\x1b[1m', '\x1b[34m', `\n < ${file} >\n`, '\x1b[0m');
   settings.file = '.' + file;
@@ -113,6 +113,7 @@ export const compile = async (
   settings.indentBy = indentBy;
   settings.mime = mime ?? 'js';
   settings.namespace = namespace;
+  settings.sync = sync;
   settings.unaryTokens = {
     '<- ': 'return ',
     '~': ' await ',

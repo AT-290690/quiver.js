@@ -48,7 +48,7 @@ TEST ->
 	and demonstrating graph testing`, EXIT: "Program has stopped!" })
 	.should("E2E - Return the correct outputs")
 
-	::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => ::log(res))
+	::async("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => ::log(res))
 
 TWO_SUM :: <{ nums, target }> -> { 
 			nums, 

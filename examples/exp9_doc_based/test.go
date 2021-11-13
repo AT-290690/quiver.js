@@ -7,7 +7,7 @@ TEST * ! :: <{ SETTINGS }> ->
 		res: { writeHead: () => true, end: () => true },
 	}
 }
-	server := ~ ::go("SERVER")({ SETTINGS })
+	server := ~ ::async("SERVER")({ SETTINGS })
 	URL := 'http://localhost:' + SETTINGS.PORT
 	suites := {}
 
@@ -112,6 +112,6 @@ TEST * ! :: <{ SETTINGS }> ->
 	 after tests passed start the server
 	*/
 	Object.values(suites).every(test => test) ?
-		::go("SERVER")({ SETTINGS }) : 
+		::async("SERVER")({ SETTINGS }) : 
 		console.log('Not all test have passed, server is not started!')
 	

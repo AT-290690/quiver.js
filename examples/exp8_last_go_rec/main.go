@@ -1,5 +1,5 @@
 START * -> 
-	result := ~ ::go("LAST")([1, 2, 3])
+	result := ~ ::async("LAST")([1, 2, 3])
 	::log(result["REC"])
 
 LAST :: <[ first, ...rest ]> -> { first, rest }
@@ -11,5 +11,5 @@ LAST :: <[ first, ...rest ]> -> { first, rest }
 			<- first
 		} 
 	REC * :: <{ rest }> ->
-		out := ~ ::go("LAST")(rest);
+		out := ~ ::async("LAST")(rest);
 		<- out["REC"] ? out["REC"] : out["ONE"]

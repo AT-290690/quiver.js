@@ -45,7 +45,7 @@ SERVER ! * ->
 			}
 
 			req.query = query
-		  ::go(::getRoot())({ method, req, res, init })
+		  ::async(::getRoot())({ method, req, res, init })
 		})
 	}
 
@@ -54,7 +54,7 @@ SERVER ! * ->
 			::log("Restarting due to error!")
 			::leave("SERVER")
 			::setRoot("SERVER")
-			::go("SERVER")()
+			::async("SERVER")()
 		}, 3000) : ::log("http://localhost:" + PORT))
 		server.on("request", start)
 		

@@ -1,5 +1,5 @@
 START * -> 
-	result := ~ ::go("LAST")([1, 2, 3])
+	result := ~ ::async("LAST")([1, 2, 3])
 	::log(result)
 
 LAST :: <[first, ...rest]> -> 

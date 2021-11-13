@@ -52,18 +52,22 @@ export class Quiver {
     return this.trace(root, this.nodes[leaf].prev, out);
   }
 
-  go(key) {
-    return args => this.goTo(key, args);
+  async(key) {
+    return args => this.dfsAsync(key, args);
   }
 
-  async goTo(key, args, prev = null, out = {}) {
+  sync(key) {
+    return args => this.dfsSync(key, args);
+  }
+
+  dfsSync(key, args, prev = null, out = {}) {
     if (this.visited[key]) return;
     const node = this.nodes[key];
     this.current = node;
     if (!node) return;
     let result;
     if (this.fn[node.key]) {
-      result = await this.fn[node.key](args, node.key, prev, node.next);
+      result = this.fn[node.key](args, node.key, prev, node.next);
     }
     if (result === undefined) return;
     if (
@@ -74,13 +78,13 @@ export class Quiver {
       return result;
     } else {
       for (const n of node.next) {
-        await this.goTo(n, result, node.key, out);
+        this.dfsSync(n, result, node.key, out);
       }
     }
     return out;
   }
 
-  async goTo(key, args, prev = null, out = {}) {
+  async dfsAsync(key, args, prev = null, out = {}) {
     if (this.visited[key]) return;
     const node = this.nodes[key];
     this.current = node;
@@ -98,7 +102,7 @@ export class Quiver {
       return result;
     } else {
       for (const n of node.next) {
-        await this.goTo(n, result, node.key, out);
+        await this.dfsAsync(n, result, node.key, out);
       }
     }
     return out;
@@ -220,7 +224,7 @@ export class Quiver {
       input: inp => ({
         output: expected => ({
           should: async desc => {
-            const res = await this.goTo(root, inp);
+            const res = await this.dfsAsync(root, inp);
             return res === undefined
               ? this.test.fail(desc, expected, 'Short Circuited')
               : this.test.isEqual(res, expected)
@@ -240,7 +244,7 @@ export class Quiver {
               }
               const path = this.trace(root, leaf);
               const qvr = this.path(path);
-              const res = await qvr.goTo(root, inp);
+              const res = await qvr.dfsAsync(root, inp);
 
               const output =
                 res === undefined || res[leaf] === undefined
@@ -260,7 +264,7 @@ export class Quiver {
           fail: async desc => {
             const path = this.trace(root, leaf);
             const qvr = this.path(path);
-            const res = await qvr.goTo(root, inp);
+            const res = await qvr.dfsAsync(root, inp);
 
             const output = res?.[leaf] === undefined;
             if (output) {

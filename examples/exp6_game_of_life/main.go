@@ -6,21 +6,22 @@ GAME_OF_LIFE ! :: -> { ...value, canvas: document.getElementById("canvas") }
 			// Count the nearby population
 			GAME_LOOP :: <{ col, row, cells }> -> ::fn["ITERATE_GRID"]({ 
 					row, col, callback: 
-					(x, y) => ::go("RULES")({ 
+					(x, y) => ::sync("RULES")({ 
 						cells, 
 						current: x + (y * col),
 						alive: ::fn["IS_ALIVE"]({ x, y, col, row, cells }) 
 						})
 					}) ?? value
-				|> :: <{ context, width, height, canvas, cells }> -> 			
-					// Clear the screen
-					context.clearRect(0, 0, canvas.width, canvas.height)
-					cells.forEach(({ x, y, alive }) => {
-						context.fillStyle = alive ? "#ff8080" : "#303030"
-						context.fillRect(x * width, y * height, width, height)
-					})
-					// Animation loop
-					setTimeout(() => window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
+				|> :: <{ cells }> -> ::fn["SET_IS_ALIVE"]({ cells }) ?? value
+					|> :: <{ context, width, height, canvas, cells }> -> 
+						// Clear the screen
+						context.clearRect(0, 0, canvas.width, canvas.height)
+						cells.forEach(({ x, y, alive }) => {
+							context.fillStyle = alive ? "#ff8080" : "#303030"
+							context.fillRect(x * width, y * height, width, height)
+						})
+						// Animation loop
+						setTimeout(() => window.requestAnimationFrame(() => ::sync("GAME_LOOP")(value)), 500)
 
 RULES :: <{ alive, cells, current }> -> { rule: [ +(alive === 2), +(alive === 3)], cells, current }
 
@@ -28,8 +29,7 @@ RULES :: <{ alive, cells, current }> -> { rule: [ +(alive === 2), +(alive === 3)
 	REVIVE <{ "rule": [0, 1] }> :: <{ cells, current }> -> (cells[current].nextAlive = true)
 	DIE <{ "rule": [0, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = false)
 
-	SET_IS_ALIVE :: <{ cells }> -> cells.forEach((cell) => cell.alive = cell.nextAlive) 
-
+SET_IS_ALIVE :: <{ cells }> -> cells.forEach((cell) => cell.alive = cell.nextAlive) 
 CREATE_CELL :: <{ x, y }> -> { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
 ITERATE_GRID :: <{ row, col, callback }> ->
 	for (let y = 0; y < row; y++) for (let x = 0; x < col; x++) callback(x, y)

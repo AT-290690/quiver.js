@@ -19,7 +19,7 @@ SERVER * ! ->
 				req.body = body
 			}
 			req.query = query
-			::go(::getRoot())({ method, req, res, SETTINGS })
+			::async(::getRoot())({ method, req, res, SETTINGS })
 		})
 	}
 	<- { PORT: SETTINGS.PORT, start, SETTINGS }

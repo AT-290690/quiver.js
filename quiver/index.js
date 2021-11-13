@@ -2,7 +2,14 @@ import * as fs from 'fs';
 const { readdir } = fs.promises;
 import { compile } from './compiler.js';
 
-export const quiver = async ({ dir, root, indentBy, mime, namespace }) => {
+export const quiver = async ({
+  dir,
+  root,
+  indentBy,
+  mime,
+  namespace,
+  sync
+}) => {
   let monolithic = true;
   if (dir) {
     dir = '/' + dir + '/';
@@ -21,6 +28,6 @@ export const quiver = async ({ dir, root, indentBy, mime, namespace }) => {
   const merge = monolithic ? files : [];
 
   for (const file of files) {
-    await compile(dir + file, merge, indentBy, mime, namespace);
+    await compile(dir + file, merge, indentBy, mime, namespace, sync);
   }
 };

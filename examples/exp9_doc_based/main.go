@@ -29,5 +29,5 @@ SETTINGS := {
 		NOT_EXIST: 404
 	}
 }
-<- ::go("TEST")({ SETTINGS })
+<- ::async("TEST")({ SETTINGS })
 	

@@ -1,12 +1,12 @@
-start * ->
+start ->
  traces := [::trace("g","e"), ::trace("g","l"),::trace("b","asad")]
  paths := traces.map((t) => ::path(t))
- ::log(~ ::go("g")(5))
- ::log(~ paths[0].go("g")(5))
+ ::log(::sync("g")(5))
+ ::log(paths[0].sync("g")(5))
 
- ::log(~ paths[0].goTo("g", 25))
- ::log(~ paths[1].goTo("g", 15))
- ::log(~ paths[2].goTo("b", 13))
+ ::log(paths[0].dfsSync("g", 25))
+ ::log(paths[1].dfsSync("g", 15))
+ ::log(paths[2].dfsSync("b", 13))
 
 a -> value
 g -> value

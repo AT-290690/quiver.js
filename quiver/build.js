@@ -27,7 +27,9 @@ ${monolithArr.join('\n')}
 export default (value) => {
 ${settings.namespace}.setRoot(${settings.namespace}.nodes["${root}"].key);
 ${settings.namespace}.visited = {};
-${settings.namespace}.goTo(${settings.namespace}.root, value);
+${settings.namespace}.${settings.sync ? 'dfsSync' : 'dfsAsync'}(${
+      settings.namespace
+    }.root, value);
 }`;
     const dubs = new Set();
     monolithNodes.forEach(collection => {
