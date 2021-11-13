@@ -3,48 +3,48 @@ const quiv = new Quiver();
 quiv.setNodes({
   FIZZ_BUZZ: {
     key: 'FIZZ_BUZZ',
-    next: ['fn[1]'],
+    next: ['fn[0]'],
     prev: null,
     level: 0,
     group: 0,
     type: 'root'
   },
-  'fn[1]': {
-    key: 'fn[1]',
-    next: ['fn[9]', 'fn[10]', 'fn[11]', 'fn[12]'],
+  'fn[0]': {
+    key: 'fn[0]',
+    next: ['fn[1]', 'fn[2]', 'fn[3]', 'fn[4]'],
     prev: 'FIZZ_BUZZ',
     level: 1,
     group: 0,
     type: 'branch'
   },
-  'fn[9]': {
-    key: 'fn[9]',
+  'fn[1]': {
+    key: 'fn[1]',
     next: [],
-    prev: 'fn[1]',
+    prev: 'fn[0]',
     level: 2,
     group: 0,
     type: 'leaf'
   },
-  'fn[10]': {
-    key: 'fn[10]',
+  'fn[2]': {
+    key: 'fn[2]',
     next: [],
-    prev: 'fn[1]',
+    prev: 'fn[0]',
     level: 2,
     group: 0,
     type: 'leaf'
   },
-  'fn[11]': {
-    key: 'fn[11]',
+  'fn[3]': {
+    key: 'fn[3]',
     next: [],
-    prev: 'fn[1]',
+    prev: 'fn[0]',
     level: 2,
     group: 0,
     type: 'leaf'
   },
-  'fn[12]': {
-    key: 'fn[12]',
+  'fn[4]': {
+    key: 'fn[4]',
     next: [],
-    prev: 'fn[1]',
+    prev: 'fn[0]',
     level: 2,
     group: 0,
     type: 'leaf'
@@ -54,13 +54,13 @@ quiv.setNodes({
 quiv.fn['FIZZ_BUZZ'] = (value, key, prev, next) => {
   return 250;
 };
-quiv.fn['fn[1]'] = (value, key, prev, next) => {
+quiv.fn['fn[0]'] = (value, key, prev, next) => {
   return {
     number: value,
-    when: [value % 15 === 0, value % 3 === 0, value % 5 === 0].map(Number)
+    when: [+(value % 15 === 0), +(value % 3 === 0), +(value % 5 === 0)]
   };
 };
-quiv.fn['fn[9]'] = (value, key, prev, next) => {
+quiv.fn['fn[1]'] = (value, key, prev, next) => {
   if (
     ![{ when: [1, 1, 1] }].some(predicate =>
       quiv.test.isEqual(predicate, value, { partial: true })
@@ -69,7 +69,7 @@ quiv.fn['fn[9]'] = (value, key, prev, next) => {
     return undefined;
   return quiv.log('FizzBuzz');
 };
-quiv.fn['fn[10]'] = (value, key, prev, next) => {
+quiv.fn['fn[2]'] = (value, key, prev, next) => {
   if (
     ![{ when: [0, 1, 0] }].some(predicate =>
       quiv.test.isEqual(predicate, value, { partial: true })
@@ -78,7 +78,7 @@ quiv.fn['fn[10]'] = (value, key, prev, next) => {
     return undefined;
   return quiv.log('Fizz');
 };
-quiv.fn['fn[11]'] = (value, key, prev, next) => {
+quiv.fn['fn[3]'] = (value, key, prev, next) => {
   if (
     ![{ when: [0, 0, 1] }].some(predicate =>
       quiv.test.isEqual(predicate, value, { partial: true })
@@ -87,7 +87,7 @@ quiv.fn['fn[11]'] = (value, key, prev, next) => {
     return undefined;
   return quiv.log('Buzz');
 };
-quiv.fn['fn[12]'] = (value, key, prev, next) => {
+quiv.fn['fn[4]'] = (value, key, prev, next) => {
   const { number } = value;
   if (
     ![{ when: [0, 0, 0] }].some(predicate =>

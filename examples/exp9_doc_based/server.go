@@ -1,8 +1,8 @@
-SERVER * ! :: { SETTINGS } ->
+SERVER * ! ->
 	::setRoot("REQUEST")
-	<- { SETTINGS } 
+	<- value 
 
-	HANDLER :: { SETTINGS } -> 
+	HANDLER :: <{ SETTINGS }> -> 
 		start := (req, res) => {
 			method := req.method
 			urlParsed := URL.parse(req.url)
@@ -24,7 +24,7 @@ SERVER * ! :: { SETTINGS } ->
 	}
 	<- { PORT: SETTINGS.PORT, start, SETTINGS }
 
-		LISTENER :: { PORT, start, SETTINGS } -> 
+		LISTENER :: <{ PORT, start, SETTINGS }> -> 
 			server := http.createServer()
 			server.listen(PORT, () => ::log("Server started!\nListening at http://localhost:" + PORT))
 			server.on("request", start)

@@ -1,4 +1,4 @@
-REQUEST :: { method, req, res, SETTINGS } ->
+REQUEST :: <{ method, req, res, SETTINGS }> ->
 	{ body, query, url } := req
 	queries := query?.split("&").map(q => {
 		[key, value] := q.split("=")
@@ -6,14 +6,14 @@ REQUEST :: { method, req, res, SETTINGS } ->
 	}).reduce((acc,item) => ({...acc,...item}),{}) || {}
 	<- { method, body, query: queries, res, url, ...SETTINGS }
 
-	INFO * :: { match, url, method } -> (
+	INFO * :: <{ match, url, method }> -> (
 		!match.url(url, "/info") ||
 		!match.method(method, "GET")
 		) ?
 		void 0
 		: (~::go("INFO[PARAMS]")(value))
 
-	AGE * :: { match, url, method } -> (
+	AGE * :: <{ match, url, method }> -> (
 		!match.url(url, "/age") ||
 		!match.method(method, "POST")
 		) ?

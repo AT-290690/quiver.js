@@ -6,4 +6,4 @@ FIZZ_BUZZ -> 250
 		|> <{ "when": [1, 1, 1] }> :: -> ::log("FizzBuzz")
 		|> <{ "when": [0, 1, 0] }> :: -> ::log("Fizz")	
 		|> <{ "when": [0, 0, 1] }> :: -> ::log("Buzz")	
-		|> <{ "when": [0, 0, 0] }> :: { number } -> ::log(number)	
+		|> <{ "when": [0, 0, 0] }> :: <{ number }> -> ::log(number)	

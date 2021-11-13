@@ -1,61 +1,39 @@
+GAME_OF_LIFE ! :: -> { ...value, canvas: document.getElementById("canvas") }
+	CONTEXT ! :: <{ canvas }> -> { ...value, context: canvas.getContext("2d"), cells: [] }
+		|> ! :: <{ row, col, cells, context }> -> ::fn["ITERATE_GRID"]({ 
+			row, col, callback: 
+			(x, y) => cells.push(::fn["CREATE_CELL"]({ x, y })) }) ?? value
+			// Count the nearby population
+			GAME_LOOP :: <{ col, row, cells }> -> ::fn["ITERATE_GRID"]({ 
+					row, col, callback: 
+					(x, y) => ::go("RULES")({ 
+						cells, 
+						current: x + (y * col),
+						alive: ::fn["IS_ALIVE"]({ x, y, col, row, cells }) 
+						})
+					}) ?? value
+				|> :: <{ context, width, height, canvas, cells }> -> 			
+					// Clear the screen
+					context.clearRect(0, 0, canvas.width, canvas.height)
+					cells.forEach(({ x, y, alive }) => {
+						context.fillStyle = alive ? "#ff8080" : "#303030"
+						context.fillRect(x * width, y * height, width, height)
+					})
+					// Animation loop
+					setTimeout(() => window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
 
+RULES :: <{ alive, cells, current }> -> { rule: [ +(alive === 2), +(alive === 3)], cells, current }
 
-GAME_OF_LIFE :: { col, row, width, height } -> 
-  // The page has loaded, start the game
-		canvas := document.getElementById('canvas')
-		context := canvas.getContext('2d')
-		cells := []
-		<- { col, row, width, height, canvas, context, cells }
+	DO_NOTHING <{ "rule": [1, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = cells[current].alive)
+	REVIVE <{ "rule": [0, 1] }> :: <{ cells, current }> -> (cells[current].nextAlive = true)
+	DIE <{ "rule": [0, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = false)
 
-	CREATE_GRID :: { row, col, cells, context } -> 
-				for (let y = 0; y < row; y++) {
-						for (let x = 0; x < col; x++) {
-								cells.push(::fn["CREATE_CELL"]({ x, y }))
-						}
-				}
-				<- value
-		GAME_LOOP -> value
-			CHECK_SURROUNDINGS :: { col, row, cells } ->
-				for (let x = 0; x < col; x++) {
-					for (let y = 0; y < row; y++) {
+	SET_IS_ALIVE :: <{ cells }> -> cells.forEach((cell) => cell.alive = cell.nextAlive) 
 
-							// Count the nearby population
-							numAlive := ::fn["IS_ALIVE"]({ x, y, col, row, cells })
-							centerIndex := x + (y * col)
-
-							if (numAlive === 2) {
-									// Do nothing
-									cells[centerIndex].nextAlive = cells[centerIndex].alive
-							} else if (numAlive === 3) {
-									// Make alive
-									cells[centerIndex].nextAlive = true
-							} else {
-									// Make dead
-									cells[centerIndex].nextAlive = false
-							}
-					}
-				}
-
-				// Apply the new state to the cells
-				for (let i = 0; i < cells.length; i++) {
-					cells[i].alive = cells[i].nextAlive
-				}
-				<- value
-				DRAW :: { context, width, height, canvas, cells } -> 				
-				// Clear the screen
-				context.clearRect(0, 0, canvas.width, canvas.height)
-				for (let i = 0; i < cells.length; i++) {
-					{ x, y, alive } := 	cells[i]
-					context.fillStyle = alive ? '#ff8080' : '#303030'
-					context.fillRect(x * width, y * height, width, height)
-				}
-				// The loop function has reached it's end, keep requesting new frames
-				setTimeout(() =>	window.requestAnimationFrame(() => ::go("GAME_LOOP")(value)), 150)
-
-
-CREATE_CELL :: { x, y } -> { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
-
-IS_ALIVE :: { x, y, col, row, cells } -> [
+CREATE_CELL :: <{ x, y }> -> { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
+ITERATE_GRID :: <{ row, col, callback }> ->
+	for (let y = 0; y < row; y++) for (let x = 0; x < col; x++) callback(x, y)
+IS_ALIVE :: <{ x, y, col, row, cells }> -> [
 			{ xd: -1, yd: -1 },
 			{ xd: 0, yd: -1 },
 			{ xd: -1, yd: 0 },

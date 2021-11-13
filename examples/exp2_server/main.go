@@ -65,10 +65,7 @@ SERVER ! * ->
 	})
 	::setRoot("REQUEST")
 
-REQUEST ->
-	{ method, req, res, init } := value
-	{ match, end, routes, toJSON, tryCatch, toString, DB_DIR, DB_FILE } := init 
-	{ body, query, url } := req
+REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON, tryCatch, toString, DB_DIR, DB_FILE } }> ->
 	queries := query?.split("&").map(q => {
 		[key, value] := q.split("=")
 		<- { [key]: value }
@@ -79,16 +76,16 @@ REQUEST ->
 	}
 	<- service
 
-	ROUTER :: { match } -> { data: value, "match": match.url(value, "/age") ?? match.url(value, "/cat") }
+	ROUTER :: <{ match }> -> { data: value, "match": match.url(value, "/age") ?? match.url(value, "/cat") }
 
-		AGE <{ "match": "/age" }> :: { data } -> 
+		AGE <{ "match": "/age" }> :: <{ data }> -> 
 			{ match } := data
 			<- { 
 				data, 
 				"match": 
 				match.method(data, "POST")
 				}
-			AGE[POST] <{ "match": "POST" }> :: { data } -> data
+			AGE[POST] <{ "match": "POST" }> :: <{ data }> -> data
 				|> -> 
 						value.body = value.toJSON(value.body) 
 						if (!value.body) <- void (value.end(value.res).status(403).send({ message: "No data provided"}))
@@ -105,7 +102,7 @@ REQUEST ->
 							}
 						<- value.end(value.res).status(200).send(age) 
 
-		CAT <{ "match": "/cat" }> :: { data } -> 
+		CAT <{ "match": "/cat" }> :: <{ data }> -> 
 					{ match } := data
 					<- { 
 					data, 
@@ -116,10 +113,10 @@ REQUEST ->
 					match.method(data, "DELETE")
 					}
 
-			CAT[GET] <{ "match": "GET" }> :: { data } ->  data
+			CAT[GET] <{ "match": "GET" }> :: <{ data }> ->  data
 				|> -> { "id": "id" in value.query, data: value }
-					|> <{ "id": false }> * :: { data } -> data.end(data.res).status(200).send(data.toJSON(~ readFile(data.DB_PATH, "utf8")))
-					|> <{ "id": true }> * :: { data } -> 
+					|> <{ "id": false }> * :: <{ data }> -> data.end(data.res).status(200).send(data.toJSON(~ readFile(data.DB_PATH, "utf8")))
+					|> <{ "id": true }> * :: <{ data }> -> 
 						raw := ~ readFile(data.DB_PATH, "utf8")
 						json := data.toJSON(raw)
 						data.tryCatch(() => { 
@@ -127,13 +124,13 @@ REQUEST ->
 							else data.end(data.res).status(200).send(json[data.query.id])
 						}, (message) => data.end(data.res).status(404).send({message}))	
 
-			CAT[POST] <{ "match": "POST" }> :: { data } -> data
-				|> :: { body, end, res, toJSON } -> 
+			CAT[POST] <{ "match": "POST" }> :: <{ data }> -> data
+				|> :: <{ body, end, res, toJSON }> -> 
 					if (!body) <- void (end(res).status(403).send({ message: "No data provided!"}))
 					json := toJSON(body)
 					if (!json.name || !json.age || !json.breed) <- void (end(res).status(403).send({ message: "Missing some or all fields."}))
 					<- { ...value, body: json }
-					|> * :: { DB_PATH, toJSON, toString,  body, res, end  } -> 
+					|> * :: <{ DB_PATH, toJSON, toString,  body, res, end  }> -> 
 						data := ~ readFile(DB_PATH, "utf8")
 						json := toJSON(data)
 						id := Object.keys(json).length
@@ -141,13 +138,13 @@ REQUEST ->
 						~ writeFile(DB_PATH, toString(json))
 						end(res).status(200).send({ message: "Cat added!" })
 
-			CAT[PUT] <{ "match": "PUT" }> :: { data } -> data
-				|> :: { body, end, res, toJSON } -> 
+			CAT[PUT] <{ "match": "PUT" }> :: <{ data }> -> data
+				|> :: <{ body, end, res, toJSON }> -> 
 					if (!body) <- void (end(res).status(403).send({ message: "No data provided!"}))
 					json := toJSON(body)
 					if (!json.age) <- void (end(res).status(403).send({ message: "Missing some or all fields."}))
 					<- { ...value, body: json}
-					|> * :: { DB_PATH, toJSON, toString, query, body, res, end } -> 
+					|> * :: <{ DB_PATH, toJSON, toString, query, body, res, end }> -> 
 						data := ~ readFile(DB_PATH, "utf8")
 						{ id } := query
 						json := toJSON(data)
@@ -156,9 +153,9 @@ REQUEST ->
 						~ writeFile(DB_PATH, toString(json))
 						end(value.res).status(200).send({ message: "Cat updated!" })
 
-			CAT[DELETE] <{ "match": "DELETE" }> :: { data } -> data
+			CAT[DELETE] <{ "match": "DELETE" }> :: <{ data }> -> data
 				|> -> ("id" in value.query) && value || void(value.end(value.res).status(403).send({ message: "No id provided!"}))
-					|> * :: { DB_PATH, toJSON, toString, query, body, res, end } -> 
+					|> * :: <{ DB_PATH, toJSON, toString, query, body, res, end }> -> 
 						data := ~ readFile(DB_PATH, "utf8")
 						json := toJSON(data)
 						{ id } := query

@@ -70,9 +70,8 @@ quiv.setRoot("REQUEST")
 
 }
 quiv.fn["REQUEST"] = (value, key, prev, next) => {
-const { method, req, res, init } = value
-const { match, end, routes, toJSON, tryCatch, toString, DB_DIR, DB_FILE } = init
-const { body, query, url } = req
+const { method, req: { body, query, url }, res, init: { match, end, toJSON, tryCatch, toString, DB_DIR, DB_FILE } } = value;
+
 const queries = query?.split("&").map(q => {
 const [key, value] = q.split("=")
 return { [key]: value }
@@ -85,12 +84,12 @@ return service
 
 }
 quiv.fn["ROUTER"] = (value, key, prev, next) => {
-const {match} = value;
+const { match } = value;
 return { data: value, "match": match.url(value, "/age") ?? match.url(value, "/cat") }
 
 }
 quiv.fn["AGE"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"/age"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 
 const { match } = data
@@ -101,7 +100,7 @@ match.method(data, "POST")
 }
 }
 quiv.fn["AGE[POST]"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"POST"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data
 }
@@ -124,7 +123,7 @@ return value.end(value.res).status(200).send(age)
 
 }
 quiv.fn["CAT"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"/cat"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 
 const { match } = data
@@ -139,7 +138,7 @@ match.method(data, "DELETE")
 
 }
 quiv.fn["CAT[GET]"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"GET"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data
 }
@@ -147,12 +146,12 @@ quiv.fn["fn[2]"] = (value, key, prev, next) => {
 return { "id": "id" in value.query, data: value }
 }
 quiv.fn["fn[3]"] = async (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"id":false}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data.end(data.res).status(200).send(data.toJSON( await  readFile(data.DB_PATH, "utf8")))
 }
 quiv.fn["fn[4]"] = async (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"id":true}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 
 const raw =  await  readFile(data.DB_PATH, "utf8")
@@ -164,12 +163,12 @@ else data.end(data.res).status(200).send(json[data.query.id])
 
 }
 quiv.fn["CAT[POST]"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"POST"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data
 }
 quiv.fn["fn[5]"] = (value, key, prev, next) => {
-const {body,end,res,toJSON} = value;
+const { body, end, res, toJSON } = value;
 
 if (!body) return void (end(res).status(403).send({ message: "No data provided!"}))
 const json = toJSON(body)
@@ -177,7 +176,7 @@ if (!json.name || !json.age || !json.breed) return void (end(res).status(403).se
 return { ...value, body: json }
 }
 quiv.fn["fn[6]"] = async (value, key, prev, next) => {
-const {DB_PATH,toJSON,toString,body,res,end} = value;
+const { DB_PATH, toJSON, toString,  body, res, end  } = value;
 
 const data =  await  readFile(DB_PATH, "utf8")
 const json = toJSON(data)
@@ -188,12 +187,12 @@ end(res).status(200).send({ message: "Cat added!" })
 
 }
 quiv.fn["CAT[PUT]"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"PUT"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data
 }
 quiv.fn["fn[7]"] = (value, key, prev, next) => {
-const {body,end,res,toJSON} = value;
+const { body, end, res, toJSON } = value;
 
 if (!body) return void (end(res).status(403).send({ message: "No data provided!"}))
 const json = toJSON(body)
@@ -201,7 +200,7 @@ if (!json.age) return void (end(res).status(403).send({ message: "Missing some o
 return { ...value, body: json}
 }
 quiv.fn["fn[8]"] = async (value, key, prev, next) => {
-const {DB_PATH,toJSON,toString,query,body,res,end} = value;
+const { DB_PATH, toJSON, toString, query, body, res, end } = value;
 
 const data =  await  readFile(DB_PATH, "utf8")
 const { id } = query
@@ -213,7 +212,7 @@ end(value.res).status(200).send({ message: "Cat updated!" })
 
 }
 quiv.fn["CAT[DELETE]"] = (value, key, prev, next) => {
-const {data} = value;
+const { data } = value;
 if(![{"match":"DELETE"}].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) return undefined;
 return data
 }
@@ -221,7 +220,7 @@ quiv.fn["fn[9]"] = (value, key, prev, next) => {
 return ("id" in value.query) && value || void(value.end(value.res).status(403).send({ message: "No id provided!"}))
 }
 quiv.fn["fn[10]"] = async (value, key, prev, next) => {
-const {DB_PATH,toJSON,toString,query,body,res,end} = value;
+const { DB_PATH, toJSON, toString, query, body, res, end } = value;
 
 const data =  await  readFile(DB_PATH, "utf8")
 const json = toJSON(data)

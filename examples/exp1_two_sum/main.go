@@ -50,7 +50,7 @@ TEST ->
 
 	::go("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => ::log(res))
 
-TWO_SUM :: { nums, target } -> { 
+TWO_SUM :: <{ nums, target }> -> { 
 			nums, 
 			target, 
 			dict: nums.reduce((acc, item, index) => {
@@ -60,7 +60,7 @@ TWO_SUM :: { nums, target } -> {
 		}, {}) 
 	}
 
-	OUT :: { nums, dict } -> nums.reduce((acc, item, index) => {
+	OUT :: <{ nums, dict }> -> nums.reduce((acc, item, index) => {
 		key := nums[index]
 		if (dict[key] !== undefined && dict[key] !== index) {
 			acc.push(index)
@@ -69,7 +69,7 @@ TWO_SUM :: { nums, target } -> {
 		<- acc
 	}, [])
 
-	DESCRIPTION :: { nums, target } -> 
+	DESCRIPTION :: <{ nums, target }> -> 
 	<- `Solving two sum problem
 	for numbers ${nums} 
 	with target ${target}

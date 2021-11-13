@@ -4,7 +4,7 @@ OUT * -> ::log(
 ["ADD_TIMES"] 
 )	
 RECURSION -> { ...value, count: !value.count ? 0 : value.count }
-	ADD_TIMES * :: { number, n, val, count } -> 
+	ADD_TIMES * :: <{ number, n, val, count }> -> 
 		<- n > value.count ? 
 		( ~ ::go("RECURSION")
 		({ number: number * val, count: ++value.count, val, n }))

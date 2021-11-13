@@ -33,19 +33,10 @@ const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   if (tokens.includes('!')) {
     output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
   }
-  if (params.find(t => t.includes('{'))) {
-    const vars = params.join(' ').trim().split('{')[1].split('}')[0].split(',');
-    output = `const {${vars
-      .map(x => x.trim())
-      .filter(Boolean)
-      .join(',')}} = value;\n${output}`;
-  }
-  if (params.find(t => t.includes('['))) {
-    const vars = params.join(' ').trim().split('[')[1].split(']')[0].split(',');
-    output = `const [${vars
-      .map(x => x.trim())
-      .filter(Boolean)
-      .join(',')}] = value;\n${output}`;
+  if (params.find(t => t.includes('<'))) {
+    output = `const ${
+      params.join(' ').trim().split('<')[1].split('>')[0]
+    } = value;\n${output}`;
   }
   return output;
 };

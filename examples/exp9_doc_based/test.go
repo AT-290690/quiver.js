@@ -1,5 +1,5 @@
 
-TEST * ! :: { SETTINGS } -> 
+TEST * ! :: <{ SETTINGS }> -> 
 	{ tree, root, isEqual, fail, success } := ::test
 	mockRes := {
 		SETTINGS: {
