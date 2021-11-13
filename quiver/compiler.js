@@ -22,7 +22,14 @@ const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
   const index = dirtyTokens.findIndex(dt => dt === '::');
   const params = dirtyTokens.slice(index);
   const tokens = index === -1 ? params : dirtyTokens.slice(0, index);
-
+  if (tokens.find(t => t.includes('<'))) {
+    const vars = JSON.parse(
+      '[' + tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') + ']'
+    );
+    output = `if(!${JSON.stringify(vars)}.some((predicate) => ${
+      settings.namespace
+    }.test.isEqual(predicate, value, { partial: true }))) return undefined;\n${expression}`;
+  }
   if (tokens.includes('!')) {
     output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
   }
@@ -63,7 +70,14 @@ const compileToJs = async () => {
   let compiledCode = '';
   arrows.forEach((lambda, index) => {
     if (lambda.length === 2) {
-      const [key, ...tokens] = lambda[0].trim().split(' ');
+      const [name, ...tokens] = lambda[0].trim().split(' ');
+      let key;
+      if (name === '|>') {
+        key = 'fn[' + index + ']';
+        lambda[0] = lambda[0].replace('|>', key);
+      } else {
+        key = name;
+      }
       createTreeMap(
         treeMap,
         !tokens.length ? lambda[0] : lambda[0].split(tokens[0])[0]

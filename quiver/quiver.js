@@ -187,7 +187,7 @@ export class Quiver {
       console.log('\x1b[32m', `PASS: ${desc}`, '\x1b[0m');
       return true;
     },
-    isEqual: (a, b) => {
+    isEqual: (a, b, options = { partial: false }) => {
       const typeA = typeof a,
         typeB = typeof b;
       if (typeA !== typeB) return false;
@@ -199,10 +199,14 @@ export class Quiver {
           isArrayB = Array.isArray(b);
         if (isArrayA !== isArrayB) return false;
         if (isArrayA && isArrayB) {
-          if (a.length !== b.length) return false;
+          if (!options.partial && a.length !== b.length) return false;
           return a.every((item, index) => this.test.isEqual(item, b[index]));
         } else {
-          if (Object.keys(a).length !== Object.keys(b).length) return false;
+          if (
+            !options.partial &&
+            Object.keys(a).length !== Object.keys(b).length
+          )
+            return false;
           for (const key in a) {
             if (!this.test.isEqual(a[key], b[key])) {
               return false;
