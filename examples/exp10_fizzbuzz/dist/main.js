@@ -1,104 +1,87 @@
 import { Quiver } from '../../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({
-  FIZZ_BUZZ: {
-    key: 'FIZZ_BUZZ',
-    next: ['fn[0]'],
-    prev: null,
-    level: 0,
-    group: 0,
-    type: 'root'
-  },
-  'fn[0]': {
-    key: 'fn[0]',
-    next: ['fn[1]', 'fn[2]', 'fn[3]', 'fn[4]'],
-    prev: 'FIZZ_BUZZ',
-    level: 1,
-    group: 0,
-    type: 'branch'
-  },
-  'fn[1]': {
-    key: 'fn[1]',
-    next: [],
-    prev: 'fn[0]',
-    level: 2,
-    group: 0,
-    type: 'leaf'
-  },
-  'fn[2]': {
-    key: 'fn[2]',
-    next: [],
-    prev: 'fn[0]',
-    level: 2,
-    group: 0,
-    type: 'leaf'
-  },
-  'fn[3]': {
-    key: 'fn[3]',
-    next: [],
-    prev: 'fn[0]',
-    level: 2,
-    group: 0,
-    type: 'leaf'
-  },
-  'fn[4]': {
-    key: 'fn[4]',
-    next: [],
-    prev: 'fn[0]',
-    level: 2,
-    group: 0,
-    type: 'leaf'
-  }
-});
+quiv.setNodes({"TEST":{"key":"TEST","next":["INPUT"],"prev":null,"level":0,"group":0,"index":-1,"type":"root"},"INPUT":{"key":"INPUT","next":["fn[0]"],"prev":"TEST","level":1,"group":0,"index":0,"type":"branch"},"fn[0]":{"key":"fn[0]","next":["FIZZBUZZ","FIZZ","BUZZ","ELSE"],"prev":"INPUT","level":2,"group":0,"index":0,"type":"branch"},"FIZZBUZZ":{"key":"FIZZBUZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":0,"type":"leaf"},"FIZZ":{"key":"FIZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":1,"type":"leaf"},"BUZZ":{"key":"BUZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":2,"type":"leaf"},"ELSE":{"key":"ELSE","next":[],"prev":"fn[0]","level":3,"group":0,"index":3,"type":"leaf"}});
 
-quiv.fn['FIZZ_BUZZ'] = (value, key, prev, next) => {
-  return 250;
+quiv.fn["TEST"] = (value, key, prev, next, index) => {
+
+
+const { tree, root } = quiv.test
+
+tree("INPUT")
+.input(1)
+.output({"ELSE": 1})
+.should("Return number")
+
+tree("INPUT")
+.input(3)
+.output({"FIZZ": "Fizz"})
+.should("Return Fizz")
+
+tree("INPUT")
+.input(5)
+.output({"BUZZ": "Buzz"})
+.should("Return Buzz")
+
+tree("INPUT")
+.input(15)
+.output({"FIZZBUZZ": "FizzBuzz"})
+.should("Return FizzBuzz")
+
+root("INPUT")
+.input(15)
+.leaf("FIZZBUZZ")
+.output( "FizzBuzz")
+.should("Return FizzBuzz")
+
+root("INPUT")
+.input(6)
+.leaf("FIZZ")
+.output( "Fizz")
+.should("Return Fizz")
+
+}
+quiv.fn["INPUT"] = (value, key, prev, next, index) => {
+
+return value
+}
+quiv.fn["fn[0]"] = (value, key, prev, next, index) => {
+
+return {
+number: value,
+predicate: [
++(value % 15 === 0),
++(value % 3 === 0),
++(value % 5 === 0)
+]
+}
+}
+quiv.fn["FIZZBUZZ"] = (value, key, prev, next, index) => {
+if(![{ predicate: [1, 1, 1] }].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) {
+return undefined;
 };
-quiv.fn['fn[0]'] = (value, key, prev, next) => {
-  return {
-    number: value,
-    when: [+(value % 15 === 0), +(value % 3 === 0), +(value % 5 === 0)]
-  };
+return "FizzBuzz"
+}
+quiv.fn["FIZZ"] = (value, key, prev, next, index) => {
+if(![{ predicate: [0, 1, 0] }].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) {
+return undefined;
 };
-quiv.fn['fn[1]'] = (value, key, prev, next) => {
-  if (
-    ![{ when: [1, 1, 1] }].some(predicate =>
-      quiv.test.isEqual(predicate, value, { partial: true })
-    )
-  )
-    return undefined;
-  return quiv.log('FizzBuzz');
+return "Fizz"
+}
+quiv.fn["BUZZ"] = (value, key, prev, next, index) => {
+if(![{ predicate: [0, 0, 1] }].some((predicate) => quiv.test.isEqual(predicate, value, { partial: true }))) {
+return undefined;
 };
-quiv.fn['fn[2]'] = (value, key, prev, next) => {
-  if (
-    ![{ when: [0, 1, 0] }].some(predicate =>
-      quiv.test.isEqual(predicate, value, { partial: true })
-    )
-  )
-    return undefined;
-  return quiv.log('Fizz');
+return "Buzz"
+}
+quiv.fn["ELSE"] = (value, key, prev, next, index) => {
+const { number } = value;
+if(![{ predicate: [1, 1, 1] } , { predicate: [0, 1, 0] } , { predicate: [0, 0, 1] }].every((predicate) => !quiv.test.isEqual(predicate, value, { partial: true }))) {
+      return undefined;
 };
-quiv.fn['fn[3]'] = (value, key, prev, next) => {
-  if (
-    ![{ when: [0, 0, 1] }].some(predicate =>
-      quiv.test.isEqual(predicate, value, { partial: true })
-    )
-  )
-    return undefined;
-  return quiv.log('Buzz');
+return number
 };
-quiv.fn['fn[4]'] = (value, key, prev, next) => {
-  const { number } = value;
-  if (
-    ![{ when: [0, 0, 0] }].some(predicate =>
-      quiv.test.isEqual(predicate, value, { partial: true })
-    )
-  )
-    return undefined;
-  return quiv.log(number);
-};
-export default value => {
-  quiv.setRoot(quiv.nodes['FIZZ_BUZZ'].key);
-  quiv.visited = {};
-  quiv.goTo(quiv.root, value);
-};
+export default (value) => {
+quiv.setRoot(quiv.nodes["TEST"].key);
+quiv.visited = {};
+quiv.dfsSync(quiv.root, value);
+}

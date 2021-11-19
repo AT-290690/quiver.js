@@ -61,7 +61,7 @@ SERVER ! * ->
 	~ access(init.DB_DIR + init.DB_FILE).catch(async () => {
 			await mkdir(init.DB_DIR, { recursive: true } )
 			await writeFile(init.DB_DIR + init.DB_FILE,
-	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw" }}`)
+	`{"0": { "breed": "Siamese", "age": 3, "name": "Purr Mclaw", "id": 0 }}`)
 	})
 	::setRoot("REQUEST")
 
@@ -78,14 +78,14 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 
 	ROUTER :: <{ match }> -> { data: value, match: match.url(value, "/age") ?? match.url(value, "/cat") }
 
-		AGE <{ match: "/age" }> :: <{ data }> -> 
+		AGE + <{ match: "/age" }> :: <{ data }> -> 
 			{ match } := data
 			<- { 
 				data, 
 				match: 
 				match.method(data, "POST")
 				}
-			AGE[POST] <{ match: "POST" }> :: <{ data }> -> data
+			AGE[POST] + <{ match: "POST" }> :: <{ data }> -> data
 				|> -> 
 						value.body = value.toJSON(value.body) 
 						if (!value.body) <- void (value.end(value.res).status(403).send({ message: "No data provided"}))
@@ -102,7 +102,7 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 							}
 						<- value.end(value.res).status(200).send(age) 
 
-		CAT <{ match: "/cat" }> :: <{ data }> -> 
+		CAT + <{ match: "/cat" }> :: <{ data }> -> 
 					{ match } := data
 					<- { 
 					data, 
@@ -113,10 +113,10 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 					match.method(data, "DELETE")
 					}
 
-			CAT[GET] <{ match: "GET" }> :: <{ data }> ->  data
+			CAT[GET] + <{ match: "GET" }> :: <{ data }> ->  data
 				|> -> { id: "id" in value.query, data: value }
-					|> <{ id: false }> * :: <{ data }> -> data.end(data.res).status(200).send(data.toJSON(~ readFile(data.DB_PATH, "utf8")))
-					|> <{ id: true }> * :: <{ data }> -> 
+					|> + <{ id: false }> * :: <{ data }> -> data.end(data.res).status(200).send(data.toJSON(~ readFile(data.DB_PATH, "utf8")))
+					|> + <{ id: true }> * :: <{ data }> -> 
 						raw := ~ readFile(data.DB_PATH, "utf8")
 						json := data.toJSON(raw)
 						data.tryCatch(() => { 
@@ -124,7 +124,7 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 							else data.end(data.res).status(200).send(json[data.query.id])
 						}, (message) => data.end(data.res).status(404).send({message}))	
 
-			CAT[POST] <{ match: "POST" }> :: <{ data }> -> data
+			CAT[POST] + <{ match: "POST" }> :: <{ data }> -> data
 				|> :: <{ body, end, res, toJSON }> -> 
 					if (!body) <- void (end(res).status(403).send({ message: "No data provided!"}))
 					json := toJSON(body)
@@ -138,7 +138,7 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 						~ writeFile(DB_PATH, toString(json))
 						end(res).status(200).send({ message: "Cat added!" })
 
-			CAT[PUT] <{ match: "PUT" }> :: <{ data }> -> data
+			CAT[PUT] + <{ match: "PUT" }> :: <{ data }> -> data
 				|> :: <{ body, end, res, toJSON }> -> 
 					if (!body) <- void (end(res).status(403).send({ message: "No data provided!"}))
 					json := toJSON(body)
@@ -153,7 +153,7 @@ REQUEST :: <{ method, req: { body, query, url }, res, init: { match, end, toJSON
 						~ writeFile(DB_PATH, toString(json))
 						end(value.res).status(200).send({ message: "Cat updated!" })
 
-			CAT[DELETE] <{ match: "DELETE" }> :: <{ data }> -> data
+			CAT[DELETE] + <{ match: "DELETE" }> :: <{ data }> -> data
 				|> -> ("id" in value.query) && value || void(value.end(value.res).status(403).send({ message: "No id provided!"}))
 					|> * :: <{ DB_PATH, toJSON, toString, query, body, res, end }> -> 
 						data := ~ readFile(DB_PATH, "utf8")

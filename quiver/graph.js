@@ -29,6 +29,7 @@ export const createTreeMap = (tree, line) => {
       prev,
       level,
       group,
+      index: -1,
       type: 'root'
     };
     prev = current;
@@ -49,6 +50,7 @@ export const traverse = tree => {
     }
     if (parent) {
       parent.next.push(current.key);
+      current.index = parent.next.length - 1;
       current.prev = parent.key;
       if (current.next.length === 0) {
         current.type = 'leaf';

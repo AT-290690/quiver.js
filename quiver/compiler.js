@@ -18,26 +18,38 @@ const parse = (source, tokens) => {
   );
 };
 const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
-  let output = expression;
+  let output = '';
   const index = dirtyTokens.findIndex(dt => dt === '::');
   const params = dirtyTokens.slice(index);
   const tokens = index === -1 ? params : dirtyTokens.slice(0, index);
-  if (tokens.find(t => t.includes('<'))) {
-    const vars =
+  if (params.find(t => t.includes('<'))) {
+    output += `const ${
+      params.join(' ').trim().split('<')[1].split('>')[0]
+    } = value;\n`;
+  }
+  if (tokens[0] === '+') {
+    const pdc =
       '[' +
       tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') +
       ']';
-    output = `if(!${vars}.some((predicate) => ${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) return undefined;\n${expression}`;
+
+    output += `if(!${pdc}.some((predicate) => ${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) {
+return undefined;\n};`;
+  } else if (tokens[0] === '-') {
+    const pdc =
+      '[' +
+      tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') +
+      ']';
+
+    output += `if(!${pdc}.every((predicate) => !${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) {
+      return undefined;\n};`;
   }
+
   if (tokens.includes('!')) {
-    output = `${settings.namespace}.visit("${arrow}");\n${expression}`;
+    output += `${settings.namespace}.visit("${arrow}");\n`;
   }
-  if (params.find(t => t.includes('<'))) {
-    output = `const ${
-      params.join(' ').trim().split('<')[1].split('>')[0]
-    } = value;\n${output}`;
-  }
-  return output;
+
+  return (output += '\n' + expression);
 };
 const compileToJs = async () => {
   const mainGraphFile = await readFile(settings.file, 'utf8');
@@ -77,12 +89,16 @@ const compileToJs = async () => {
       const expression = parse(lambda[1]?.trim(), settings.unaryTokens);
 
       const body = expression
-        ? parseExpressionDerives('return ' + expression, tokens, key)
-        : parseExpressionDerives('', tokens, key);
+        ? parseExpressionDerives(
+            'return ' + expression,
+            tokens.filter(Boolean),
+            key
+          )
+        : parseExpressionDerives('', tokens.filter(Boolean), key);
       let startBrace = index !== 0 ? '}\n' : '';
       compiledCode += `${startBrace}${settings.namespace}.fn["${key}"] =${
         tokens.includes('*') ? ' async' : ''
-      } (value, key, prev, next) => {\n${body ? body + '\n' : ''}`;
+      } (value, key, prev, next, index) => {\n${body ? body + '\n' : ''}`;
     } else {
       const body = parse(lambda[0]?.trim(), settings.unaryTokens).split(':=');
 

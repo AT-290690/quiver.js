@@ -1,6 +1,6 @@
 import { Quiver } from '../../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({"TEST":{"key":"TEST","next":[],"prev":null,"level":0,"group":0,"type":"root"},"TWO_SUM":{"key":"TWO_SUM","next":["OUT","DESCRIPTION","EXIT"],"prev":null,"level":0,"group":1,"type":"root"},"OUT":{"key":"OUT","next":[],"prev":"TWO_SUM","level":1,"group":1,"type":"leaf"},"DESCRIPTION":{"key":"DESCRIPTION","next":[],"prev":"TWO_SUM","level":1,"group":1,"type":"leaf"},"EXIT":{"key":"EXIT","next":[],"prev":"TWO_SUM","level":1,"group":1,"type":"leaf"}});
+quiv.setNodes({"TEST":{"key":"TEST","next":[],"prev":null,"level":0,"group":0,"pass":false,"type":"root"},"TWO_SUM":{"key":"TWO_SUM","next":["OUT","DESCRIPTION","EXIT"],"prev":null,"level":0,"group":1,"pass":false,"type":"root"},"OUT":{"key":"OUT","next":[],"prev":"TWO_SUM","level":1,"group":1,"pass":false,"type":"leaf"},"DESCRIPTION":{"key":"DESCRIPTION","next":[],"prev":"TWO_SUM","level":1,"group":1,"pass":false,"type":"leaf"},"EXIT":{"key":"EXIT","next":[],"prev":"TWO_SUM","level":1,"group":1,"pass":false,"type":"leaf"}});
 /* 
 Example 1
 Solving two sum problem
@@ -8,6 +8,8 @@ and demonstrating graph testing
 */
 
 quiv.fn["TEST"] = (value, key, prev, next) => {
+
+
 const { root, tree } = quiv.test
 
 root("TWO_SUM")
@@ -56,6 +58,7 @@ quiv.async("TWO_SUM")({ nums: [-3, 4, 3, 90], target: 0 }).then(res => quiv.log(
 }
 quiv.fn["TWO_SUM"] = (value, key, prev, next) => {
 const { nums, target } = value;
+
 return {
 nums,
 target,
@@ -69,6 +72,7 @@ return acc
 }
 quiv.fn["OUT"] = (value, key, prev, next) => {
 const { nums, dict } = value;
+
 return nums.reduce((acc, item, index) => {
 const key = nums[index]
 if (dict[key] !== undefined && dict[key] !== index) {
@@ -82,6 +86,7 @@ return acc
 quiv.fn["DESCRIPTION"] = (value, key, prev, next) => {
 const { nums, target } = value;
 
+
 return `Solving two sum problem
 for numbers ${nums}
 with target ${target}
@@ -89,10 +94,11 @@ and demonstrating graph testing`
 
 }
 quiv.fn["EXIT"] = (value, key, prev, next) => {
+
 return "Program has stopped!"
 };
 export default (value) => {
 quiv.setRoot(quiv.nodes["TEST"].key);
 quiv.visited = {};
-quiv.dfsAsync(quiv.root, value);
+quiv.dfsSync(quiv.root, value);
 }

@@ -111,6 +111,11 @@ export class Quiver {
   is(root) {
     return {
       connected: leaf => {
+        if (
+          this.nodes[root]?.group === undefined ||
+          this.nodes[leaf]?.group === undefined
+        )
+          return false;
         return this.nodes[root].group === this.nodes[leaf].group;
       },
       visited: () => {
