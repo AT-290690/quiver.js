@@ -4,22 +4,22 @@ TEST ->
 
 tree("INPUT")
 .input(1)
-.output({"ELSE": 1})
+.output(1)
 .should("Return number")
 
 tree("INPUT")
 .input(3)
-.output({"FIZZ": "Fizz"})
+.output("Fizz")
 .should("Return Fizz")
 
 tree("INPUT")
 .input(5)
-.output({"BUZZ": "Buzz"})
+.output("Buzz")
 .should("Return Buzz")
 
 tree("INPUT")
 .input(15)
-.output({"FIZZBUZZ": "FizzBuzz"})
+.output("FizzBuzz")
 .should("Return FizzBuzz")
 
 root("INPUT")
@@ -43,7 +43,7 @@ root("INPUT")
 				 +(value % 5 === 0)
 				]
 			}
-			FIZZBUZZ + <{ predicate: [1, 1, 1] }> :: -> "FizzBuzz"
-			FIZZ + <{ predicate: [0, 1, 0] }> :: -> "Fizz"	
-			BUZZ + <{ predicate: [0, 0, 1] }> :: -> "Buzz"
-			ELSE - <{ predicate: [1, 1, 1] } | { predicate: [0, 1, 0] } | { predicate: [0, 0, 1] }> :: <{ number }> -> number
+			FIZZBUZZ + ~ <{ predicate: [1, 1, 1] }> :: -> "FizzBuzz"
+			FIZZ + ~ <{ predicate: [0, 1, 0] }> :: -> "Fizz"	
+			BUZZ + ~ <{ predicate: [0, 0, 1] }> :: -> "Buzz"
+			ELSE - ~ <{ predicate: [1, 1, 1] } | { predicate: [0, 1, 0] } | { predicate: [0, 0, 1] }> :: <{ number }> -> number

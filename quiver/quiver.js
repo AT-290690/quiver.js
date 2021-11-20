@@ -74,14 +74,14 @@ export class Quiver {
       node.type === 'leaf' ||
       (node.type === 'root' && node.next.length === 0)
     ) {
-      out[key] = result;
+      out['recursive result'] = result;
       return result;
     } else {
       for (const n of node.next) {
         this.dfsSync(n, result, node.key, out);
       }
     }
-    return out;
+    return out['recursive result'];
   }
 
   async dfsAsync(key, args, prev = null, out = {}) {
@@ -98,14 +98,14 @@ export class Quiver {
       node.type === 'leaf' ||
       (node.type === 'root' && node.next.length === 0)
     ) {
-      out[key] = result;
+      out['recursive result'] = result;
       return result;
     } else {
       for (const n of node.next) {
         await this.dfsAsync(n, result, node.key, out);
       }
     }
-    return out;
+    return out['recursive result'];
   }
 
   is(root) {
@@ -209,7 +209,9 @@ export class Quiver {
         if (isArrayA !== isArrayB) return false;
         if (isArrayA && isArrayB) {
           if (!options.partial && a.length !== b.length) return false;
-          return a.every((item, index) => this.test.isEqual(item, b[index]));
+          return a.every((item, index) =>
+            this.test.isEqual(item, b[index], options)
+          );
         } else {
           if (
             !options.partial &&
@@ -217,7 +219,7 @@ export class Quiver {
           )
             return false;
           for (const key in a) {
-            if (!this.test.isEqual(a[key], b[key])) {
+            if (!this.test.isEqual(a[key], b[key], options)) {
               return false;
             }
           }
@@ -250,13 +252,12 @@ export class Quiver {
               const path = this.trace(root, leaf);
               const qvr = this.path(path);
               const res = await qvr.dfsAsync(root, inp);
-
               const output =
-                res === undefined || res[leaf] === undefined
+                res === undefined
                   ? this.test.fail(desc, expected, 'Short Circuited')
-                  : this.test.isEqual(res[leaf], expected)
+                  : this.test.isEqual(res, expected)
                   ? this.test.success(desc)
-                  : this.test.fail(desc, expected, res[leaf]);
+                  : this.test.fail(desc, expected, res);
               if (!output)
                 console.log(
                   '\x1b[2m',

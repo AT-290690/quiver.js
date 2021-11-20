@@ -1,6 +1,6 @@
 import { Quiver } from '../../../quiver/quiver.js';
 const quiv = new Quiver();
-quiv.setNodes({"TEST":{"key":"TEST","next":["INPUT"],"prev":null,"level":0,"group":0,"index":-1,"type":"root"},"INPUT":{"key":"INPUT","next":["fn[0]"],"prev":"TEST","level":1,"group":0,"index":0,"type":"branch"},"fn[0]":{"key":"fn[0]","next":["FIZZBUZZ","FIZZ","BUZZ","ELSE"],"prev":"INPUT","level":2,"group":0,"index":0,"type":"branch"},"FIZZBUZZ":{"key":"FIZZBUZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":0,"type":"leaf"},"FIZZ":{"key":"FIZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":1,"type":"leaf"},"BUZZ":{"key":"BUZZ","next":[],"prev":"fn[0]","level":3,"group":0,"index":2,"type":"leaf"},"ELSE":{"key":"ELSE","next":[],"prev":"fn[0]","level":3,"group":0,"index":3,"type":"leaf"}});
+quiv.setNodes({"TEST":{"key":"TEST","next":["INPUT"],"prev":null,"level":0,"group":0,"index":-1,"type":"root"},"INPUT":{"key":"INPUT","next":["fn_0"],"prev":"TEST","level":1,"group":0,"index":0,"type":"branch"},"fn_0":{"key":"fn_0","next":["FIZZBUZZ","FIZZ","BUZZ","ELSE"],"prev":"INPUT","level":2,"group":0,"index":0,"type":"branch"},"FIZZBUZZ":{"key":"FIZZBUZZ","next":[],"prev":"fn_0","level":3,"group":0,"index":0,"type":"leaf"},"FIZZ":{"key":"FIZZ","next":[],"prev":"fn_0","level":3,"group":0,"index":1,"type":"leaf"},"BUZZ":{"key":"BUZZ","next":[],"prev":"fn_0","level":3,"group":0,"index":2,"type":"leaf"},"ELSE":{"key":"ELSE","next":[],"prev":"fn_0","level":3,"group":0,"index":3,"type":"leaf"}});
 
 quiv.fn["TEST"] = (value, key, prev, next, index) => {
 
@@ -9,22 +9,22 @@ const { tree, root } = quiv.test
 
 tree("INPUT")
 .input(1)
-.output({"ELSE": 1})
+.output(1)
 .should("Return number")
 
 tree("INPUT")
 .input(3)
-.output({"FIZZ": "Fizz"})
+.output("Fizz")
 .should("Return Fizz")
 
 tree("INPUT")
 .input(5)
-.output({"BUZZ": "Buzz"})
+.output("Buzz")
 .should("Return Buzz")
 
 tree("INPUT")
 .input(15)
-.output({"FIZZBUZZ": "FizzBuzz"})
+.output("FizzBuzz")
 .should("Return FizzBuzz")
 
 root("INPUT")
@@ -44,7 +44,7 @@ quiv.fn["INPUT"] = (value, key, prev, next, index) => {
 
 return value
 }
-quiv.fn["fn[0]"] = (value, key, prev, next, index) => {
+quiv.fn["fn_0"] = (value, key, prev, next, index) => {
 
 return {
 number: value,

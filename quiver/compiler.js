@@ -28,20 +28,22 @@ const parseExpressionDerives = (expression, dirtyTokens, arrow) => {
     } = value;\n`;
   }
   if (tokens[0] === '+') {
+    const partial = tokens.includes('~');
     const pdc =
       '[' +
       tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') +
       ']';
 
-    output += `if(!${pdc}.some((predicate) => ${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) {
+    output += `if(!${pdc}.some((predicate) => ${settings.namespace}.test.isEqual(predicate, value, { partial: ${partial} }))) {
 return undefined;\n};`;
   } else if (tokens[0] === '-') {
+    const partial = tokens.includes('~');
     const pdc =
       '[' +
       tokens.join(' ').trim().split('<')[1].split('>')[0].split('|') +
       ']';
 
-    output += `if(!${pdc}.every((predicate) => !${settings.namespace}.test.isEqual(predicate, value, { partial: true }))) {
+    output += `if(!${pdc}.every((predicate) => !${settings.namespace}.test.isEqual(predicate, value, { partial: ${partial} }))) {
       return undefined;\n};`;
   }
 
@@ -76,7 +78,7 @@ const compileToJs = async () => {
       const [name, ...tokens] = lambda[0].trim().split(' ');
       let key;
       if (name === '|>') {
-        key = 'fn[' + countLambdas + ']';
+        key = 'fn_' + countLambdas;
         countLambdas++;
         lambda[0] = lambda[0].replace('|>', key);
       } else {
