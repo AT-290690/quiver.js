@@ -15,6 +15,7 @@
     "exp8": "node examples/exp8_last_go_rec/main.js",
     "exp9": "node examples/exp9_doc_based/main.js",
     "exp10": "node examples/exp10_fizzbuzz/main.js",
+    "exp11": "node examples/exp11_bingo/main.js",
     "quiv": "node index.js"
   },
   "type": "module",

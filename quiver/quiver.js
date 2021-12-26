@@ -213,6 +213,8 @@ export class Quiver {
             this.test.isEqual(item, b[index], options)
           );
         } else {
+          if (a === undefined || a === null || b === undefined || b === null)
+            return a === b;
           if (
             !options.partial &&
             Object.keys(a).length !== Object.keys(b).length
