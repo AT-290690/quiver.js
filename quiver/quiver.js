@@ -1,10 +1,11 @@
 export class Quiver {
-  fn = {};
-  nodes = {};
-  current;
-  root = null;
-  visited = {};
-
+  constructor() {
+    this.fn = {};
+    this.nodes = {};
+    this.current = null;
+    this.root = null;
+    this.visited = {};
+  }
   setNodes(nodes) {
     this.nodes = Object.freeze(nodes);
   }
