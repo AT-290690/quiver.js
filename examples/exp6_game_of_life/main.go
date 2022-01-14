@@ -25,9 +25,9 @@ GAME_OF_LIFE ! :: -> { ...value, canvas: document.getElementById("canvas") }
 
 RULES :: <{ alive, cells, current }> -> { rule: [ +(alive === 2), +(alive === 3)], cells, current }
 
-	DO_NOTHING + <{ rule: [1, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = cells[current].alive)
-	REVIVE + <{ rule: [0, 1] }> :: <{ cells, current }> -> (cells[current].nextAlive = true)
-	DIE + <{ rule: [0, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = false)
+	DO_NOTHING + ~ <{ rule: [1, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = cells[current].alive)
+	REVIVE + ~ <{ rule: [0, 1] }> :: <{ cells, current }> -> (cells[current].nextAlive = true)
+	DIE + ~ <{ rule: [0, 0] }> :: <{ cells, current }> -> (cells[current].nextAlive = false)
 
 SET_IS_ALIVE :: <{ cells }> -> cells.forEach((cell) => cell.alive = cell.nextAlive) 
 CREATE_CELL :: <{ x, y }> -> { x, y, alive: Math.random() > 0.5 } // Store the position of this cell in the grid
